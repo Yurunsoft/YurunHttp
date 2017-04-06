@@ -1,6 +1,4 @@
 <?php
-namespace Yurun\Until;
-
 class HttpResponse
 {
 	/**
@@ -48,6 +46,15 @@ class HttpResponse
 		$this->handler = $handler;
 		$this->response = $response;
 		$this->parseResponse();
+	}
+
+	/**
+	 * 获取http状态码
+	 * @return int 
+	 */
+	public function httpCode()
+	{
+		return curl_getinfo($this->handler, CURLINFO_HTTP_CODE);
 	}
 
 	/**
