@@ -1,6 +1,4 @@
 <?php
-namespace Yurun\Until;
-
 class HttpRequest
 {
 	/**
@@ -307,6 +305,8 @@ class HttpRequest
 			CURLOPT_POSTFIELDS		=> $this->content,
 			// 保存cookie
 			CURLOPT_COOKIEJAR		=> $this->cookieFileName,
+			// 自动重定向
+			CURLOPT_FOLLOWLOCATION	=> true,
 		));
 		$this->parseOptions();
 		$this->parseHeaders();
