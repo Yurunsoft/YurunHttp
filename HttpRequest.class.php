@@ -38,6 +38,12 @@ class HttpRequest
 	public $cookieFileName = '';
 
 	/**
+	 * 失败重试次数
+	 * @var mixed
+	 */
+	public $retry = 0;
+
+	/**
 	 * __construct
 	 * @return mixed 
 	 */
@@ -55,6 +61,9 @@ class HttpRequest
 	public function open()
 	{
 		$this->handler = curl_init();
+		$this->retry = 0;
+		$this->headers = $this->options = array();
+		$this->url = $this->content = '';
 	}
 
 	public function close()
@@ -115,7 +124,10 @@ class HttpRequest
 	 */
 	public function options($options)
 	{
-		$this->options = array_merge($this->options, $options);
+		foreach($options as $key => $value)
+		{
+			$this->options[$key] = $value;
+		}
 		return $this;
 	}
 
@@ -274,6 +286,17 @@ class HttpRequest
 	}
 
 	/**
+	 * 设置失败重试次数，状态码非200时重试
+	 * @param string $userAgent 
+	 * @return HttpRequest 
+	 */
+	public function retry($retry)
+	{
+		$this->retry = $retry;
+		return $this;
+	}
+
+	/**
 	 * 发送请求
 	 * @param string $url 
 	 * @param array $params 
@@ -310,7 +333,17 @@ class HttpRequest
 		));
 		$this->parseOptions();
 		$this->parseHeaders();
-		return new HttpResponse($this->handler, curl_exec($this->handler));
+		for($i = 0; $i <= $this->retry; ++$i)
+		{
+			$response = new HttpResponse($this->handler, curl_exec($this->handler));
+			if(0 >= $this->retry || 200 === $response->httpCode())
+			{
+				break;
+			}
+		}
+		$this->close();
+		$this->open();
+		return $response;
 	}
 
 	/**
@@ -385,7 +418,6 @@ class HttpRequest
 	protected function parseOptions()
 	{
 		curl_setopt_array($this->handler, $this->options);
-		$this->options = array();
 	}
 
 	/**
@@ -394,7 +426,6 @@ class HttpRequest
 	protected function parseHeaders()
 	{
 		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat());
-		$this->headers = array();
 	}
 
 	/**
