@@ -34,6 +34,12 @@ class HttpRequest
 	public $headers = array();
 
 	/**
+	 * Cookies
+	 * @var array
+	 */
+	public $cookies = array();
+
+	/**
 	 * 保存Cookie文件的文件名
 	 * @var string
 	 */
@@ -259,13 +265,26 @@ class HttpRequest
 	}
 
 	/**
-	 * 设置Cookie
-	 * @param mixed $cookie 
+	 * 设置Cookies
+	 * @param array $headers 
 	 * @return HttpRequest 
 	 */
-	public function cookie($cookie)
+	public function cookies($headers)
 	{
-		// TODO:
+		$this->cookies = array_merge($this->cookies, $headers);
+		return $this;
+	}
+
+	/**
+	 * 设置Cookie
+	 * @param string $name 
+	 * @param string $value 
+	 * @return HttpRequest 
+	 */
+	public function cookie($name, $value)
+	{
+		$this->cookies[$name] = $value;
+		return $this;
 	}
 
 	/**
@@ -375,6 +394,7 @@ class HttpRequest
 			// 发送内容
 			CURLOPT_POSTFIELDS		=> $this->content,
 			// 保存cookie
+			CURLOPT_COOKIEFILE		=> $this->cookieFileName,
 			CURLOPT_COOKIEJAR		=> $this->cookieFileName,
 			// 自动重定向
 			CURLOPT_FOLLOWLOCATION	=> true,
@@ -382,6 +402,7 @@ class HttpRequest
 		$this->parseOptions();
 		$this->parseProxy();
 		$this->parseHeaders();
+		$this->parseCookies();
 		for($i = 0; $i <= $this->retry; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
@@ -390,8 +411,6 @@ class HttpRequest
 				break;
 			}
 		}
-		$this->close();
-		$this->open();
 		return $response;
 	}
 
@@ -491,6 +510,16 @@ class HttpRequest
 	protected function parseHeaders()
 	{
 		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat());
+	}
+
+	protected function parseCookies()
+	{
+		$content = '';
+		foreach($this->cookies as $name => $value)
+		{
+			$content .= "{$name}={$value}; ";
+		}
+		curl_setopt($this->handler, CURLOPT_COOKIE, $content);
 	}
 
 	/**
