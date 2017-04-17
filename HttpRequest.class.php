@@ -35,15 +35,45 @@ class HttpRequest
 
 	/**
 	 * 保存Cookie文件的文件名
-	 * @var mixed
+	 * @var string
 	 */
 	public $cookieFileName = '';
 
 	/**
 	 * 失败重试次数
-	 * @var mixed
+	 * @var int
 	 */
 	public $retry = 0;
+
+	/**
+	 * 是否使用代理
+	 * @var bool
+	 */
+	public $useProxy = false;
+
+	/**
+	 * 代理设置
+	 * @var array
+	 */
+	public $proxy = array();
+
+	/**
+	 * 代理认证方式
+	 */
+	public static $proxyAuths = array(
+		'basic'		=>	CURLAUTH_BASIC,
+		'ntlm'		=>	CURLAUTH_NTLM
+	);
+
+	/**
+	 * 代理类型
+	 */
+	public static $proxyType = array(
+		'http'		=>	CURLPROXY_HTTP,
+		'socks4'	=>	CURLPROXY_SOCKS4,
+		'socks4a'	=>	6,	// CURLPROXY_SOCKS4A
+		'socks5'	=>	CURLPROXY_SOCKS5,
+	);
 
 	/**
 	 * __construct
@@ -66,6 +96,11 @@ class HttpRequest
 		$this->retry = 0;
 		$this->headers = $this->options = array();
 		$this->url = $this->content = '';
+		$this->useProxy = false;
+		$this->proxy = array(
+			'auth'	=>	'basic',
+			'type'	=>	'http',
+		);
 	}
 
 	public function close()
@@ -298,6 +333,17 @@ class HttpRequest
 		return $this;
 	}
 
+	public function proxy($server, $port, $type = 'http', $auth = 'basic')
+	{
+		$this->useProxy = true;
+		$this->proxy = array(
+			'server'	=>	$server,
+			'port'		=>	$port,
+			'type'		=>	$type,
+			'auth'		=>	$auth,
+		);
+	}
+
 	/**
 	 * 发送请求
 	 * @param string $url 
@@ -334,6 +380,7 @@ class HttpRequest
 			CURLOPT_FOLLOWLOCATION	=> true,
 		));
 		$this->parseOptions();
+		$this->parseProxy();
 		$this->parseHeaders();
 		for($i = 0; $i <= $this->retry; ++$i)
 		{
@@ -420,6 +467,22 @@ class HttpRequest
 	protected function parseOptions()
 	{
 		curl_setopt_array($this->handler, $this->options);
+	}
+
+	/**
+	 * 处理代理
+	 */
+	protected function parseProxy()
+	{
+		if($this->useProxy)
+		{
+			curl_setopt_array($this->handler, array(
+				CURLOPT_PROXYAUTH	=> self::$proxyAuths[$this->proxy['auth']],
+				CURLOPT_PROXY		=> $this->proxy['server'],
+				CURLOPT_PROXYPORT	=> $this->proxy['port'],
+				CURLOPT_PROXYTYPE	=> 'socks5' === $this->proxy['type'] ? (defined('CURLPROXY_SOCKS5_HOSTNAME') ? CURLPROXY_SOCKS5_HOSTNAME : self::$proxyType[$this->proxy['type']]) : self::$proxyType[$this->proxy['type']],
+			));
+		}
 	}
 
 	/**
