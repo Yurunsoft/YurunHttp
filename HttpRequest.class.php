@@ -1,4 +1,6 @@
 <?php
+namespace Yurun\Until;
+
 class HttpRequest
 {
 	/**
