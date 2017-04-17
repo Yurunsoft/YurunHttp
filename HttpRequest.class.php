@@ -352,6 +352,14 @@ class HttpRequest
 		return $this;
 	}
 
+	/**
+	 * 代理
+	 * @param string $server 
+	 * @param int $port 
+	 * @param string $type 
+	 * @param string $auth 
+	 * @return HttpRequest 
+	 */
 	public function proxy($server, $port, $type = 'http', $auth = 'basic')
 	{
 		$this->useProxy = true;
@@ -361,6 +369,7 @@ class HttpRequest
 			'type'		=>	$type,
 			'auth'		=>	$auth,
 		);
+		return $this;
 	}
 
 	/**
