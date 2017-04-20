@@ -64,6 +64,18 @@ class HttpRequest
 	public $proxy = array();
 
 	/**
+	 * 是否验证证书
+	 * @var bool
+	 */
+	public $IsVerifyCA = false;
+
+	/**
+	 * CA根证书路径
+	 * @var string
+	 */
+	public $caCert;
+
+	/**
 	 * 代理认证方式
 	 */
 	public static $proxyAuths = array(
@@ -408,6 +420,7 @@ class HttpRequest
 			// 自动重定向
 			CURLOPT_FOLLOWLOCATION	=> true,
 		));
+		$this->parseCA();
 		$this->parseOptions();
 		$this->parseProxy();
 		$this->parseHeaders();
@@ -521,6 +534,9 @@ class HttpRequest
 		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat());
 	}
 
+	/**
+	 * 处理Cookie
+	 */
 	protected function parseCookies()
 	{
 		$content = '';
@@ -533,7 +549,7 @@ class HttpRequest
 
 	/**
 	 * 处理成CURL可以识别的headers格式
-	 * @return mixed 
+	 * @return array 
 	 */
 	protected function parseHeadersFormat()
 	{
@@ -543,5 +559,27 @@ class HttpRequest
 			$headers[] = $name . ':' . $value;
 		}
 		return $headers;
+	}
+	
+	/**
+	 * 处理证书
+	 */
+	protected function parseCA()
+	{
+		if($this->IsVerifyCA)
+		{
+			curl_setopt_array($this->handler, array(
+				CURLOPT_SSL_VERIFYPEER	=> true,
+				CURLOPT_CAINFO			=> $this->caCert,
+				CURLOPT_SSL_VERIFYHOST	=> 2,
+			));
+		}
+		else
+		{
+			curl_setopt_array($this->handler, array(
+				CURLOPT_SSL_VERIFYPEER	=> false,
+				CURLOPT_SSL_VERIFYHOST	=> 0,
+			));
+		}
 	}
 }

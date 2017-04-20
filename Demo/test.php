@@ -6,7 +6,7 @@ $h = HttpRequest::newSession();
 // 设置单个header
 $h->header('test','666');
 // 设置多个header
-$h->header(array(
+$h->headers(array(
 	'test2'	=>	'777',
 	'test3'	=>	'888',
 ));
@@ -31,7 +31,7 @@ $h->options(array(
 // cURL设置单个
 $h->option(CURLOPT_HEADER,true);
 // POST请求+POST参数
-$r = $h->post('http://www.baidu.com/s',array('wd'=>'搜索词'));
+$r = $h->post('https://www.baidu.com/s',array('wd'=>'搜索词'));
 // GET请求+GET参数+失败重试3次
-$r = $h->retry(3)->get('http://www.baidu.com/s',array('wd'=>'搜索词'));
+$r = $h->retry(3)->get('https://www.baidu.com/s',array('wd'=>'搜索词'));
 var_dump($r->body,$r->headers,$r->cookies);
