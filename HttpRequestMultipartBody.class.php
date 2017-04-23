@@ -37,11 +37,11 @@ class HttpRequestMultipartBody
      */
     public function add($key, $value)
     {
-        array_push($this->list, array(
-            "type"          => static::TYPE_KV,
-            "key"           => $key,
-            "value"         => $value,
-        ));
+        $this->list[] = array(
+            'type'          => static::TYPE_KV,
+            'key'           => $key,
+            'value'         => $value,
+        );
     }
 
     /**
@@ -52,19 +52,24 @@ class HttpRequestMultipartBody
      */
     public function addFile($key, $file, $file_name)
     {
-        array_push($this->list, array(
-                "type"      => static::TYPE_FILE,
-                "key"       => $key,
-                "file"      => $file,
-                "file_name" => $file_name
-        ));
+        $this->list[] = array(
+                'type'      => static::TYPE_FILE,
+                'key'       => $key,
+                'file'      => $file,
+                'file_name' => $file_name
+        );
     }
 
     public function remove($key)
     {
-        for($i=0; $i<count($this->list); $i++)
-            if($this->list[$i]["key"]==$key)
+        $count = count($this->list);
+        for($i = 0; $i < $count; $i++)
+        {
+            if($this->list[$i]['key'] === $key)
+            {
                 array_splice($this->list, $i, 1);
+            }
+        }
     }
 
     public function clear()
@@ -78,10 +83,10 @@ class HttpRequestMultipartBody
     public function content()
     {
         $this->generateBoundary();
-        $content = "";
+        $content = '';
         foreach ($this->list as $item)
         {
-            switch ($item["type"])
+            switch ($item['type'])
             {
                 case static::TYPE_KV :
                 default :
@@ -93,7 +98,7 @@ class HttpRequestMultipartBody
                     $content .= sprintf("--%s\r\n", $this->boundary);
                     $content .= sprintf("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n", $item["key"], $item["file_name"]);
                     $content .= sprintf("Content-Type: application/octet-stream\r\n\r\n");
-                    $content .= file_get_contents($item["file"]) . "\r\n";
+                    $content .= file_get_contents($item['file']) . "\r\n";
                     break;
             }
         }
@@ -108,8 +113,11 @@ class HttpRequestMultipartBody
     {
         $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $randStr = '';
-        for ( $i = 0; $i < 64; $i++ )
-            $randStr .= $chars[ mt_rand(0, strlen($chars) - 1) ];
+        $max = strlen($chars) - 1;
+        for ($i = 0; $i < 64; $i++)
+        {
+            $randStr .= $chars[ mt_rand(0, $max) ];
+        }
 
         $this->boundary = '__BOUNDARY__' . $randStr . '__BOUNDARY__';
     }

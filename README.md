@@ -20,8 +20,8 @@ var_dump($response);
 ```php
 <?php
 $requestBody = array(
-    "lang" => "php",
-    "ver"  => "any"
+    'lang' => 'php',
+    'ver'  => 'any'
 );
 $http = HttpRequest::newSession();
 $response = $http->post('http://www.baidu.com/', $requestBody);
@@ -34,12 +34,12 @@ var_dump($response);
 <?php
 $requestBody = <<<EOF
 {
-    "lang": "php",
-    "ver":  "any"
+    'lang': 'php',
+    'ver':  'any'
 }
 EOF;
 $http = HttpRequest::newSession();
-$http->contentType("application/json");
+$http->contentType('application/json');
 $response = $http->post('http://www.baidu.com/', $requestBody);
 var_dump($response);
 ```
@@ -49,8 +49,8 @@ var_dump($response);
 ```php
 <?php
 $requestBody = new HttpRequestMultipartBody();
-$requestBody->add("name", "php");
-$requestBody->addFile("file", "/path/to/aaa.txt", "aaa.txt");
+$requestBody->add('name', 'php');
+$requestBody->addFile('file', '/path/to/aaa.txt', 'aaa.txt');
 $http = HttpRequest::newSession();
 $response = $http->post('http://www.baidu.com/', $requestBody);
 var_dump($response);
