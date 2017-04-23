@@ -44,7 +44,7 @@ $response = $http->post('http://www.baidu.com/', $requestBody);
 var_dump($response);
 ```
 
-### POST(multiPart)
+### POST(multi_part)
 
 ```php
 <?php
