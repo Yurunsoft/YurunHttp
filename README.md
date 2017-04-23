@@ -56,4 +56,17 @@ $response = $http->post('http://www.baidu.com/', $requestBody);
 var_dump($response);
 ```
 
+### 链式调用
+
+```php
+<?php
+$http = HttpRequest::newSession();
+$response = $http->retry(3) // 失败重试3次
+                 ->ua('Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)')
+                 ->referer('http://www.baidu.com/')
+                 ->accept('text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
+                 ->acceptLanguage('zh-CN,zh;q=0.8')
+                 ->get('http://www.baidu.com/');
+var_dump($response);
+```
 具体详见Demo
