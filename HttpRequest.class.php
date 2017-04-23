@@ -392,7 +392,12 @@ class HttpRequest
 	 */
 	public function send($url, $params = array(), $method = 'GET')
 	{
-		if(!empty($params))
+	    if($params instanceof HttpRequestMultipartBody)
+	    {
+            $this->content = $params->content();
+            $this->contentType(sprintf("multipart/form-data; boundary=%s", $params->getBoundary()));
+        }
+        else if(!empty($params))
 		{
 			if(is_array($params))
 			{
