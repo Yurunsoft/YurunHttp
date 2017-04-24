@@ -151,24 +151,33 @@ class HttpRequest
 	}
 
 	/**
-	 * 设置发送内容
+	 * 设置发送内容，requestBody的别名
 	 * @param mixed $content 
 	 * @return HttpRequest 
 	 */
 	public function content($content)
 	{
-		$this->content = $content;
-		return $this;
+		return $this->requestBody($content);
 	}
 
 	/**
-	 * 设置参数
+	 * 设置参数，requestBody的别名
 	 * @param mixed $content 
 	 * @return HttpRequest 
 	 */
 	public function params($params)
 	{
-		$this->content = $params;
+		return $this->requestBody($params);
+	}
+
+	/**
+	 * 设置请求主体
+	 * @param mixed $requestBody 
+	 * @return HttpRequest 
+	 */
+	public function requestBody($requestBody)
+	{
+		$this->content = $requestBody;
 		return $this;
 	}
 
@@ -387,25 +396,25 @@ class HttpRequest
 	/**
 	 * 发送请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function send($url, $params = array(), $method = 'GET')
+	public function send($url, $requestBody = array(), $method = 'GET')
 	{
-		if(!empty($params))
+		if(!empty($requestBody))
 		{
-			if(is_array($params))
+			if(is_array($requestBody))
 			{
-				$this->content = http_build_query($params);
+				$this->content = http_build_query($requestBody);
 			}
-			else if($params instanceof HttpRequestMultipartBody)
+			else if($requestBody instanceof HttpRequestMultipartBody)
 			{
-				$this->content = $params->content();
-				$this->contentType(sprintf('multipart/form-data; boundary=%s', $params->getBoundary()));
+				$this->content = $requestBody->content();
+				$this->contentType(sprintf('multipart/form-data; boundary=%s', $requestBody->getBoundary()));
 			}
 			else
 			{
-				$this->content = $params;
+				$this->content = $requestBody;
 			}
 		}
 		curl_setopt_array($this->handler, array(
@@ -444,67 +453,67 @@ class HttpRequest
 	/**
 	 * GET请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function get($url, $params = array())
+	public function get($url, $requestBody = array())
 	{
-		return $this->send($url, $params, 'GET');
+		return $this->send($url, $requestBody, 'GET');
 	}
 
 	/**
 	 * POST请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function post($url, $params = array())
+	public function post($url, $requestBody = array())
 	{
-		return $this->send($url, $params, 'POST');
+		return $this->send($url, $requestBody, 'POST');
 	}
 
 	/**
 	 * HEAD请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function head($url, $params = array())
+	public function head($url, $requestBody = array())
 	{
-		return $this->send($url, $params, 'HEAD');
+		return $this->send($url, $requestBody, 'HEAD');
 	}
 
 	/**
 	 * PUT请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function put($url, $params = array())
+	public function put($url, $requestBody = array())
 	{
-		return $this->send($url, $params, 'PUT');
+		return $this->send($url, $requestBody, 'PUT');
 	}
 
 	/**
 	 * PATCH请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function patch($url, $params = array())
+	public function patch($url, $requestBody = array())
 	{
-		return $this->send($url, $params, 'PATCH');
+		return $this->send($url, $requestBody, 'PATCH');
 	}
 
 	/**
 	 * DELETE请求
 	 * @param string $url 
-	 * @param array $params 
+	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function delete($url, $params = array())
+	public function delete($url, $requestBody = array())
 	{
-		return $this->send($url, $params, 'DELETE');
+		return $this->send($url, $requestBody, 'DELETE');
 	}
 
 	/**
