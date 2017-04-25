@@ -21,10 +21,10 @@ class HttpResponse
 	 */
 	public $headers = array();
 
-    /**
-     * 返回头, 包含中间所有请求(即包含重定向)的返回头
-     * @var array
-     */
+	/**
+	 * 返回头, 包含中间所有请求(即包含重定向)的返回头
+	 * @var array
+	 */
 	public $allHeaders = array();
 
 	/**
@@ -84,41 +84,41 @@ class HttpResponse
 	 */
 	protected function parseHeader()
 	{
-	    $rawHeaders = explode("\r\n\r\n", trim($this->headerContent), 2);
-	    $requestCount = count($rawHeaders);
-	    for($i=0; $i<$requestCount; ++$i){
-            array_push($this->allHeaders, $this->parseHeaderOneRequest($rawHeaders[$i]));
-        }
-        if($requestCount>0) $this->headers = $this->allHeaders[$requestCount-1];
+		$rawHeaders = explode("\r\n\r\n", trim($this->headerContent), 2);
+		$requestCount = count($rawHeaders);
+		for($i=0; $i<$requestCount; ++$i){
+			array_push($this->allHeaders, $this->parseHeaderOneRequest($rawHeaders[$i]));
+		}
+		if($requestCount>0) $this->headers = $this->allHeaders[$requestCount-1];
 	}
 
 	protected function parseHeaderOneRequest($piece){
-	    $tmpHeaders = array();
-        $lines = explode("\r\n", $piece);
-        $linesCount = count($lines);
-        //从1开始，第0行包含了协议信息和状态信息，排除该行
-        for($i=1; $i<$linesCount; ++$i){
-            $line = trim($lines[$i]);
-            if(empty($line)) continue;
-            list($key, $value) = explode(':', $line, 2);
-            $key = trim($key);
-            $value = trim($value);
-            if(isset($tmpHeaders[$key])){
-                if(is_array($tmpHeaders[$key])){
-                    array_push($tmpHeaders[$key], $value);
-                }else{
-                    $tmp = $tmpHeaders[$key];
-                    $tmpHeaders[$key] = array(
-                        $tmp,
-                        $value
-                    );
-                }
-            }else{
-                $tmpHeaders[$key] = $value;
-            }
-        }
-        return $tmpHeaders;
-    }
+		$tmpHeaders = array();
+		$lines = explode("\r\n", $piece);
+		$linesCount = count($lines);
+		//从1开始，第0行包含了协议信息和状态信息，排除该行
+		for($i=1; $i<$linesCount; ++$i){
+			$line = trim($lines[$i]);
+			if(empty($line)) continue;
+			list($key, $value) = explode(':', $line, 2);
+			$key = trim($key);
+			$value = trim($value);
+			if(isset($tmpHeaders[$key])){
+				if(is_array($tmpHeaders[$key])){
+					array_push($tmpHeaders[$key], $value);
+				}else{
+					$tmp = $tmpHeaders[$key];
+					$tmpHeaders[$key] = array(
+						$tmp,
+						$value
+					);
+				}
+			}else{
+				$tmpHeaders[$key] = $value;
+			}
+		}
+		return $tmpHeaders;
+	}
 
 	/**
 	 * 处理cookie

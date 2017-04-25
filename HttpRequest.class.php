@@ -434,7 +434,7 @@ class HttpRequest
 		for($i = 0; $i <= $this->retry && $statusCode>=500; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
-            $statusCode = $response->httpCode();
+			$statusCode = $response->httpCode();
 		}
 		return $response;
 	}
