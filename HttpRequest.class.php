@@ -162,7 +162,7 @@ class HttpRequest
 
 	/**
 	 * 设置参数，requestBody的别名
-	 * @param mixed $content 
+	 * @param mixed $params 
 	 * @return HttpRequest 
 	 */
 	public function params($params)
@@ -439,11 +439,14 @@ class HttpRequest
 		$this->parseProxy();
 		$this->parseHeaders();
 		$this->parseCookies();
-		$statusCode = 500; //第一次请求之前，statusCode设置到500以上
-		for($i = 0; $i <= $this->retry && $statusCode>=500; ++$i)
+		for($i = 0; $i <= $this->retry; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
-			$statusCode = $response->httpCode();
+			// 状态码为5XX才需要重试
+			if(0 > $this->retry && ((int)($response->httpCode()/100) != 5))
+			{
+				break;
+			}
 		}
 		return $response;
 	}

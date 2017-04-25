@@ -87,11 +87,16 @@ class HttpResponse
 		$rawHeaders = explode("\r\n\r\n", trim($this->headerContent), 2);
 		$requestCount = count($rawHeaders);
 		for($i=0; $i<$requestCount; ++$i){
-			array_push($this->allHeaders, $this->parseHeaderOneRequest($rawHeaders[$i]));
+			$this->allHeaders[] = $this->parseHeaderOneRequest($rawHeaders[$i]);
 		}
 		if($requestCount>0) $this->headers = $this->allHeaders[$requestCount-1];
 	}
 
+	/**
+	 * parseHeaderOneRequest
+	 * @param string $piece 
+	 * @return array
+	 */
 	protected function parseHeaderOneRequest($piece){
 		$tmpHeaders = array();
 		$lines = explode("\r\n", $piece);
@@ -105,7 +110,7 @@ class HttpResponse
 			$value = trim($value);
 			if(isset($tmpHeaders[$key])){
 				if(is_array($tmpHeaders[$key])){
-					array_push($tmpHeaders[$key], $value);
+					$tmpHeaders[$key][] = $value;
 				}else{
 					$tmp = $tmpHeaders[$key];
 					$tmpHeaders[$key] = array(
