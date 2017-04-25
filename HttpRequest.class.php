@@ -85,7 +85,7 @@ class HttpRequest
 	 * 总超时时间，单位：毫秒
 	 * @var int
 	 */
-	public $timeout = 30000;
+	public $timeout = 0;
 
 	/**
 	 * 代理认证方式
