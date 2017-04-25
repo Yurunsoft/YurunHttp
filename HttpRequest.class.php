@@ -76,6 +76,18 @@ class HttpRequest
 	public $caCert;
 
 	/**
+	 * 连接超时时间，单位：毫秒
+	 * @var int
+	 */
+	public $connectTimeout = 30000;
+
+	/**
+	 * 总超时时间，单位：毫秒
+	 * @var int
+	 */
+	public $timeout = 30000;
+
+	/**
 	 * 代理认证方式
 	 */
 	public static $proxyAuths = array(
@@ -394,6 +406,25 @@ class HttpRequest
 	}
 
 	/**
+	 * 设置超时时间
+	 * @param int $timeout 总超时时间，单位：毫秒
+	 * @param int $connectTimeout 连接超时时间，单位：毫秒
+	 * @return HttpRequest 
+	 */
+	public function timeout($timeout = null, $connectTimeout = null)
+	{
+		if(null !== $timeout)
+		{
+			$this->timeout = $timeout;
+		}
+		if(null !== $connectTimeout)
+		{
+			$this->connectTimeout = $connectTimeout;
+		}
+		return $this;
+	}
+
+	/**
 	 * 发送请求
 	 * @param string $url 
 	 * @param array $requestBody 
@@ -439,6 +470,7 @@ class HttpRequest
 		$this->parseProxy();
 		$this->parseHeaders();
 		$this->parseCookies();
+		$this->parseTimeout();
 		for($i = 0; $i <= $this->retry; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
@@ -597,5 +629,17 @@ class HttpRequest
 				CURLOPT_SSL_VERIFYHOST	=> 0,
 			));
 		}
+	}
+
+	/**
+	 * 处理超时时间
+	 * @return mixed 
+	 */
+	protected function parseTimeout()
+	{
+		curl_setopt_array($this->handler, array(
+			CURLOPT_CONNECTTIMEOUT_MS	=> $this->connectTimeout,
+			CURLOPT_TIMEOUT_MS			=> $this->timeout,
+		));
 	}
 }
