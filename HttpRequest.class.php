@@ -442,8 +442,9 @@ class HttpRequest
 		for($i = 0; $i <= $this->retry; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
+			$httpCode = $response->httpCode();
 			// 状态码为5XX才需要重试
-			if(0 > $this->retry && ((int)($response->httpCode()/100) != 5))
+			if($httpCode > 0 && ((int)($httpCode/100) != 5))
 			{
 				break;
 			}
