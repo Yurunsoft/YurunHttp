@@ -369,7 +369,7 @@ class HttpRequest
 	 */
 	public function retry($retry)
 	{
-		$this->retry = $retry;
+		$this->retry = $retry<0?0:$retry;   //至少请求1次，即重试0次
 		return $this;
 	}
 
@@ -439,13 +439,11 @@ class HttpRequest
 		$this->parseProxy();
 		$this->parseHeaders();
 		$this->parseCookies();
-		for($i = 0; $i <= $this->retry; ++$i)
+		$statusCode = 500; //第一次请求之前，statusCode设置到500以上
+		for($i = 0; $i <= $this->retry && $statusCode>=500; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
-			if(0 >= $this->retry || 200 === $response->httpCode())
-			{
-				break;
-			}
+			$statusCode = $response->httpCode();
 		}
 		return $response;
 	}
