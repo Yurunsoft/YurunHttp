@@ -88,6 +88,18 @@ class HttpRequest
 	public $timeout = 0;
 
 	/**
+	 * 下载限速，为0则不限制，单位：字节
+	 * @var int
+	 */
+	public $downloadSpeed;
+
+	/**
+	 * 上传限速，为0则不限制，单位：字节
+	 * @var int
+	 */
+	public $uploadSpeed;
+
+	/**
 	 * 代理认证方式
 	 */
 	public static $proxyAuths = array(
@@ -425,6 +437,19 @@ class HttpRequest
 	}
 
 	/**
+	 * 限速
+	 * @param int $download 下载速度，为0则不限制，单位：字节
+	 * @param int $upload 上传速度，为0则不限制，单位：字节
+	 * @return HttpRequest 
+	 */
+	public function limitRate($download = 0, $upload = 0)
+	{
+		$this->downloadSpeed = $download;
+		$this->uploadSpeed = $upload;
+		return $this;
+	}
+
+	/**
 	 * 发送请求
 	 * @param string $url 
 	 * @param array $requestBody 
@@ -470,7 +495,7 @@ class HttpRequest
 		$this->parseProxy();
 		$this->parseHeaders();
 		$this->parseCookies();
-		$this->parseTimeout();
+		$this->parseNetwork();
 		for($i = 0; $i <= $this->retry; ++$i)
 		{
 			$response = new HttpResponse($this->handler, curl_exec($this->handler));
@@ -632,14 +657,20 @@ class HttpRequest
 	}
 
 	/**
-	 * 处理超时时间
+	 * 处理网络相关
 	 * @return mixed 
 	 */
-	protected function parseTimeout()
+	protected function parseNetwork()
 	{
 		curl_setopt_array($this->handler, array(
-			CURLOPT_CONNECTTIMEOUT_MS	=> $this->connectTimeout,
-			CURLOPT_TIMEOUT_MS			=> $this->timeout,
+			// 连接超时
+			CURLOPT_CONNECTTIMEOUT_MS		=> $this->connectTimeout,
+			// 总超时
+			CURLOPT_TIMEOUT_MS				=> $this->timeout,
+			// 下载限速
+			CURLOPT_MAX_RECV_SPEED_LARGE	=> $this->downloadSpeed,
+			// 上传限速
+			CURLOPT_MAX_SEND_SPEED_LARGE	=> $this->uploadSpeed,
 		));
 	}
 }
