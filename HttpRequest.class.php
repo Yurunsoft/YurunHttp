@@ -67,7 +67,7 @@ class HttpRequest
 	 * 是否验证证书
 	 * @var bool
 	 */
-	public $IsVerifyCA = false;
+	public $isVerifyCA = false;
 
 	/**
 	 * CA根证书路径
@@ -98,6 +98,24 @@ class HttpRequest
 	 * @var int
 	 */
 	public $uploadSpeed;
+
+	/**
+	 * 用于连接中需要的用户名
+	 * @var string
+	 */
+	public $username;
+
+	/**
+	 * 用于连接中需要的密码
+	 * @var string
+	 */
+	public $password;
+
+	/**
+	 * 请求结果保存至文件的配置
+	 * @var mixed
+	 */
+	public $saveFileOption = array();
 
 	/**
 	 * 代理认证方式
@@ -143,6 +161,15 @@ class HttpRequest
 			'auth'	=>	'basic',
 			'type'	=>	'http',
 		);
+		$this->isVerifyCA = false;
+		$this->caCert = null;
+		$this->connectTimeout = 30000;
+		$this->timeout = 0;
+		$this->downloadSpeed = null;
+		$this->uploadSpeed = null;
+		$this->username = null;
+		$this->password = null;
+		$this->saveFileOption = array();
 	}
 
 	public function close()
@@ -450,13 +477,52 @@ class HttpRequest
 	}
 
 	/**
+	 * 设置用于连接中需要的用户名和密码
+	 * @param string $username 
+	 * @param string $password 
+	 * @return HttpRequest 
+	 */
+	public function userPwd($username, $password)
+	{
+		$this->username = $username;
+		$this->password = $password;
+		return $this;
+	}
+
+	/**
+	 * 保存至文件的设置
+	 * @param string $filePath 
+	 * @param string $fileMode 
+	 * @return HttpRequest 
+	 */
+	public function saveFile($filePath, $fileMode = 'w+')
+	{
+		$this->saveFileOption['filePath'] = $filePath;
+		$this->saveFileOption['fileModel'] = $fileMode;
+		return $this;
+	}
+
+	/**
+	 * 获取文件保存路径
+	 * @return string 
+	 */
+	public function getSavePath()
+	{
+		return $this->saveFileOption['savePath'];
+	}
+
+	/**
 	 * 发送请求
 	 * @param string $url 
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function send($url, $requestBody = array(), $method = 'GET')
+	public function send($url = null, $requestBody = array(), $method = 'GET')
 	{
+		if(null !== $url)
+		{
+			$this->url = $url;
+		}
 		if(!empty($requestBody))
 		{
 			if(is_array($requestBody))
@@ -506,6 +572,12 @@ class HttpRequest
 				break;
 			}
 		}
+		// 关闭保存至文件的句柄
+		if(isset($this->saveFileOption['fp']))
+		{
+			fclose($this->saveFileOption['fp']);
+			$this->saveFileOption['fp'] = null;
+		}
 		return $response;
 	}
 
@@ -515,7 +587,7 @@ class HttpRequest
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function get($url, $requestBody = array())
+	public function get($url = null, $requestBody = array())
 	{
 		return $this->send($url, $requestBody, 'GET');
 	}
@@ -526,7 +598,7 @@ class HttpRequest
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function post($url, $requestBody = array())
+	public function post($url = null, $requestBody = array())
 	{
 		return $this->send($url, $requestBody, 'POST');
 	}
@@ -537,7 +609,7 @@ class HttpRequest
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function head($url, $requestBody = array())
+	public function head($url = null, $requestBody = array())
 	{
 		return $this->send($url, $requestBody, 'HEAD');
 	}
@@ -548,7 +620,7 @@ class HttpRequest
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function put($url, $requestBody = array())
+	public function put($url = null, $requestBody = array())
 	{
 		return $this->send($url, $requestBody, 'PUT');
 	}
@@ -559,7 +631,7 @@ class HttpRequest
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function patch($url, $requestBody = array())
+	public function patch($url = null, $requestBody = array())
 	{
 		return $this->send($url, $requestBody, 'PATCH');
 	}
@@ -570,7 +642,7 @@ class HttpRequest
 	 * @param array $requestBody 
 	 * @return HttpResponse 
 	 */
-	public function delete($url, $requestBody = array())
+	public function delete($url = null, $requestBody = array())
 	{
 		return $this->send($url, $requestBody, 'DELETE');
 	}
@@ -581,6 +653,24 @@ class HttpRequest
 	protected function parseOptions()
 	{
 		curl_setopt_array($this->handler, $this->options);
+		// 请求结果保存为文件
+		if(null !== $this->saveFileOption['filePath'])
+		{
+			curl_setopt_array($this->handler, array(
+				CURLOPT_HEADER => false,
+				CURLOPT_RETURNTRANSFER => false,
+			));
+			$filePath = $this->saveFileOption['filePath'];
+			$last = substr($filePath, -1, 1);
+			if('/' === $last || '\\' === $last)
+			{
+				// 自动获取文件名
+				$filePath .= basename($this->url);
+			}
+			$this->saveFileOption['savePath'] = $filePath;
+			$this->saveFileOption['fp'] = fopen($filePath, isset($this->saveFileOption['fileMode']) ? $this->saveFileOption['fileMode'] : 'w+');
+			curl_setopt($this->handler, CURLOPT_FILE, $this->saveFileOption['fp']);
+		}
 	}
 
 	/**
@@ -639,7 +729,7 @@ class HttpRequest
 	 */
 	protected function parseCA()
 	{
-		if($this->IsVerifyCA)
+		if($this->isVerifyCA)
 		{
 			curl_setopt_array($this->handler, array(
 				CURLOPT_SSL_VERIFYPEER	=> true,
@@ -662,6 +752,15 @@ class HttpRequest
 	 */
 	protected function parseNetwork()
 	{
+		// 用户名密码处理
+		if('' != $this->username)
+		{
+			$userPwd = $this->username . ':' . $this->password;
+		}
+		else
+		{
+			$userPwd = '';
+		}
 		curl_setopt_array($this->handler, array(
 			// 连接超时
 			CURLOPT_CONNECTTIMEOUT_MS		=> $this->connectTimeout,
@@ -671,6 +770,8 @@ class HttpRequest
 			CURLOPT_MAX_RECV_SPEED_LARGE	=> $this->downloadSpeed,
 			// 上传限速
 			CURLOPT_MAX_SEND_SPEED_LARGE	=> $this->uploadSpeed,
+			// 连接中用到的用户名和密码
+			CURLOPT_USERPWD					=> $userPwd,
 		));
 	}
 }
