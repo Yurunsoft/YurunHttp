@@ -6,9 +6,9 @@
  * Time: 下午2:58
  */
 
-include '../HttpRequestMultipartBody.class.php';
-include '../HttpRequest.class.php';
-include '../HttpResponse.class.php';
+include '../HttpRequestMultipartBody.php';
+include '../HttpRequest.php';
+include '../HttpResponse.php';
 
 $multipartBody = new \Yurun\Until\HttpRequestMultipartBody();
 $multipartBody->add('aaa', 'bbb');

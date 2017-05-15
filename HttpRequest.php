@@ -654,7 +654,7 @@ class HttpRequest
 	{
 		curl_setopt_array($this->handler, $this->options);
 		// 请求结果保存为文件
-		if(null !== $this->saveFileOption['filePath'])
+		if(isset($this->saveFileOption['filePath']) && null !== $this->saveFileOption['filePath'])
 		{
 			curl_setopt_array($this->handler, array(
 				CURLOPT_HEADER => false,
