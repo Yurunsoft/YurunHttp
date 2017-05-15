@@ -16,10 +16,16 @@ class HttpResponse
 	public $response;
 
 	/**
-	 * 返回头
+	 * 返回头, 最后一次请求的返回头
 	 * @var array
 	 */
 	public $headers = array();
+
+	/**
+	 * 返回头, 包含中间所有请求(即包含重定向)的返回头
+	 * @var array
+	 */
+	public $allHeaders = array();
 
 	/**
 	 * Cookie
@@ -78,11 +84,45 @@ class HttpResponse
 	 */
 	protected function parseHeader()
 	{
-		preg_match_all('/([^:\r\n]+)\s*:\s*([^\r\n]+)\r\n/', $this->headerContent, $matches, PREG_SET_ORDER);
-		foreach($matches as $match)
-		{
-			$this->headers[$match[1]] = $match[2];
+		$rawHeaders = explode("\r\n\r\n", trim($this->headerContent), 2);
+		$requestCount = count($rawHeaders);
+		for($i=0; $i<$requestCount; ++$i){
+			$this->allHeaders[] = $this->parseHeaderOneRequest($rawHeaders[$i]);
 		}
+		if($requestCount>0) $this->headers = $this->allHeaders[$requestCount-1];
+	}
+
+	/**
+	 * parseHeaderOneRequest
+	 * @param string $piece 
+	 * @return array
+	 */
+	protected function parseHeaderOneRequest($piece){
+		$tmpHeaders = array();
+		$lines = explode("\r\n", $piece);
+		$linesCount = count($lines);
+		//从1开始，第0行包含了协议信息和状态信息，排除该行
+		for($i=1; $i<$linesCount; ++$i){
+			$line = trim($lines[$i]);
+			if(empty($line)) continue;
+			list($key, $value) = explode(':', $line, 2);
+			$key = trim($key);
+			$value = trim($value);
+			if(isset($tmpHeaders[$key])){
+				if(is_array($tmpHeaders[$key])){
+					$tmpHeaders[$key][] = $value;
+				}else{
+					$tmp = $tmpHeaders[$key];
+					$tmpHeaders[$key] = array(
+						$tmp,
+						$value
+					);
+				}
+			}else{
+				$tmpHeaders[$key] = $value;
+			}
+		}
+		return $tmpHeaders;
 	}
 
 	/**
