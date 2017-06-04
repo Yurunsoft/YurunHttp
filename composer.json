@@ -1,0 +1,13 @@
+{
+    "name": "yurunsoft/yurun-http",
+    "description": "An OO php cURL wrapper",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Yurun\\Until\\": "./"
+        }
+    },
+    "require": {}
+}
