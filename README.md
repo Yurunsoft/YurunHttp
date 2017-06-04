@@ -9,12 +9,6 @@
 本项目可以使用composer安装，遵循psr-4自动加载规则，在你的 `composer.json` 中加入下面的内容
 ```json
 {
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://git.oschina.net/yurunsoft/YurunHttp"
-        }
-    ],
     "require": {
         "yurunsoft/yurun-http": "dev-master"
     }
