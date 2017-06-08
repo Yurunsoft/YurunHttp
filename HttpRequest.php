@@ -118,6 +118,24 @@ class HttpRequest
 	public $saveFileOption = array();
 
 	/**
+	 * 根据location自动重定向
+	 * @var bool
+	 */
+	public $followLocation = true;
+
+	/**
+	 * 最大重定向次数
+	 * @var int
+	 */
+	public $maxRedirects = 10;
+
+	/**
+	 * 使用自定义实现的重定向，性能较差。如果不是环境不支持自动重定向，请勿设为true
+	 * @var bool
+	 */
+	public static $customLocation = false;
+
+	/**
 	 * 临时目录
 	 * @var string
 	 */
@@ -546,8 +564,6 @@ class HttpRequest
 			}
 		}
 		curl_setopt_array($this->handler, array(
-			// 请求地址
-			CURLOPT_URL				=> $url,
 			// 请求方法
 			CURLOPT_CUSTOMREQUEST	=> $method,
 			// 返回内容
@@ -560,7 +576,9 @@ class HttpRequest
 			CURLOPT_COOKIEFILE		=> $this->cookieFileName,
 			CURLOPT_COOKIEJAR		=> $this->cookieFileName,
 			// 自动重定向
-			CURLOPT_FOLLOWLOCATION	=> true,
+			CURLOPT_FOLLOWLOCATION	=> self::$customLocation ? false : $this->followLocation,
+			// 最大重定向次数
+			CURLOPT_MAXREDIRS		=> $this->maxRedirects,
 		));
 		$this->parseCA();
 		$this->parseOptions();
@@ -568,16 +586,28 @@ class HttpRequest
 		$this->parseHeaders();
 		$this->parseCookies();
 		$this->parseNetwork();
-		for($i = 0; $i <= $this->retry; ++$i)
-		{
-			$response = new HttpResponse($this->handler, curl_exec($this->handler));
-			$httpCode = $response->httpCode();
-			// 状态码为5XX才需要重试
-			if($httpCode > 0 && ((int)($httpCode/100) != 5))
+		$count = 0;
+		do{
+			curl_setopt($this->handler, CURLOPT_URL, $url);
+			for($i = 0; $i <= $this->retry; ++$i)
+			{
+				$response = new HttpResponse($this->handler, curl_exec($this->handler));
+				$httpCode = $response->httpCode();
+				// 状态码为5XX才需要重试
+				if($httpCode > 0 && ((int)($httpCode/100) != 5))
+				{
+					break;
+				}
+			}
+			if(self::$customLocation && (301 === $httpCode || 302 === $httpCode) && ++$count <= $this->maxRedirects)
+			{
+				$url = $response->headers['Location'];
+			}
+			else
 			{
 				break;
 			}
-		}
+		}while(true);
 		// 关闭保存至文件的句柄
 		if(isset($this->saveFileOption['fp']))
 		{
