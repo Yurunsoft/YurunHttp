@@ -137,13 +137,13 @@ class HttpResponse
 			$count2 = count($list);
 			if(isset($list[0]))
 			{
-				list($cookieName, $value) = explode('=', $list[0]);
+				list($cookieName, $value) = explode('=', $list[0], 2);
 				$cookieName = trim($cookieName);
 				$this->cookies[$cookieName] = array('value'=>$value);
 				for($j = 1; $j < $count2; ++$j)
 				{
-					list($name, $value) = explode('=', $list[$j]);
-					$this->cookies[$cookieName][trim($name)] = $value;
+					$kv = explode('=', $list[$j], 2);
+					$this->cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
 				}
 			}
 		}
