@@ -4,6 +4,21 @@
 
 一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法。
 
+## Composer
+
+本项目可以使用composer安装，遵循psr-4自动加载规则，在你的 `composer.json` 中加入下面的内容
+```json
+{
+    "require": {
+        "yurunsoft/yurun-http": "dev-master"
+    }
+}
+```
+
+然后执行 `composer install` 安装。
+
+之后你便可以使用 `include "vendor/autoload.php";` 来自动加载类。（ps：不要忘了namespace）
+
 ## 用法
 
 ### 链式调用

@@ -1,7 +1,7 @@
 <?php
 namespace Yurun\Until;
-require '../HttpRequest.class.php';
-require '../HttpResponse.class.php';
+require '../HttpRequest.php';
+require '../HttpResponse.php';
 $h = HttpRequest::newSession();
 // 设置单个header
 $h->header('test','666');
