@@ -118,6 +118,12 @@ class HttpRequest
 	public $saveFileOption = array();
 
 	/**
+	 * 临时目录
+	 * @var string
+	 */
+	public static $tempDir;
+
+	/**
 	 * 代理认证方式
 	 */
 	public static $proxyAuths = array(
@@ -142,7 +148,7 @@ class HttpRequest
 	public function __construct()
 	{
 		$this->open();
-		$this->cookieFileName = tempnam(sys_get_temp_dir(),'');
+		$this->cookieFileName = tempnam(null === self::$tempDir ? sys_get_temp_dir() : self::$tempDir,'');
 	}
 
 	public function __destruct()
