@@ -104,7 +104,7 @@ class HttpResponse
 		//从1开始，第0行包含了协议信息和状态信息，排除该行
 		for($i=1; $i<$linesCount; ++$i){
 			$line = trim($lines[$i]);
-			if(empty($line||strstr($line, ':') == false)) continue;
+			if(empty($line)||strstr($line, ':') == false) continue;
 			list($key, $value) = explode(':', $line, 2);
 			$key = trim($key);
 			$value = trim($value);
