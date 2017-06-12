@@ -10,7 +10,7 @@
 ```json
 {
     "require": {
-        "jtunggit/yurun-http": "dev-master"
+        "yurunsoft/yurun-http": "dev-master"
     }
 }
 ```
