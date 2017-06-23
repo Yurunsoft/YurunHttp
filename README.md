@@ -73,7 +73,7 @@ $response = $http->post('http://www.baidu.com/', $requestBody);
 var_dump($response);
 ```
 
-### POST(multi_part)
+### POST上传文件(multi_part)
 
 ```php
 <?php
@@ -96,4 +96,12 @@ $http = HttpRequest::newSession();
 $http->saveFile('./')->get($url); // 使用ftp服务器中的文件名保存到当前目录
 $http->saveFile('./abc.txt')->get($url); // 指定文件名保存
 ```
+
+### 文件下载
+
+```php
+$http = HttpRequest::newSession();
+$http->download('baidu.html', 'http://www.baidu.com');
+```
+
 具体详见Demo

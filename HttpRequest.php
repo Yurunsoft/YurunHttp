@@ -684,6 +684,21 @@ class HttpRequest
 	}
 
 	/**
+	 * 直接下载文件
+	 * @param string $fileName
+	 * @param string $url
+	 * @param array $requestBody
+	 * @param string $method
+	 * @return HttpResponse
+	 */
+	public function download($fileName, $url = null, $requestBody = array(), $method = 'GET')
+	{
+		$result = $this->saveFile($fileName)->send($url, $requestBody, $method);
+		$this->saveFileOption = array();
+		return $result;
+	}
+
+	/**
 	 * 处理Options
 	 */
 	protected function parseOptions()
