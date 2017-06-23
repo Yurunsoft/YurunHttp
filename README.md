@@ -100,6 +100,7 @@ $http->saveFile('./abc.txt')->get($url); // 指定文件名保存
 ### 文件下载
 
 ```php
+<?php
 $http = HttpRequest::newSession();
 $http->download('baidu.html', 'http://www.baidu.com');
 ```
