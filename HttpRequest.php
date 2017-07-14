@@ -202,6 +202,10 @@ class HttpRequest
 		{
 			curl_close($this->handler);
 			$this->handler = null;
+			if(is_file($this->cookieFileName))
+			{
+				unlink($this->cookieFileName);
+			}
 		}
 	}
 
