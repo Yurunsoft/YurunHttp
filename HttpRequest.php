@@ -597,8 +597,8 @@ class HttpRequest
 			{
 				$response = new HttpResponse($this->handler, curl_exec($this->handler));
 				$httpCode = $response->httpCode();
-				// 状态码为5XX才需要重试
-				if($httpCode > 0 && ((int)($httpCode/100) != 5))
+				// 状态码为5XX或者0才需要重试
+				if(!(0 === $httpCode || (5 === (int)($httpCode/100))))
 				{
 					break;
 				}
