@@ -1,6 +1,9 @@
 {
     "name": "yurunsoft/yurun-http",
     "description": "一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法。(An open source HTTP class library based on PHP cURL, support chain operations, eliminating the use of miscellaneous cURL methods.)",
+    "require": {
+        "yurunsoft/yurun-event" : "dev-master"
+    },
     "type": "library",
     "license": "MIT",
     "minimum-stability": "stable",
@@ -8,6 +11,5 @@
         "psr-4": {
             "Yurun\\Until\\": "./"
         }
-    },
-    "require": {}
+    }
 }
