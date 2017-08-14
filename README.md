@@ -105,4 +105,22 @@ $http = HttpRequest::newSession();
 $http->download('baidu.html', 'http://www.baidu.com');
 ```
 
+### 断点续传分块下载
+```php
+<?php
+try{
+	$download = new Download('http://tool.chinaz.com/ChinazSEOTool.zip');
+	$download->blockSize = 1048576; // 每一块数据的大小，可以不设置，默认为1M
+	// 绑定每一块数据下载完成事件
+	$download->on('progressChanged', function($e){
+		var_dump($e);
+	});
+	// 下载
+	$download->download(__DIR__ . '/1.zip');
+}catch(Exception $e)
+{
+	var_dump($e->getMessage());
+}
+```
+
 具体详见Demo
