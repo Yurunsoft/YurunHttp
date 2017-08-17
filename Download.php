@@ -74,39 +74,49 @@ class Download
 	 */
 	public function getFileSize()
 	{
-		$this->response = $this->http->options(array(
+		$this->response = $this->http->headers(array(
+			'Range'	=>	'bytes=0-1',
+		))->options(array(
 			CURLOPT_NOBODY	=>	true
 		))->send($this->url, $this->params, $this->method);
-		if(isset($this->response->headers['Content-Length']))
+		if(isset($this->response->headers['Content-Range']))
 		{
-			return (int)$this->response->headers['Content-Length'];
+			list(, $length) = explode('/', $this->response->headers['Content-Range']);
+			return (int)$length;
 		}
 		else
 		{
-			throw new \Exception('获取文件大小失败');
+			return false;
 		}
 	}
 
 	public function download($filename)
 	{
 		$this->fileSize = $this->getFileSize();
-		$canBreakContinue = isset($this->response->headers['Accept-Ranges']);
-		switch($this->breakContinue)
+		if($this->fileSize)
 		{
-			case BreakContinue::AUTO:
-				$this->isBreakContinue = $canBreakContinue;
-				break;
-			case BreakContinue::ON:
-				$this->isBreakContinue = (true === $canBreakContinue);
-				break;
-			case BreakContinue::OFF:
-				$this->isBreakContinue = false;
-				break;
+			$canBreakContinue = isset($this->response->headers['Content-Range']);
+			switch($this->breakContinue)
+			{
+				case BreakContinue::AUTO:
+					$this->isBreakContinue = $canBreakContinue;
+					break;
+				case BreakContinue::ON:
+					$this->isBreakContinue = (true === $canBreakContinue);
+					break;
+				case BreakContinue::OFF:
+					$this->isBreakContinue = false;
+					break;
+			}
+		}
+		else
+		{
+			$canBreakContinue = $this->isBreakContinue = false;
 		}
 		$this->http->options(array(
 			CURLOPT_NOBODY	=>	false
 		));
-		if($this->breakContinue)
+		if($this->isBreakContinue)
 		{
 			$fp = fopen($filename, 'a+');
 			if(false === $fp)
@@ -118,7 +128,6 @@ class Download
 			{
 				throw new \Exception('获取本地文件大小失败');
 			}
-			++$begin;
 			while($begin < $this->fileSize)
 			{
 				$length = min($this->fileSize - $begin, $this->blockSize);
