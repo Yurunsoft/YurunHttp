@@ -66,6 +66,15 @@ class HttpResponse
 	}
 
 	/**
+	 * 获取请求总耗时，单位：秒
+	 * @return void
+	 */
+	public function totalTime()
+	{
+		return curl_getinfo($this->handler, CURLINFO_TOTAL_TIME);
+	}
+
+	/**
 	 * 处理
 	 * @return mixed 
 	 */
