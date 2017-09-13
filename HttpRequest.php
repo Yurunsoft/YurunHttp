@@ -130,6 +130,43 @@ class HttpRequest
 	public $maxRedirects = 10;
 
 	/**
+	 * 证书类型
+	 * 支持的格式有"PEM" (默认值), "DER"和"ENG"
+	 * @var string
+	 */
+	public $certType = 'pem';
+
+	/**
+	 * 一个包含 PEM 格式证书的文件名
+	 * @var string
+	 */
+	
+	public $certPath = '';
+	/**
+	 * 使用证书需要的密码
+	 * @var string
+	 */
+	public $certPassword = null;
+
+	/**
+	 * certType规定的私钥的加密类型，支持的密钥类型为"PEM"(默认值)、"DER"和"ENG"
+	 * @var string
+	 */
+	public $keyType = 'pem';
+	
+	/**
+	 * 包含 SSL 私钥的文件名
+	 * @var string
+	 */
+	public $keyPath = '';
+
+	/**
+	 * SSL私钥的密码
+	 * @var string
+	 */
+	public $keyPassword = null;
+
+	/**
 	 * 使用自定义实现的重定向，性能较差。如果不是环境不支持自动重定向，请勿设为true
 	 * @var bool
 	 */
@@ -540,6 +577,48 @@ class HttpRequest
 	}
 
 	/**
+	 * 设置SSL证书
+	 * @param string $path
+	 * @param string $type
+	 * @param string $password
+	 * @return HttpRequest
+	 */
+	public function sslCert($path, $type = null, $password = null)
+	{
+		$this->certPath = $path;
+		if(null !== $type)
+		{
+			$this->certType = $type;
+		}
+		if(null !== $password)
+		{
+			$this->certPassword = $password;
+		}
+		return $this;
+	}
+
+	/**
+	 * 设置SSL私钥
+	 * @param string $path
+	 * @param string $type
+	 * @param string $password
+	 * @return HttpRequest
+	 */
+	public function sslKey($path, $type = null, $password = null)
+	{
+		$this->keyPath = $path;
+		if(null !== $type)
+		{
+			$this->keyType = $type;
+		}
+		if(null !== $password)
+		{
+			$this->keyPassword = $password;
+		}
+		return $this;
+	}
+
+	/**
 	 * 发送请求
 	 * @param string $url 
 	 * @param array $requestBody 
@@ -584,7 +663,7 @@ class HttpRequest
 			// 最大重定向次数
 			CURLOPT_MAXREDIRS		=> $this->maxRedirects,
 		));
-		$this->parseCA();
+		$this->parseSSL();
 		$this->parseOptions();
 		$this->parseProxy();
 		$this->parseHeaders();
@@ -780,9 +859,9 @@ class HttpRequest
 	}
 	
 	/**
-	 * 处理证书
+	 * 处理SSL
 	 */
-	protected function parseCA()
+	protected function parseSSL()
 	{
 		if($this->isVerifyCA)
 		{
@@ -797,6 +876,22 @@ class HttpRequest
 			curl_setopt_array($this->handler, array(
 				CURLOPT_SSL_VERIFYPEER	=> false,
 				CURLOPT_SSL_VERIFYHOST	=> 0,
+			));
+		}
+		if('' !== $this->certPath)
+		{
+			curl_setopt_array($this->handler, array(
+				CURLOPT_SSLCERT			=> $this->certPath,
+				CURLOPT_SSLCERTPASSWD	=> $this->certPassword,
+				CURLOPT_SSLCERTTYPE		=> $this->certType,
+			));
+		}
+		if('' !== $this->keyPath)
+		{
+			curl_setopt_array($this->handler, array(
+				CURLOPT_SSLKEY			=> $this->keyPath,
+				CURLOPT_SSLKEYPASSWD	=> $this->keyPassword,
+				CURLOPT_SSLKEYTYPE		=> $this->keyType,
 			));
 		}
 	}
