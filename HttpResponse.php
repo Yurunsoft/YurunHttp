@@ -46,6 +46,12 @@ class HttpResponse
 	public $body = '';
 
 	/**
+	 * 是否请求成功
+	 * @var boolean
+	 */
+	public $success;
+
+	/**
 	 * __construct
 	 * @return mixed 
 	 */
@@ -53,6 +59,7 @@ class HttpResponse
 	{
 		$this->handler = $handler;
 		$this->response = $response;
+		$this->success = false !== $response;
 		$this->parseResponse();
 	}
 
@@ -156,5 +163,23 @@ class HttpResponse
 				}
 			}
 		}
+	}
+
+	/**
+	 * 返回当前会话最后一次错误的字符串
+	 * @return string
+	 */
+	public function error()
+	{
+		return curl_error($this->handler);
+	}
+
+	/**
+	 * 返回最后一次的错误代码
+	 * @return int
+	 */
+	public function errno()
+	{
+		return curl_errno($this->handler);
 	}
 }
