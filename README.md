@@ -10,7 +10,7 @@
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "dev-master"
+        "yurunsoft/yurun-http": "1.3.*"
     }
 }
 ```
@@ -32,7 +32,16 @@ $response = $http->retry(3) // 失败重试3次
                  ->accept('text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
                  ->acceptLanguage('zh-CN,zh;q=0.8')
                  ->get('http://www.baidu.com/');
-var_dump($response);
+if($response->success)
+{
+    $body = $response->body; // 返回的正文内容
+    $header = $response->headers; // 返回头
+}
+else
+{
+    // 失败输出错误码和错误信息
+    echo $response->errno(), ':', $response->error();
+}
 ```
 
 ### GET
