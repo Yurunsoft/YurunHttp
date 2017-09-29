@@ -91,6 +91,11 @@ class HttpResponse
 		$headerSize = curl_getinfo($this->handler, CURLINFO_HEADER_SIZE);
 		$this->headerContent = substr($this->response, 0, $headerSize);
 		$this->body = substr($this->response, $headerSize);
+		// PHP 7.0.0开始substr()的 string 字符串长度与 start 相同时将返回一个空字符串。在之前的版本中，这种情况将返回 FALSE 。
+		if(false === $this->body)
+		{
+			$this->body = '';
+		}
 		$this->parseHeader();
 		$this->parseCookie();
 	}
