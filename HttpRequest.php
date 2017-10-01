@@ -622,6 +622,7 @@ class HttpRequest
 	 * 发送请求
 	 * @param string $url 
 	 * @param array $requestBody 
+	 * @param array $method 
 	 * @return HttpResponse 
 	 */
 	public function send($url = null, $requestBody = array(), $method = 'GET')
