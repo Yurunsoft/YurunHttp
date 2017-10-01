@@ -563,7 +563,7 @@ class HttpRequest
 	public function saveFile($filePath, $fileMode = 'w+')
 	{
 		$this->saveFileOption['filePath'] = $filePath;
-		$this->saveFileOption['fileModel'] = $fileMode;
+		$this->saveFileOption['fileMode'] = $fileMode;
 		return $this;
 	}
 
