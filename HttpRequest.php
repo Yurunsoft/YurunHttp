@@ -4,31 +4,31 @@ namespace Yurun\Until;
 class HttpRequest
 {
 	/**
-	 * CURL操作对象
+	 * CURL操作对象，`curl_init()`的返回值
 	 * @var resource
 	 */
 	public $handler;
 
 	/**
-	 * Url地址
+	 * 需要请求的Url地址
 	 * @var string
 	 */
 	public $url;
 
 	/**
-	 * 发送内容
+	 * 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`
 	 * @var mixed
 	 */
 	public $content;
 
 	/**
-	 * CurlOptions
+	 * `curl_setopt_array()`所需要的第二个参数
 	 * @var array
 	 */
 	public $options = array();
 
 	/**
-	 * header头
+	 * 请求头
 	 * @var array
 	 */
 	public $headers = array();
@@ -40,19 +40,19 @@ class HttpRequest
 	public $cookies = array();
 
 	/**
-	 * 保存Cookie文件的文件名
+	 * 保存Cookie文件的文件名，为空不保存
 	 * @var string
 	 */
 	public $cookieFileName = '';
 
 	/**
-	 * 失败重试次数
+	 * 失败重试次数，默认为0
 	 * @var int
 	 */
 	public $retry = 0;
 
 	/**
-	 * 是否使用代理
+	 * 是否使用代理，默认false
 	 * @var bool
 	 */
 	public $useProxy = false;
@@ -173,7 +173,7 @@ class HttpRequest
 	public static $customLocation = false;
 
 	/**
-	 * 临时目录
+	 * 临时目录，有些特殊环境（如某国内虚拟主机）需要特别设置一下临时文件目录
 	 * @var string
 	 */
 	public static $tempDir;
