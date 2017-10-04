@@ -256,7 +256,7 @@ class HttpRequest
 	}
 
 	/**
-	 * 设置Url
+	 * 设置请求地址
 	 * @param mixed $url 
 	 * @return HttpRequest 
 	 */
