@@ -197,7 +197,7 @@ class HttpRequest
 	);
 
 	/**
-	 * __construct
+	 * 构造方法
 	 * @return mixed 
 	 */
 	public function __construct()
@@ -206,11 +206,18 @@ class HttpRequest
 		$this->cookieFileName = tempnam(null === self::$tempDir ? sys_get_temp_dir() : self::$tempDir,'');
 	}
 
+	/**
+	 * 析构方法
+	 */
 	public function __destruct()
 	{
 		$this->close();
 	}
 
+	/**
+	 * 打开一个新连接，初始化所有参数。一般不需要手动调用。
+	 * @return void
+	 */
 	public function open()
 	{
 		$this->handler = curl_init();
@@ -233,6 +240,10 @@ class HttpRequest
 		$this->saveFileOption = array();
 	}
 
+	/**
+	 * 关闭连接。一般不需要手动调用。
+	 * @return void
+	 */
 	public function close()
 	{
 		if(null !== $this->handler)
@@ -247,7 +258,7 @@ class HttpRequest
 	}
 
 	/**
-	 * 创建一个新会话
+	 * 创建一个新会话，等同于new
 	 * @return HttpRequest 
 	 */
 	public static function newSession()
@@ -257,7 +268,7 @@ class HttpRequest
 
 	/**
 	 * 设置请求地址
-	 * @param mixed $url 
+	 * @param string $url 请求地址
 	 * @return HttpRequest 
 	 */
 	public function url($url)
@@ -268,7 +279,7 @@ class HttpRequest
 
 	/**
 	 * 设置发送内容，requestBody的别名
-	 * @param mixed $content 
+	 * @param mixed $content 发送内容，可以是字符串、数组、HttpRequestMultipartBody
 	 * @return HttpRequest 
 	 */
 	public function content($content)
@@ -278,7 +289,7 @@ class HttpRequest
 
 	/**
 	 * 设置参数，requestBody的别名
-	 * @param mixed $params 
+	 * @param mixed $params 发送内容，可以是字符串、数组、HttpRequestMultipartBody
 	 * @return HttpRequest 
 	 */
 	public function params($params)
@@ -288,7 +299,7 @@ class HttpRequest
 
 	/**
 	 * 设置请求主体
-	 * @param mixed $requestBody 
+	 * @param mixed $requestBody 发送内容，可以是字符串、数组、HttpRequestMultipartBody
 	 * @return HttpRequest 
 	 */
 	public function requestBody($requestBody)
@@ -299,7 +310,7 @@ class HttpRequest
 
 	/**
 	 * 批量设置CURL的Option
-	 * @param array $options 
+	 * @param array $options curl_setopt_array()所需要的第二个参数
 	 * @return HttpRequest 
 	 */
 	public function options($options)
@@ -313,8 +324,8 @@ class HttpRequest
 
 	/**
 	 * 设置CURL的Option
-	 * @param int $option 
-	 * @param mixed $value 
+	 * @param int $option 需要设置的CURLOPT_XXX选项
+	 * @param mixed $value 值
 	 * @return HttpRequest 
 	 */
 	public function option($option, $value)
@@ -324,8 +335,8 @@ class HttpRequest
 	}
 
 	/**
-	 * 批量设置CURL的Option
-	 * @param array $options 
+	 * 批量设置请求头
+	 * @param array $headers 
 	 * @return HttpRequest 
 	 */
 	public function headers($headers)
@@ -335,9 +346,9 @@ class HttpRequest
 	}
 
 	/**
-	 * 设置CURL的Option
-	 * @param int $option 
-	 * @param mixed $value 
+	 * 设置请求头
+	 * @param string $header 请求头名称
+	 * @param string $value 值
 	 * @return HttpRequest 
 	 */
 	public function header($header, $value)
@@ -348,7 +359,7 @@ class HttpRequest
 
 	/**
 	 * 设置Accept
-	 * @param string $accept 
+	 * @param string $accept
 	 * @return HttpRequest 
 	 */
 	public function accept($accept)
@@ -402,20 +413,20 @@ class HttpRequest
 	}
 
 	/**
-	 * 设置Cookies
-	 * @param array $headers 
+	 * 批量设置Cookies
+	 * @param array $cookies 键值对应数组
 	 * @return HttpRequest 
 	 */
-	public function cookies($headers)
+	public function cookies($cookies)
 	{
-		$this->cookies = array_merge($this->cookies, $headers);
+		$this->cookies = array_merge($this->cookies, $cookies);
 		return $this;
 	}
 
 	/**
 	 * 设置Cookie
-	 * @param string $name 
-	 * @param string $value 
+	 * @param string $name 名称
+	 * @param string $value 值
 	 * @return HttpRequest 
 	 */
 	public function cookie($name, $value)
@@ -480,21 +491,21 @@ class HttpRequest
 
 	/**
 	 * 设置失败重试次数，状态码非200时重试
-	 * @param string $userAgent 
+	 * @param string $retry 
 	 * @return HttpRequest 
 	 */
 	public function retry($retry)
 	{
-		$this->retry = $retry<0?0:$retry;   //至少请求1次，即重试0次
+		$this->retry = $retry < 0 ? 0 : $retry;   //至少请求1次，即重试0次
 		return $this;
 	}
 
 	/**
 	 * 代理
-	 * @param string $server 
-	 * @param int $port 
-	 * @param string $type 
-	 * @param string $auth 
+	 * @param string $server 代理服务器地址
+	 * @param int $port 代理服务器端口
+	 * @param string $type 代理类型，支持：http、socks4、socks4a、socks5
+	 * @param string $auth 代理认证方式，支持：basic、ntlm。一般默认basic
 	 * @return HttpRequest 
 	 */
 	public function proxy($server, $port, $type = 'http', $auth = 'basic')
@@ -543,8 +554,8 @@ class HttpRequest
 
 	/**
 	 * 设置用于连接中需要的用户名和密码
-	 * @param string $username 
-	 * @param string $password 
+	 * @param string $username 用户名
+	 * @param string $password 密码
 	 * @return HttpRequest 
 	 */
 	public function userPwd($username, $password)
@@ -556,8 +567,8 @@ class HttpRequest
 
 	/**
 	 * 保存至文件的设置
-	 * @param string $filePath 
-	 * @param string $fileMode 
+	 * @param string $filePath 文件路径
+	 * @param string $fileMode 文件打开方式，默认w+
 	 * @return HttpRequest 
 	 */
 	public function saveFile($filePath, $fileMode = 'w+')
@@ -578,9 +589,9 @@ class HttpRequest
 
 	/**
 	 * 设置SSL证书
-	 * @param string $path
-	 * @param string $type
-	 * @param string $password
+	 * @param string $path 一个包含 PEM 格式证书的文件名
+	 * @param string $type 证书类型，支持的格式有”PEM” (默认值), “DER”和”ENG”
+	 * @param string $password 使用证书需要的密码
 	 * @return HttpRequest
 	 */
 	public function sslCert($path, $type = null, $password = null)
@@ -599,9 +610,9 @@ class HttpRequest
 
 	/**
 	 * 设置SSL私钥
-	 * @param string $path
-	 * @param string $type
-	 * @param string $password
+	 * @param string $path 包含 SSL 私钥的文件名
+	 * @param string $type certType规定的私钥的加密类型，支持的密钥类型为”PEM”(默认值)、”DER”和”ENG”
+	 * @param string $password SSL私钥的密码
 	 * @return HttpRequest
 	 */
 	public function sslKey($path, $type = null, $password = null)
@@ -619,10 +630,10 @@ class HttpRequest
 	}
 
 	/**
-	 * 发送请求
-	 * @param string $url 
-	 * @param array $requestBody 
-	 * @param array $method 
+	 * 发送请求，所有请求的老祖宗
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $method 请求方法，GET、POST等
 	 * @return HttpResponse 
 	 */
 	public function send($url = null, $requestBody = array(), $method = 'GET')
@@ -703,8 +714,8 @@ class HttpRequest
 
 	/**
 	 * GET请求
-	 * @param string $url 
-	 * @param array $requestBody 
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return HttpResponse 
 	 */
 	public function get($url = null, $requestBody = array())
@@ -714,8 +725,8 @@ class HttpRequest
 
 	/**
 	 * POST请求
-	 * @param string $url 
-	 * @param array $requestBody 
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return HttpResponse 
 	 */
 	public function post($url = null, $requestBody = array())
@@ -725,8 +736,8 @@ class HttpRequest
 
 	/**
 	 * HEAD请求
-	 * @param string $url 
-	 * @param array $requestBody 
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return HttpResponse 
 	 */
 	public function head($url = null, $requestBody = array())
@@ -736,8 +747,8 @@ class HttpRequest
 
 	/**
 	 * PUT请求
-	 * @param string $url 
-	 * @param array $requestBody 
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return HttpResponse 
 	 */
 	public function put($url = null, $requestBody = array())
@@ -747,8 +758,8 @@ class HttpRequest
 
 	/**
 	 * PATCH请求
-	 * @param string $url 
-	 * @param array $requestBody 
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return HttpResponse 
 	 */
 	public function patch($url = null, $requestBody = array())
@@ -758,8 +769,8 @@ class HttpRequest
 
 	/**
 	 * DELETE请求
-	 * @param string $url 
-	 * @param array $requestBody 
+	 * @param string $url 请求地址，如果为null则取url属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return HttpResponse 
 	 */
 	public function delete($url = null, $requestBody = array())
@@ -769,10 +780,10 @@ class HttpRequest
 
 	/**
 	 * 直接下载文件
-	 * @param string $fileName
-	 * @param string $url
-	 * @param array $requestBody
-	 * @param string $method
+	 * @param string $fileName 保存路径
+	 * @param string $url 下载文件地址
+	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param string $method 请求方法，GET、POST等，一般用GET
 	 * @return HttpResponse
 	 */
 	public function download($fileName, $url = null, $requestBody = array(), $method = 'GET')
@@ -784,6 +795,7 @@ class HttpRequest
 
 	/**
 	 * 处理Options
+	 * @return void
 	 */
 	protected function parseOptions()
 	{
@@ -810,6 +822,7 @@ class HttpRequest
 
 	/**
 	 * 处理代理
+	 * @return void
 	 */
 	protected function parseProxy()
 	{
@@ -826,6 +839,7 @@ class HttpRequest
 
 	/**
 	 * 处理Headers
+	 * @return void
 	 */
 	protected function parseHeaders()
 	{
@@ -834,6 +848,7 @@ class HttpRequest
 
 	/**
 	 * 处理Cookie
+	 * @return void
 	 */
 	protected function parseCookies()
 	{
@@ -861,6 +876,7 @@ class HttpRequest
 	
 	/**
 	 * 处理SSL
+	 * @return void
 	 */
 	protected function parseSSL()
 	{
@@ -899,7 +915,7 @@ class HttpRequest
 
 	/**
 	 * 处理网络相关
-	 * @return mixed 
+	 * @return void
 	 */
 	protected function parseNetwork()
 	{
