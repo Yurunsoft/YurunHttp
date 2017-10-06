@@ -590,7 +590,7 @@ class HttpRequest
 	/**
 	 * 设置SSL证书
 	 * @param string $path 一个包含 PEM 格式证书的文件名
-	 * @param string $type 证书类型，支持的格式有”PEM” (默认值), “DER”和”ENG”
+	 * @param string $type 证书类型，支持的格式有”PEM”(默认值),“DER”和”ENG”
 	 * @param string $password 使用证书需要的密码
 	 * @return HttpRequest
 	 */
