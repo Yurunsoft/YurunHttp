@@ -4,6 +4,8 @@
 
 一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法。
 
+## [在线文档](http://doc.yurunsoft.com/YurunHttp "在线文档")
+
 ## Composer
 
 本项目可以使用composer安装，遵循psr-4自动加载规则，在你的 `composer.json` 中加入下面的内容
