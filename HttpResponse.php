@@ -4,14 +4,14 @@ namespace Yurun\Until;
 class HttpResponse
 {
 	/**
-	 * CURL操作对象
-	 * @var mixed
+	 * CURL操作对象，`curl_init()`的返回值
+	 * @var resource
 	 */
 	public $handler;
 
 	/**
-	 * 请求返回结果
-	 * @var mixed
+	 * 请求返回结果，包含返回头和返回主体
+	 * @var string
 	 */
 	public $response;
 
@@ -35,7 +35,7 @@ class HttpResponse
 
 	/**
 	 * 头部内容
-	 * @var mixed
+	 * @var string
 	 */
 	public $headerContent = '';
 
@@ -52,8 +52,7 @@ class HttpResponse
 	public $success;
 
 	/**
-	 * __construct
-	 * @return mixed 
+	 * 构造方法
 	 */
 	public function __construct($handler, $response)
 	{
@@ -74,7 +73,7 @@ class HttpResponse
 
 	/**
 	 * 获取请求总耗时，单位：秒
-	 * @return void
+	 * @return int
 	 */
 	public function totalTime()
 	{
@@ -83,7 +82,6 @@ class HttpResponse
 
 	/**
 	 * 处理
-	 * @return mixed 
 	 */
 	protected function parseResponse()
 	{

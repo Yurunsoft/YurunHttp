@@ -15,25 +15,28 @@ class HttpRequestMultipartBody
      * 类型，键值对
      */
     const TYPE_KV = 0;
+
     /**
      * 类型，文件
      */
     const TYPE_FILE = 1;
 
     /**
-     * @var array 列表
+     * 列表
+     * @var array
      */
     private $list = array();
 
     /**
-     * @var string 边界字符串
+     * 边界字符串
+     * @var string
      */
     private $boundary;
 
     /**
      * 添加键值对
-     * @param $key string
-     * @param $value string
+     * @param string $key
+     * @param string $value
      */
     public function add($key, $value)
     {
@@ -46,20 +49,25 @@ class HttpRequestMultipartBody
 
     /**
      * 添加文件
-     * @param $key string
-     * @param $file string 文件路径
-     * @param $file_name string 文件名
+     * @param string $key
+     * @param string $file 文件路径
+     * @param string $fileName 文件名
      */
-    public function addFile($key, $file, $file_name)
+    public function addFile($key, $file, $fileName)
     {
         $this->list[] = array(
                 'type'      => static::TYPE_FILE,
                 'key'       => $key,
                 'file'      => $file,
-                'file_name' => $file_name
+                'file_name' => $fileName
         );
     }
 
+    /**
+     * 移除键值
+     * @param string $key
+     * @return void
+     */
     public function remove($key)
     {
         $count = count($this->list);
@@ -72,13 +80,18 @@ class HttpRequestMultipartBody
         }
     }
 
+    /**
+     * 清除所有键值
+     * @return void
+     */
     public function clear()
     {
         $this->list = array();
     }
 
     /**
-     * @return string 最终构建的body内容
+     * 获取最终构建的body内容
+     * @return string
      */
     public function content()
     {
@@ -91,12 +104,12 @@ class HttpRequestMultipartBody
                 case static::TYPE_KV :
                 default :
                     $content .= sprintf("--%s\r\n", $this->boundary);
-                    $content .= sprintf("Content-Disposition: form-data; name=\"%s\"\r\n\r\n", $item["key"]);
-                    $content .= $item["value"] . "\r\n";
+                    $content .= sprintf("Content-Disposition: form-data; name=\"%s\"\r\n\r\n", $item['key']);
+                    $content .= $item['value'] . "\r\n";
                     break;
                 case static::TYPE_FILE :
                     $content .= sprintf("--%s\r\n", $this->boundary);
-                    $content .= sprintf("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n", $item["key"], $item["file_name"]);
+                    $content .= sprintf("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n", $item['key'], $item['file_name']);
                     $content .= sprintf("Content-Type: application/octet-stream\r\n\r\n");
                     $content .= file_get_contents($item['file']) . "\r\n";
                     break;
@@ -122,6 +135,10 @@ class HttpRequestMultipartBody
         $this->boundary = '__BOUNDARY__' . $randStr . '__BOUNDARY__';
     }
 
+    /**
+     * 获取边界字符串
+     * @return string
+     */
     public function getBoundary()
     {
         return $this->boundary;
