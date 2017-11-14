@@ -646,7 +646,7 @@ class HttpRequest
 		{
 			if(is_array($requestBody))
 			{
-				$this->content = http_build_query($requestBody);
+				$this->content = http_build_query($requestBody, '', '&');
 			}
 			else if($requestBody instanceof HttpRequestMultipartBody)
 			{
