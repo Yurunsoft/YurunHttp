@@ -658,7 +658,7 @@ class HttpRequest
 				$this->content = $requestBody;
 			}
 		}
-		curl_setopt_array($this->handler, array(
+		$options = array(
 			// 请求方法
 			CURLOPT_CUSTOMREQUEST	=> $method,
 			// 返回内容
@@ -674,7 +674,13 @@ class HttpRequest
 			CURLOPT_FOLLOWLOCATION	=> self::$customLocation ? false : $this->followLocation,
 			// 最大重定向次数
 			CURLOPT_MAXREDIRS		=> $this->maxRedirects,
-		));
+		);
+		// 自动解压缩支持
+		if(isset($this->headers['Accept-Encoding']))
+		{
+			$options[CURLOPT_ENCODING] = $this->headers['Accept-Encoding'];
+		}
+		curl_setopt_array($this->handler, $options);
 		$this->parseSSL();
 		$this->parseOptions();
 		$this->parseProxy();
