@@ -1,7 +1,7 @@
 <?php
+// 很杂的demo
 namespace Yurun\Until;
-require '../HttpRequest.php';
-require '../HttpResponse.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 $h = HttpRequest::newSession();
 // 设置单个header
 $h->header('test','666');

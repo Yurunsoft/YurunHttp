@@ -5,10 +5,8 @@
  * Date: 17/4/23
  * Time: 下午2:58
  */
-
-include '../HttpRequestMultipartBody.php';
-include '../HttpRequest.php';
-include '../HttpResponse.php';
+// 文件上传
+require dirname(__DIR__) . '/vendor/autoload.php';
 
 $multipartBody = new \Yurun\Until\HttpRequestMultipartBody();
 $multipartBody->add('aaa', 'bbb');
