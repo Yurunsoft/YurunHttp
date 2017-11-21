@@ -680,6 +680,10 @@ class HttpRequest
 		{
 			$options[CURLOPT_ENCODING] = $this->headers['Accept-Encoding'];
 		}
+		else
+		{
+			$options[CURLOPT_ENCODING] = '';
+		}
 		curl_setopt_array($this->handler, $options);
 		$this->parseSSL();
 		$this->parseOptions();
