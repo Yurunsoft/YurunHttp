@@ -63,13 +63,33 @@ class HttpResponse
 	}
 
 	/**
+	 * 获取返回的主体内容
+	 * @param string $fromEncoding 请求返回数据的编码，如果不为空则进行编码转换
+	 * @param string $toEncoding 要转换到的编码，默认为UTF-8
+	 * @return void
+	 */
+	public function body($fromEncoding = null, $toEncoding = 'UTF-8')
+	{
+		if(null === $fromEncoding)
+		{
+			return $this->body;
+		}
+		else
+		{
+			return mb_convert_encoding($this->body, $toEncoding, $fromEncoding);
+		}
+	}
+
+	/**
 	 * 获取xml格式内容
 	 * @param boolean $assoc 为true时返回数组，为false时返回对象
+	 * @param string $fromEncoding 请求返回数据的编码，如果不为空则进行编码转换
+	 * @param string $toEncoding 要转换到的编码，默认为UTF-8
 	 * @return mixed
 	 */
-	public function xml($assoc = false)
+	public function xml($assoc = false, $fromEncoding = null, $toEncoding = 'UTF-8')
 	{
-		$xml = simplexml_load_string($this->body, null, LIBXML_NOCDATA | LIBXML_COMPACT);
+		$xml = simplexml_load_string($this->body($fromEncoding, $toEncoding), null, LIBXML_NOCDATA | LIBXML_COMPACT);
 		if($assoc)
 		{
 			$xml = (array)$xml;
@@ -80,21 +100,25 @@ class HttpResponse
 	/**
 	 * 获取json格式内容
 	 * @param boolean $assoc 为true时返回数组，为false时返回对象
+	 * @param string $fromEncoding 请求返回数据的编码，如果不为空则进行编码转换
+	 * @param string $toEncoding 要转换到的编码，默认为UTF-8
 	 * @return mixed
 	 */
-	public function json($assoc = false)
+	public function json($assoc = false, $fromEncoding = null, $toEncoding = 'UTF-8')
 	{
-		return json_decode($this->body, $assoc);
+		return json_decode($this->body($fromEncoding, $toEncoding), $assoc);
 	}
 
 	/**
 	 * 获取jsonp格式内容
 	 * @param boolean $assoc 为true时返回数组，为false时返回对象
+	 * @param string $fromEncoding 请求返回数据的编码，如果不为空则进行编码转换
+	 * @param string $toEncoding 要转换到的编码，默认为UTF-8
 	 * @return mixed
 	 */
-	public function jsonp($assoc = false)
+	public function jsonp($assoc = false, $fromEncoding = null, $toEncoding = 'UTF-8')
 	{
-		$jsonp = trim($this->body);
+		$jsonp = trim($this->body($fromEncoding, $toEncoding));
 		if(isset($jsonp[0]) && $jsonp[0] !== '[' && $jsonp[0] !== '{') {
 			$begin = strpos($jsonp, '(');
 			if(false !== $begin)
