@@ -2,9 +2,13 @@
 
 ## 简介
 
-一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法。
+一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法，简单易用。
 
-## [在线文档](http://doc.yurunsoft.com/YurunHttp "在线文档")
+我们有完善的在线技术文档：[http://doc.yurunsoft.com/YurunHttp](http://doc.yurunsoft.com/YurunHttp)
+
+同时欢迎各位加入技术支持群74401592，如有问题可以及时解答和修复。
+
+个人精力有限，欢迎各位来提交PR（[码云](https://gitee.com/yurunsoft/YurunHttp)/[Github](https://github.com/Yurunsoft/YurunHttp)），一起完善YurunHttp，让它能够更加好用。
 
 ## Composer
 
@@ -17,7 +21,7 @@
 }
 ```
 
-然后执行 `composer install` 安装。
+然后执行 `composer update` 安装。
 
 之后你便可以使用 `include "vendor/autoload.php";` 来自动加载类。（ps：不要忘了namespace）
 
