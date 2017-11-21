@@ -63,6 +63,53 @@ class HttpResponse
 	}
 
 	/**
+	 * 获取xml格式内容
+	 * @param boolean $assoc 为true时返回数组，为false时返回对象
+	 * @return mixed
+	 */
+	public function xml($assoc = false)
+	{
+		$xml = simplexml_load_string($this->body, null, LIBXML_NOCDATA | LIBXML_COMPACT);
+		if($assoc)
+		{
+			$xml = (array)$xml;
+		}
+		return $xml;
+	}
+
+	/**
+	 * 获取json格式内容
+	 * @param boolean $assoc 为true时返回数组，为false时返回对象
+	 * @return mixed
+	 */
+	public function json($assoc = false)
+	{
+		return json_decode($this->body, $assoc);
+	}
+
+	/**
+	 * 获取jsonp格式内容
+	 * @param boolean $assoc 为true时返回数组，为false时返回对象
+	 * @return mixed
+	 */
+	public function jsonp($assoc = false)
+	{
+		$jsonp = trim($this->body);
+		if(isset($jsonp[0]) && $jsonp[0] !== '[' && $jsonp[0] !== '{') {
+			$begin = strpos($jsonp, '(');
+			if(false !== $begin)
+			{
+				$end = strrpos($jsonp, ')');
+				if(false !== $end)
+				{
+					$jsonp = substr($jsonp, $begin + 1, $end - $begin - 1);
+				}
+			}
+		}
+		return json_decode($jsonp, $assoc);
+	}
+
+	/**
 	 * 获取http状态码
 	 * @return int 
 	 */
