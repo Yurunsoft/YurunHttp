@@ -730,7 +730,19 @@ class HttpRequest
 	 */
 	public function get($url = null, $requestBody = array())
 	{
-		return $this->send($url, $requestBody, 'GET');
+		if(!empty($requestBody))
+		{
+			if(strpos($url, '?'))
+			{
+				$url .= '&';
+			}
+			else
+			{
+				$url .= '?';
+			}
+			$url .= http_build_query($requestBody, '', '&');
+		}
+		return $this->send($url, array(), 'GET');
 	}
 
 	/**
