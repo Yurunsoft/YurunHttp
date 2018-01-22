@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Until;
+namespace Yurun\Util;
 require dirname(__DIR__) . '/vendor/autoload.php';
 try{
 	$download = new Download('http://dldir1.qq.com/weixin/Windows/WeChatSetup.exe');

@@ -6,7 +6,7 @@
  * Time: 下午2:14
  */
 
-namespace Yurun\Until;
+namespace Yurun\Util;
 
 class HttpRequestMultipartBody
 {

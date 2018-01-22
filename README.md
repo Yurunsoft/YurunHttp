@@ -146,7 +146,7 @@ try{
 ### 编码转换
 ```php
 <?php
-$http = Yurun\Until\HttpRequest::newSession();
+$http = Yurun\Util\HttpRequest::newSession();
 var_dump($http->get('http://www.baidu.com/')->body('UTF-8', 'gb2312')); // utf-8转gb2312
 ```
 
@@ -154,7 +154,7 @@ var_dump($http->get('http://www.baidu.com/')->body('UTF-8', 'gb2312')); // utf-8
 支持jsonp、json、xml
 ```php
 <?php
-$http = Yurun\Until\HttpRequest::newSession();
+$http = Yurun\Util\HttpRequest::newSession();
 var_dump('jsonp:', $http->get('https://graph.qq.com/oauth2.0/token')->jsonp($assoc));
 // 你也可以获取时候进行编码转换，如下代码：gb2312转utf-8
 // var_dump('jsonp:', $http->get('https://graph.qq.com/oauth2.0/token')->jsonp($assoc, 'gb2312', 'utf-8'));

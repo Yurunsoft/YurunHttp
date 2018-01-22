@@ -8,7 +8,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Yurun\\Until\\": "./"
+            "Yurun\\Util\\": "./"
         }
     }
 }

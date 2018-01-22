@@ -1,6 +1,6 @@
 <?php
 // 很杂的demo
-namespace Yurun\Until;
+namespace Yurun\Util;
 require dirname(__DIR__) . '/vendor/autoload.php';
 $h = HttpRequest::newSession();
 // 设置单个header

@@ -1,9 +1,9 @@
 <?php
-namespace Yurun\Until;
+namespace Yurun\Util;
 
 class Download
 {
-	use \Yurun\Until\ClassEvent;
+	use \Yurun\Util\ClassEvent;
 
 	/**
 	 * HttpRequest

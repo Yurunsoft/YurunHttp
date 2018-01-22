@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Until;
+namespace Yurun\Util;
 
 class HttpResponse
 {
