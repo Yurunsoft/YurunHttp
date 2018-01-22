@@ -22,6 +22,11 @@ class HttpRequestMultipartBody
     const TYPE_FILE = 1;
 
     /**
+     * 类型，文件二进制
+     */
+    const TYPE_FILE_CONTENT = 2;
+
+    /**
      * 列表
      * @var array
      */
@@ -64,6 +69,23 @@ class HttpRequestMultipartBody
     }
 
     /**
+     * 添加文件，直接传入文件内容
+     * @param string $key
+     * @param mixed $fileContent
+     * @param string $fileName
+     * @return void
+     */
+    public function addFileContent($key, $fileContent, $fileName)
+    {
+        $this->list[] = array(
+            'type'          => static::TYPE_FILE_CONTENT,
+            'key'           => $key,
+            'fileContent'   => $fileContent,
+            'file_name'     => $fileName
+        );
+    }
+
+    /**
      * 移除键值
      * @param string $key
      * @return void
@@ -101,17 +123,23 @@ class HttpRequestMultipartBody
         {
             switch ($item['type'])
             {
-                case static::TYPE_KV :
+                case static::TYPE_KV:
                 default :
                     $content .= sprintf("--%s\r\n", $this->boundary);
                     $content .= sprintf("Content-Disposition: form-data; name=\"%s\"\r\n\r\n", $item['key']);
                     $content .= $item['value'] . "\r\n";
                     break;
-                case static::TYPE_FILE :
+                case static::TYPE_FILE:
                     $content .= sprintf("--%s\r\n", $this->boundary);
                     $content .= sprintf("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n", $item['key'], $item['file_name']);
                     $content .= sprintf("Content-Type: application/octet-stream\r\n\r\n");
                     $content .= file_get_contents($item['file']) . "\r\n";
+                    break;
+                case static::TYPE_FILE_CONTENT:
+                    $content .= sprintf("--%s\r\n", $this->boundary);
+                    $content .= sprintf("Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n", $item['key'], $item['file_name']);
+                    $content .= sprintf("Content-Type: application/octet-stream\r\n\r\n");
+                    $content .= $item['fileContent'] . "\r\n";
                     break;
             }
         }
