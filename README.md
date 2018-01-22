@@ -20,7 +20,7 @@
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "1.3.*"
+        "yurunsoft/yurun-http": "2.*"
     }
 }
 ```
