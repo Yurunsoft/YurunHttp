@@ -1,0 +1,2 @@
+[10-Jun-2017 09:53:08 UTC] PHP Notice:  Undefined variable: a in D:\projects\YurunHttp\Demo\test.php on line 6
+[10-Jun-2017 09:53:24 UTC] PHP Notice:  Undefined offset: 0 in D:\projects\YurunHttp\Demo\test.php on line 7
