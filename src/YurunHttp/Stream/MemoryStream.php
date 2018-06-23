@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Util\Stream\Stream;
+namespace Yurun\Util\YurunHttp\Stream;
 
 use Psr\Http\Message\StreamInterface;
 

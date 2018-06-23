@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Util\Http\Psr7;
+namespace Yurun\Util\YurunHttp\Http\Psr7;
 
 use Psr\Http\Message\UriInterface;
 
@@ -48,7 +48,7 @@ class Uri implements UriInterface
 	 */
 	protected $fragment;
 
-	public function __construct(string $uri = '')
+	public function __construct($uri = '')
 	{
 		$uriOption = parse_url($uri);
 		if(false === $uriOption)

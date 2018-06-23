@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Util\Http\Psr7;
+namespace Yurun\Util\YurunHttp\Http\Psr7;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\MessageInterface;
@@ -277,7 +277,7 @@ abstract class AbstractMessage implements MessageInterface
      * @return static
      * @throws \InvalidArgumentException When the body is not valid.
      */
-    public function withBody(StreamInterface $body)
+    public function withBody($body)
     {
         $self = clone $this;
         $self->body = $body;
@@ -289,7 +289,7 @@ abstract class AbstractMessage implements MessageInterface
      * @param array $headers
      * @return static
      */
-    protected function setHeaders(array $headers)
+    protected function setHeaders($headers)
     {
         foreach($headers as $name => $value)
         {
@@ -305,7 +305,7 @@ abstract class AbstractMessage implements MessageInterface
      * @param string $value
      * @return static
      */
-    protected function setHeader(AbstractMessage $object, $name, $value)
+    protected function setHeader($object, $name, $value)
     {
         $lowerName = strtolower($name);
         if(!isset($object->headerNames[$lowerName]))

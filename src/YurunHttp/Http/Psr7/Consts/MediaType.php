@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Util\Http\Psr7\Consts;
+namespace Yurun\Util\YurunHttp\Http\Psr7\Consts;
 
 /**
  * 常见的媒体类型

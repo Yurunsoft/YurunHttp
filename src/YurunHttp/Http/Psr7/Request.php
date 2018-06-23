@@ -1,16 +1,16 @@
 <?php
-namespace Yurun\Util\Http\Psr7;
+namespace Yurun\Util\YurunHttp\Http\Psr7;
 
-use Yurun\Util\Http\Psr7\Uri;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\RequestInterface;
-use Yurun\Util\Http\Psr7\Consts\RequestMethod;
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\RequestMethod;
 
 class Request extends AbstractMessage implements RequestInterface
 {
     /**
      * 请求地址
-     * @var Yurun\Util\Http\Psr7\Uri
+     * @var Yurun\Util\YurunHttp\Http\Psr7\Uri
      */
     protected $uri;
 
@@ -28,13 +28,13 @@ class Request extends AbstractMessage implements RequestInterface
 
     /**
      * 构造方法
-     * @param string|Yurun\Util\Http\Psr7\Uri $url
+     * @param string|Yurun\Util\YurunHttp\Http\Psr7\Uri $url
      * @param array $headers
      * @param string $body
      * @param string $method
      * @param string $version
      */
-    public function __construct($uri = null, array $headers = [], $body = '', string $method = RequestMethod::GET, string $version = '1.1')
+    public function __construct($uri = null, $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1')
     {
         parent::__construct($body);
         if(! $uri instanceof Uri)
@@ -68,7 +68,7 @@ class Request extends AbstractMessage implements RequestInterface
      */
 	public function getRequestTarget()
 	{
-        return $this->requestTarget ?? (string)$this->uri;
+        return null === $this->requestTarget ? (string)$this->uri : $this->requestTarget;
 	}
 
     /**
@@ -171,7 +171,7 @@ class Request extends AbstractMessage implements RequestInterface
      * @param bool $preserveHost Preserve the original state of the Host header.
      * @return static
      */
-	public function withUri(UriInterface $uri, $preserveHost = false)
+	public function withUri($uri, $preserveHost = false)
 	{
         $self = clone $this;
         $self->uri = $uri;

@@ -1,5 +1,5 @@
 <?php
-namespace Yurun\Util\Http\Psr7\Consts;
+namespace Yurun\Util\YurunHttp\Http\Psr7\Consts;
 
 abstract class StatusCode
 {

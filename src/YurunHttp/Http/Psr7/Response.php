@@ -1,8 +1,8 @@
 <?php
-namespace Yurun\Util\Http\Psr7;
+namespace Yurun\Util\YurunHttp\Http\Psr7;
 
 use Psr\Http\Message\ResponseInterface;
-use Yurun\Util\Http\Psr7\Consts\StatusCode;
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\StatusCode;
 
 class Response extends AbstractMessage implements ResponseInterface
 {
