@@ -48,7 +48,7 @@ class Uri implements UriInterface
 	 */
 	protected $fragment;
 
-	public function __construct($uri = '')
+	public function __construct(string $uri = '')
 	{
 		$uriOption = parse_url($uri);
 		if(false === $uriOption)

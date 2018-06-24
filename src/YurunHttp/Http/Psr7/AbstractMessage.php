@@ -3,7 +3,7 @@ namespace Yurun\Util\YurunHttp\Http\Psr7;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\MessageInterface;
-use Yurun\Util\Stream\Stream\MemoryStream;
+use Yurun\Util\YurunHttp\Stream\MemoryStream;
 
 abstract class AbstractMessage implements MessageInterface
 {
@@ -277,7 +277,7 @@ abstract class AbstractMessage implements MessageInterface
      * @return static
      * @throws \InvalidArgumentException When the body is not valid.
      */
-    public function withBody($body)
+    public function withBody(StreamInterface $body)
     {
         $self = clone $this;
         $self->body = $body;
@@ -289,7 +289,7 @@ abstract class AbstractMessage implements MessageInterface
      * @param array $headers
      * @return static
      */
-    protected function setHeaders($headers)
+    protected function setHeaders(array $headers)
     {
         foreach($headers as $name => $value)
         {

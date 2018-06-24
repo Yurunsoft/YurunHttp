@@ -34,7 +34,7 @@ class Request extends AbstractMessage implements RequestInterface
      * @param string $method
      * @param string $version
      */
-    public function __construct($uri = null, $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1')
+    public function __construct($uri = null, array $headers = [], $body = '', string $method = RequestMethod::GET, string $version = '1.1')
     {
         parent::__construct($body);
         if(! $uri instanceof Uri)
@@ -171,7 +171,7 @@ class Request extends AbstractMessage implements RequestInterface
      * @param bool $preserveHost Preserve the original state of the Host header.
      * @return static
      */
-	public function withUri($uri, $preserveHost = false)
+	public function withUri(UriInterface $uri, $preserveHost = false)
 	{
         $self = clone $this;
         $self->uri = $uri;

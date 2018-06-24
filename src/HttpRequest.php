@@ -1,6 +1,11 @@
 <?php
 namespace Yurun\Util;
 
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
+use Yurun\Util\YurunHttp\Http\Psr7\Request;
+use Yurun\Util\YurunHttp\Http\Psr7\ServerRequest;
+use Yurun\Util\YurunHttp\Stream\MemoryStream;
+
 class HttpRequest
 {
 	/**
@@ -246,15 +251,28 @@ class HttpRequest
 	 */
 	public function close()
 	{
-		if(null !== $this->handler)
+		
+	}
+
+	/**
+	 * 构建Request类
+	 * @return \Yurun\Util\YurunHttp\Http\Psr7\ServerRequest
+	 */
+	protected function buildRequest($requestBody)
+	{
+		$this->buildBody();
+		$request = new ServerRequest;
+		$request = $request->withUri(new Uri($this->url))
+						   ->withBody(new MemoryStream($this->content))
+						   ->withCookieParams($this->cookies)
+						   ;
+		foreach($this->headers as $name => $value)
 		{
-			curl_close($this->handler);
-			$this->handler = null;
-			if(is_file($this->cookieFileName))
-			{
-				unlink($this->cookieFileName);
-			}
+			$request = $request->withHeader($name, $value);
 		}
+		$uploadFiles = [];
+		$request = $request->withUploadedFiles($uploadFiles);
+		return $request;
 	}
 
 	/**
@@ -638,88 +656,7 @@ class HttpRequest
 	 */
 	public function send($url = null, $requestBody = array(), $method = 'GET')
 	{
-		if(null !== $url)
-		{
-			$this->url = $url;
-		}
-		if(!empty($requestBody))
-		{
-			if(is_array($requestBody))
-			{
-				$this->content = http_build_query($requestBody, '', '&');
-			}
-			else if($requestBody instanceof HttpRequestMultipartBody)
-			{
-				$this->content = $requestBody->content();
-				$this->contentType(sprintf('multipart/form-data; boundary=%s', $requestBody->getBoundary()));
-			}
-			else
-			{
-				$this->content = $requestBody;
-			}
-		}
-		$options = array(
-			// 请求方法
-			CURLOPT_CUSTOMREQUEST	=> $method,
-			// 返回内容
-			CURLOPT_RETURNTRANSFER	=> true,
-			// 返回header
-			CURLOPT_HEADER			=> true,
-			// 发送内容
-			CURLOPT_POSTFIELDS		=> $this->content,
-			// 保存cookie
-			CURLOPT_COOKIEFILE		=> $this->cookieFileName,
-			CURLOPT_COOKIEJAR		=> $this->cookieFileName,
-			// 自动重定向
-			CURLOPT_FOLLOWLOCATION	=> self::$customLocation ? false : $this->followLocation,
-			// 最大重定向次数
-			CURLOPT_MAXREDIRS		=> $this->maxRedirects,
-		);
-		// 自动解压缩支持
-		if(isset($this->headers['Accept-Encoding']))
-		{
-			$options[CURLOPT_ENCODING] = $this->headers['Accept-Encoding'];
-		}
-		else
-		{
-			$options[CURLOPT_ENCODING] = '';
-		}
-		curl_setopt_array($this->handler, $options);
-		$this->parseSSL();
-		$this->parseOptions();
-		$this->parseProxy();
-		$this->parseHeaders();
-		$this->parseCookies();
-		$this->parseNetwork();
-		$count = 0;
-		do{
-			curl_setopt($this->handler, CURLOPT_URL, $url);
-			for($i = 0; $i <= $this->retry; ++$i)
-			{
-				$response = new HttpResponse($this->handler, curl_exec($this->handler));
-				$httpCode = $response->httpCode();
-				// 状态码为5XX或者0才需要重试
-				if(!(0 === $httpCode || (5 === (int)($httpCode/100))))
-				{
-					break;
-				}
-			}
-			if(self::$customLocation && (301 === $httpCode || 302 === $httpCode) && ++$count <= $this->maxRedirects)
-			{
-				$url = $response->headers['Location'];
-			}
-			else
-			{
-				break;
-			}
-		}while(true);
-		// 关闭保存至文件的句柄
-		if(isset($this->saveFileOption['fp']))
-		{
-			fclose($this->saveFileOption['fp']);
-			$this->saveFileOption['fp'] = null;
-		}
-		return $response;
+		
 	}
 
 	/**
@@ -810,157 +747,6 @@ class HttpRequest
 	 */
 	public function download($fileName, $url = null, $requestBody = array(), $method = 'GET')
 	{
-		$result = $this->saveFile($fileName)->send($url, $requestBody, $method);
-		$this->saveFileOption = array();
-		return $result;
-	}
-
-	/**
-	 * 处理Options
-	 * @return void
-	 */
-	protected function parseOptions()
-	{
-		curl_setopt_array($this->handler, $this->options);
-		// 请求结果保存为文件
-		if(isset($this->saveFileOption['filePath']) && null !== $this->saveFileOption['filePath'])
-		{
-			curl_setopt_array($this->handler, array(
-				CURLOPT_HEADER => false,
-				CURLOPT_RETURNTRANSFER => false,
-			));
-			$filePath = $this->saveFileOption['filePath'];
-			$last = substr($filePath, -1, 1);
-			if('/' === $last || '\\' === $last)
-			{
-				// 自动获取文件名
-				$filePath .= basename($this->url);
-			}
-			$this->saveFileOption['savePath'] = $filePath;
-			$this->saveFileOption['fp'] = fopen($filePath, isset($this->saveFileOption['fileMode']) ? $this->saveFileOption['fileMode'] : 'w+');
-			curl_setopt($this->handler, CURLOPT_FILE, $this->saveFileOption['fp']);
-		}
-	}
-
-	/**
-	 * 处理代理
-	 * @return void
-	 */
-	protected function parseProxy()
-	{
-		if($this->useProxy)
-		{
-			curl_setopt_array($this->handler, array(
-				CURLOPT_PROXYAUTH	=> self::$proxyAuths[$this->proxy['auth']],
-				CURLOPT_PROXY		=> $this->proxy['server'],
-				CURLOPT_PROXYPORT	=> $this->proxy['port'],
-				CURLOPT_PROXYTYPE	=> 'socks5' === $this->proxy['type'] ? (defined('CURLPROXY_SOCKS5_HOSTNAME') ? CURLPROXY_SOCKS5_HOSTNAME : self::$proxyType[$this->proxy['type']]) : self::$proxyType[$this->proxy['type']],
-			));
-		}
-	}
-
-	/**
-	 * 处理Headers
-	 * @return void
-	 */
-	protected function parseHeaders()
-	{
-		curl_setopt($this->handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat());
-	}
-
-	/**
-	 * 处理Cookie
-	 * @return void
-	 */
-	protected function parseCookies()
-	{
-		$content = '';
-		foreach($this->cookies as $name => $value)
-		{
-			$content .= "{$name}={$value}; ";
-		}
-		curl_setopt($this->handler, CURLOPT_COOKIE, $content);
-	}
-
-	/**
-	 * 处理成CURL可以识别的headers格式
-	 * @return array 
-	 */
-	protected function parseHeadersFormat()
-	{
-		$headers = array();
-		foreach($this->headers as $name => $value)
-		{
-			$headers[] = $name . ':' . $value;
-		}
-		return $headers;
-	}
-	
-	/**
-	 * 处理SSL
-	 * @return void
-	 */
-	protected function parseSSL()
-	{
-		if($this->isVerifyCA)
-		{
-			curl_setopt_array($this->handler, array(
-				CURLOPT_SSL_VERIFYPEER	=> true,
-				CURLOPT_CAINFO			=> $this->caCert,
-				CURLOPT_SSL_VERIFYHOST	=> 2,
-			));
-		}
-		else
-		{
-			curl_setopt_array($this->handler, array(
-				CURLOPT_SSL_VERIFYPEER	=> false,
-				CURLOPT_SSL_VERIFYHOST	=> 0,
-			));
-		}
-		if('' !== $this->certPath)
-		{
-			curl_setopt_array($this->handler, array(
-				CURLOPT_SSLCERT			=> $this->certPath,
-				CURLOPT_SSLCERTPASSWD	=> $this->certPassword,
-				CURLOPT_SSLCERTTYPE		=> $this->certType,
-			));
-		}
-		if('' !== $this->keyPath)
-		{
-			curl_setopt_array($this->handler, array(
-				CURLOPT_SSLKEY			=> $this->keyPath,
-				CURLOPT_SSLKEYPASSWD	=> $this->keyPassword,
-				CURLOPT_SSLKEYTYPE		=> $this->keyType,
-			));
-		}
-	}
-
-	/**
-	 * 处理网络相关
-	 * @return void
-	 */
-	protected function parseNetwork()
-	{
-		// 用户名密码处理
-		if('' != $this->username)
-		{
-			$userPwd = $this->username . ':' . $this->password;
-		}
-		else
-		{
-			$userPwd = '';
-		}
-		curl_setopt_array($this->handler, array(
-			// 连接超时
-			CURLOPT_CONNECTTIMEOUT_MS		=> $this->connectTimeout,
-			// 总超时
-			CURLOPT_TIMEOUT_MS				=> $this->timeout,
-			// 下载限速
-			CURLOPT_MAX_RECV_SPEED_LARGE	=> $this->downloadSpeed,
-			// 上传限速
-			CURLOPT_MAX_SEND_SPEED_LARGE	=> $this->uploadSpeed,
-			// 连接中用到的用户名和密码
-			CURLOPT_USERPWD					=> $userPwd,
-		));
+		
 	}
 }
