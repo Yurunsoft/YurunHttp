@@ -52,7 +52,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     protected $attributes = [];
 
-    public function __construct($uri = null, array $headers = [], $body = '', string $method = RequestMethod::GET, string $version = '1.1', array $server = [], array $cookies = [], array $files = [])
+    public function __construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1', array $server = [], array $cookies = [], array $files = [])
     {
         $this->server = $server;
         $this->cookies = $cookies;
@@ -83,7 +83,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getServerParam($name, $default = null)
     {
-        return $this->server[$name] ?? $default;
+        return isset($this->server[$name]) ? $this->server[$name] : $default;
     }
 
     /**
@@ -133,7 +133,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getCookie($name, $default = null)
     {
-        return $this->cookies[$name] ?? $default;
+        return isset($this->cookies[$name]) ? $this->cookies[$name] : $default;
     }
 
     /**

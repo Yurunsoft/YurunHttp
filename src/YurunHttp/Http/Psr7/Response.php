@@ -18,11 +18,11 @@ class Response extends AbstractMessage implements ResponseInterface
 	 */
     protected $reasonPhrase;
 
-	public function __construct()
+	public function __construct($body = '', $statusCode = StatusCode::OK, $reasonPhrase = null)
 	{
-        parent::__construct('');
-		$this->statusCode = StatusCode::OK;
-		$this->reasonPhrase = StatusCode::getReasonPhrase($this->statusCode);
+        parent::__construct($body);
+        $this->statusCode = $statusCode;
+		$this->reasonPhrase = null === $reasonPhrase ? StatusCode::getReasonPhrase($this->statusCode) : $reasonPhrase;
 	}
 
     /**

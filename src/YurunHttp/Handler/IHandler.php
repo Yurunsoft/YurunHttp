@@ -16,5 +16,5 @@ interface IHandler
      * 接收请求
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function recv(): Response;
+    public function recv();
 }

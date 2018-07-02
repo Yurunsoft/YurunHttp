@@ -3,7 +3,7 @@ namespace Yurun\Util\YurunHttp\Http\Psr7\Consts;
 
 abstract class StatusCode
 {
-	const CONTINUE = 100;
+	const _CONTINUE = 100;
 	const SWITCHING_PROTOCOLS = 101;
 	const PROCESSING = 102;
 	const OK = 200;
@@ -66,7 +66,7 @@ abstract class StatusCode
 	const NETWORK_AUTHENTICATION_REQUIRED = 511;
 
 	private static $reasonPhrases = [
-        self::CONTINUE => 'Continue',
+        self::_CONTINUE => 'Continue',
 		self::SWITCHING_PROTOCOLS => 'Switching Protocols',
 		self::PROCESSING => 'Processing',
 		self::OK => 'OK',

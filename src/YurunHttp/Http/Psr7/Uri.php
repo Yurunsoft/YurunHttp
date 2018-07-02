@@ -48,7 +48,7 @@ class Uri implements UriInterface
 	 */
 	protected $fragment;
 
-	public function __construct(string $uri = '')
+	public function __construct($uri = '')
 	{
 		$uriOption = parse_url($uri);
 		if(false === $uriOption)
@@ -95,7 +95,7 @@ class Uri implements UriInterface
 		// 主机+端口
 		$uri .= $host. (null === $port ? '' : (':' . $port));
 		// 路径
-		$uri .= '/' . ltrim('/', $path);
+        $uri .= '/' . ltrim($path, '/');
 		// 查询参数
 		$uri .= ('' === $query ? '' : ('?' . $query));
 		// 锚点

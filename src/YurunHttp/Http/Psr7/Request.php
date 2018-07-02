@@ -34,7 +34,7 @@ class Request extends AbstractMessage implements RequestInterface
      * @param string $method
      * @param string $version
      */
-    public function __construct($uri = null, array $headers = [], $body = '', string $method = RequestMethod::GET, string $version = '1.1')
+    public function __construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1')
     {
         parent::__construct($body);
         if(! $uri instanceof Uri)

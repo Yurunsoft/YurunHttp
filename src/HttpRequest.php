@@ -2,18 +2,13 @@
 namespace Yurun\Util;
 
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
-use Yurun\Util\YurunHttp\Http\Psr7\Request;
-use Yurun\Util\YurunHttp\Http\Psr7\ServerRequest;
+use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\Stream\MemoryStream;
+use Yurun\Util\YurunHttp\Http\Request;
+use Imi\Server\Http\Message\UploadedFile;
 
 class HttpRequest
 {
-	/**
-	 * CURL操作对象，`curl_init()`的返回值
-	 * @var resource
-	 */
-	public $handler;
-
 	/**
 	 * 需要请求的Url地址
 	 * @var string
@@ -21,7 +16,7 @@ class HttpRequest
 	public $url;
 
 	/**
-	 * 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`
+	 * 发送内容，可以是字符串、数组（支持键值、Imi\Server\Http\Message\UploadedFile，其中键值会作为html编码，文件则是上传）
 	 * @var mixed
 	 */
 	public $content;
@@ -225,7 +220,6 @@ class HttpRequest
 	 */
 	public function open()
 	{
-		$this->handler = curl_init();
 		$this->retry = 0;
 		$this->headers = $this->options = array();
 		$this->url = $this->content = '';
@@ -252,27 +246,6 @@ class HttpRequest
 	public function close()
 	{
 		
-	}
-
-	/**
-	 * 构建Request类
-	 * @return \Yurun\Util\YurunHttp\Http\Psr7\ServerRequest
-	 */
-	protected function buildRequest($requestBody)
-	{
-		$this->buildBody();
-		$request = new ServerRequest;
-		$request = $request->withUri(new Uri($this->url))
-						   ->withBody(new MemoryStream($this->content))
-						   ->withCookieParams($this->cookies)
-						   ;
-		foreach($this->headers as $name => $value)
-		{
-			$request = $request->withHeader($name, $value);
-		}
-		$uploadFiles = [];
-		$request = $request->withUploadedFiles($uploadFiles);
-		return $request;
 	}
 
 	/**
@@ -648,22 +621,59 @@ class HttpRequest
 	}
 
 	/**
+	 * 处理请求主体
+	 * @param string|array $requestBody
+	 * @return array
+	 */
+	protected function parseRequestBody($requestBody)
+	{
+		$body = $files = [];
+		if(is_string($requestBody))
+		{
+			$body = $requestBody;
+		}
+		else if(is_array($requestBody))
+		{
+			foreach($requestBody as $k => $v)
+			{
+				if($v instanceof UploadedFile)
+				{
+					$files[] = $v;
+				}
+				else
+				{
+					$body[$k] = $v;
+				}
+			}
+			$body = http_build_query($body, '', '&');
+		}
+		else
+		{
+			throw new \InvalidArgumentException('$requestBody only can be string or array');
+		}
+		return [$body, $files];
+	}
+
+	/**
 	 * 发送请求，所有请求的老祖宗
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @param array $method 请求方法，GET、POST等
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function send($url = null, $requestBody = array(), $method = 'GET')
 	{
-		
+		list($body, $files) = $this->parseRequestBody($requestBody);
+		$request = new Request($url, $this->headers, $body, $method);
+		$request->withUploadedFiles($files);
+		return YurunHttp::send($request);
 	}
 
 	/**
 	 * GET请求
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function get($url = null, $requestBody = array())
 	{
@@ -686,7 +696,7 @@ class HttpRequest
 	 * POST请求
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function post($url = null, $requestBody = array())
 	{
@@ -697,7 +707,7 @@ class HttpRequest
 	 * HEAD请求
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function head($url = null, $requestBody = array())
 	{
@@ -708,7 +718,7 @@ class HttpRequest
 	 * PUT请求
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function put($url = null, $requestBody = array())
 	{
@@ -719,7 +729,7 @@ class HttpRequest
 	 * PATCH请求
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function patch($url = null, $requestBody = array())
 	{
@@ -730,7 +740,7 @@ class HttpRequest
 	 * DELETE请求
 	 * @param string $url 请求地址，如果为null则取url属性值
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
-	 * @return HttpResponse 
+	 * @return Response 
 	 */
 	public function delete($url = null, $requestBody = array())
 	{
@@ -743,10 +753,12 @@ class HttpRequest
 	 * @param string $url 下载文件地址
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @param string $method 请求方法，GET、POST等，一般用GET
-	 * @return HttpResponse
+	 * @return Response
 	 */
 	public function download($fileName, $url = null, $requestBody = array(), $method = 'GET')
 	{
-		
+		$result = $this->saveFile($fileName)->send($url, $requestBody, $method);
+		$this->saveFileOption = array();
+		return $result;
 	}
 }

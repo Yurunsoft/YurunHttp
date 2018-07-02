@@ -9,7 +9,9 @@ abstract class YurunHttp
      * 默认处理器类
      * @var string
      */
-    private static $defaultHandler = Curl::class;
+    private static $defaultHandler = 'Yurun\Util\YurunHttp\Handler\Curl';
+
+    private static $attributes = [];
 
     /**
      * 设置默认处理器类
@@ -42,8 +44,49 @@ abstract class YurunHttp
             $handlerClass = static::$defaultHandler;
         }
         $handler = new $handlerClass();
+        $time = microtime(true);
         $handler->send($request);
-        return $handler->recv();
+        $response = $handler->recv();
+        $response = $response->withTotalTime(microtime(true) - $time);
+        return $response;
     }
+
+    /**
+     * 获取所有全局属性
+     * @return array
+     */
+    public static function getAttributes()
+	{
+		return static::$attributes;
+	}
+
+    /**
+     * 获取全局属性值
+     * @param string $name
+     * @param mixed $default
+     * @return mixed
+     */
+    public static function getAttribute($name, $default = null)
+	{
+        if(array_key_exists($name, static::$attributes))
+        {
+            return static::$attributes[$name];
+        }
+        else
+        {
+            return $default;
+        }
+	}
+
+    /**
+     * 设置全局属性值
+     * @param string $name
+     * @param mixed $value
+     * @return mixed
+     */
+    public static function setAttribute($name, $value)
+	{
+        static::$attributes[$name] = $value;
+	}
 
 }
