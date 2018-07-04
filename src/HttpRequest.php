@@ -668,6 +668,7 @@ class HttpRequest
 		list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody);
 		$request = new Request($url, $this->headers, $body, $method);
 		$request = $request->withUploadedFiles($files)
+							->withCookieParams($this->cookies)
 							->withAttribute('maxRedirects', $this->maxRedirects)
 							->withAttribute('isVerifyCA', $this->isVerifyCA)
 							->withAttribute('caCert', $this->caCert)
