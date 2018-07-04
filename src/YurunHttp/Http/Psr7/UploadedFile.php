@@ -1,7 +1,7 @@
 <?php
-namespace Imi\Server\Http\Message;
+namespace Yurun\Util\YurunHttp\Http\Psr7;
 
-use Imi\Util\Stream\FileStream;
+use Yurun\Util\YurunHttp\Stream\FileStream;
 use Psr\Http\Message\UploadedFileInterface;
 
 class UploadedFile implements UploadedFileInterface
@@ -38,7 +38,7 @@ class UploadedFile implements UploadedFileInterface
     
     /**
      * 文件流
-     * @var \Imi\Util\Stream\FileStream
+     * @var \Yurun\Util\YurunHttp\Stream\FileStream
      */
     protected $stream;
     
@@ -48,12 +48,19 @@ class UploadedFile implements UploadedFileInterface
      */
     protected $isMoved = false;
 
-    public function __construct($fileName, $mediaType, $tmpFileName, $size, $error)
+    public function __construct($fileName, $mediaType, $tmpFileName, $size = null, $error = 0)
     {
         $this->fileName = $fileName;
         $this->mediaType = $mediaType;
         $this->tmpFileName = $tmpFileName;
-        $this->size = $size;
+        if(null === $size)
+        {
+            $this->size = filesize($tmpFileName);
+        }
+        else
+        {
+            $this->size = $size;
+        }
         $this->error = $error;
     }
 
@@ -205,5 +212,14 @@ class UploadedFile implements UploadedFileInterface
     public function getClientMediaType()
 	{
 		return $this->mediaType;
-	}
+    }
+    
+    /**
+     * 获取上传文件的临时文件路径
+     * @return string
+     */
+    public function getTempFileName()
+    {
+        return $this->tmpFileName;
+    }
 }

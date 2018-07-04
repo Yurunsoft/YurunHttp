@@ -3,6 +3,8 @@ namespace Yurun\Util\YurunHttp\Handler;
 
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp;
+use Yurun\Util\YurunHttp\FormDataBuilder;
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
 
 class Curl implements IHandler
@@ -67,6 +69,13 @@ class Curl implements IHandler
 		$this->handler = curl_init();
 		$tempDir = YurunHttp::getAttribute('tempDir');
 		$cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
+        $files = $request->getUploadedFiles();
+		$body = (string)$request->getBody();
+		if(isset($files[0]))
+		{
+			$body = FormDataBuilder::build($body, $files, $boundary);
+			$this->request = $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
+		}
 		$options = [
 			// 请求方法
 			CURLOPT_CUSTOMREQUEST	=> $request->getMethod(),
@@ -75,7 +84,7 @@ class Curl implements IHandler
 			// 返回header
 			CURLOPT_HEADER			=> true,
 			// 发送内容
-			CURLOPT_POSTFIELDS		=> (string)$request->getBody(),
+			CURLOPT_POSTFIELDS		=> $body,
 			// 保存cookie
 			CURLOPT_COOKIEFILE		=> $cookieFileName,
 			CURLOPT_COOKIEJAR		=> $cookieFileName,
@@ -85,9 +94,10 @@ class Curl implements IHandler
 			CURLOPT_MAXREDIRS		=> $this->request->getAttribute('maxRedirects', 10),
         ];
 		// 自动解压缩支持
-		if('' !== $request->getHeaderLine('Accept-Encoding'))
+		$acceptEncoding = $request->getHeaderLine('Accept-Encoding');
+		if('' !== $acceptEncoding)
 		{
-			$options[CURLOPT_ENCODING] = $this->headers['Accept-Encoding'];
+			$options[CURLOPT_ENCODING] = $acceptEncoding;
 		}
 		else
 		{

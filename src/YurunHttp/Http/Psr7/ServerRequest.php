@@ -1,7 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp\Http\Psr7;
 
-use Imi\Server\Http\Message\UploadedFile;
+use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Psr\Http\Message\ServerRequestInterface;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\RequestHeader;
@@ -35,7 +35,7 @@ class ServerRequest extends Request implements ServerRequestInterface
 
     /**
      * 上传的文件
-     * @var \Imi\Server\Http\Message\UploadedFile[]
+     * @var \Yurun\Util\YurunHttp\Http\Psr7\UploadedFile[]
      */
     protected $files;
 
@@ -191,7 +191,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * These values MAY be prepared from $_FILES or the message body during
      * instantiation, or MAY be injected via withUploadedFiles().
      *
-     * @return array An array tree of UploadedFileInterface instances; an empty
+     * @return UploadedFile[] An array tree of UploadedFileInterface instances; an empty
      *     array MUST be returned if no data is present.
      */
     public function getUploadedFiles()
@@ -363,7 +363,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * 设置上传的文件
      * @param self $object
-     * @param array $files
+     * @param \Yurun\Util\YurunHttp\Http\Psr7\UploadedFile[] $files
      * @return static
      */
     protected function setUploadedFiles(self $object, array $files)
@@ -371,7 +371,14 @@ class ServerRequest extends Request implements ServerRequestInterface
         $object->files = [];
         foreach($files as $file)
         {
-            $object->files[] = new UploadedFile($file['name'], $file['type'], $file['tmp_name'], $file['size'], $file['error']);
+            if($file instanceof UploadedFile)
+            {
+                $object->files[] = $file;
+            }
+            else
+            {
+                $object->files[] = new UploadedFile($file['name'], $file['type'], $file['tmp_name'], $file['size'], $file['error']);
+            }
         }
         return $object;
     }

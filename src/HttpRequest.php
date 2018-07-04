@@ -5,7 +5,7 @@ use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\Stream\MemoryStream;
 use Yurun\Util\YurunHttp\Http\Request;
-use Imi\Server\Http\Message\UploadedFile;
+use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 
 class HttpRequest
 {
@@ -16,7 +16,7 @@ class HttpRequest
 	public $url;
 
 	/**
-	 * 发送内容，可以是字符串、数组（支持键值、Imi\Server\Http\Message\UploadedFile，其中键值会作为html编码，文件则是上传）
+	 * 发送内容，可以是字符串、数组（支持键值、Yurun\Util\YurunHttp\Http\Psr7\UploadedFile，其中键值会作为html编码，文件则是上传）
 	 * @var mixed
 	 */
 	public $content;
@@ -663,9 +663,9 @@ class HttpRequest
 	 * @param array $method 请求方法，GET、POST等
 	 * @return Response 
 	 */
-	public function send($url = null, $requestBody = array(), $method = 'GET')
+	public function send($url = null, $requestBody = null, $method = 'GET')
 	{
-		list($body, $files) = $this->parseRequestBody($requestBody);
+		list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody);
 		$request = new Request($url, $this->headers, $body, $method);
 		$request = $request->withUploadedFiles($files)
 							->withAttribute('maxRedirects', $this->maxRedirects)
@@ -701,7 +701,7 @@ class HttpRequest
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return Response 
 	 */
-	public function get($url = null, $requestBody = array())
+	public function get($url = null, $requestBody = null)
 	{
 		if(!empty($requestBody))
 		{
@@ -724,7 +724,7 @@ class HttpRequest
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return Response 
 	 */
-	public function post($url = null, $requestBody = array())
+	public function post($url = null, $requestBody = null)
 	{
 		return $this->send($url, $requestBody, 'POST');
 	}
@@ -735,7 +735,7 @@ class HttpRequest
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return Response 
 	 */
-	public function head($url = null, $requestBody = array())
+	public function head($url = null, $requestBody = null)
 	{
 		return $this->send($url, $requestBody, 'HEAD');
 	}
@@ -746,7 +746,7 @@ class HttpRequest
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return Response 
 	 */
-	public function put($url = null, $requestBody = array())
+	public function put($url = null, $requestBody = null)
 	{
 		return $this->send($url, $requestBody, 'PUT');
 	}
@@ -757,7 +757,7 @@ class HttpRequest
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return Response 
 	 */
-	public function patch($url = null, $requestBody = array())
+	public function patch($url = null, $requestBody = null)
 	{
 		return $this->send($url, $requestBody, 'PATCH');
 	}
@@ -768,7 +768,7 @@ class HttpRequest
 	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
 	 * @return Response 
 	 */
-	public function delete($url = null, $requestBody = array())
+	public function delete($url = null, $requestBody = null)
 	{
 		return $this->send($url, $requestBody, 'DELETE');
 	}
@@ -781,7 +781,7 @@ class HttpRequest
 	 * @param string $method 请求方法，GET、POST等，一般用GET
 	 * @return Response
 	 */
-	public function download($fileName, $url = null, $requestBody = array(), $method = 'GET')
+	public function download($fileName, $url = null, $requestBody = null, $method = 'GET')
 	{
 		$result = $this->saveFile($fileName)->send($url, $requestBody, $method);
 		$this->saveFileOption = array();

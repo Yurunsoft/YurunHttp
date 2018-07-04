@@ -4,6 +4,8 @@ namespace Yurun\Util\YurunHttp\Handler;
 use Swoole\Coroutine;
 use Swoole\Coroutine\Http\Client;
 use Yurun\Util\YurunHttp\Http\Response;
+use Yurun\Util\YurunHttp\FormDataBuilder;
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
 class Swoole implements IHandler
 {
@@ -63,9 +65,22 @@ class Swoole implements IHandler
         {
             $this->headers[$name] = implode(',', $values);
         }
-        $this->handler->setHeaders($this->headers);
         // cookie
         $this->handler->setCookies($request->getCookieParams());
+        // body
+        $files = $request->getUploadedFiles();
+        $body = (string)$request->getBody();
+        if(isset($files[0]))
+        {
+            foreach($files as $file)
+            {
+                $this->handler->addFile($file->getTempFileName(), basename($file->getClientFilename()), $file->getClientMediaType());
+            }
+            parse_str($body, $body);
+        }
+        $this->handler->setData($body);
+        $this->handler->setHeaders($this->headers);
+        // 其它处理
 		$this->parseSSL();
 		$this->parseProxy();
         $this->parseNetwork();
