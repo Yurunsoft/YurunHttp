@@ -220,7 +220,7 @@ class Swoole implements IHandler
             $this->request = $this->request->withAddedHeader('Authorization', 'Basic ' . $auth);
         }
         // 超时
-        $this->settings['timeout'] = $this->request->getAttribute('connectTimeout', 30000);
+        $this->settings['timeout'] = $this->request->getAttribute('timeout', 30000) / 1000;
     }
 
     /**
