@@ -45,6 +45,13 @@ abstract class YurunHttp
         }
         $handler = new $handlerClass();
         $time = microtime(true);
+        foreach(static::$attributes as $name => $value)
+        {
+            if(null === $request->getAttribute($name))
+            {
+                $request = $request->withAttribute($name, $value);
+            }
+        }
         $handler->send($request);
         $response = $handler->recv();
         $response = $response->withTotalTime(microtime(true) - $time);

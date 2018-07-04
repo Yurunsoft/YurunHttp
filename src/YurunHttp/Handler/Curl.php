@@ -270,8 +270,8 @@ class Curl implements IHandler
 				CURLOPT_SSL_VERIFYHOST	=> 0,
 			));
 		}
-		$certPath = $this->request->getAttribute('certPath');
-		if(null !== $certPath)
+		$certPath = $this->request->getAttribute('certPath', '');
+		if('' !== $certPath)
 		{
 			curl_setopt_array($this->handler, array(
 				CURLOPT_SSLCERT			=> $certPath,
@@ -279,8 +279,8 @@ class Curl implements IHandler
 				CURLOPT_SSLCERTTYPE		=> $this->request->getAttribute('certType', 'pem'),
 			));
 		}
-		$keyPath = $this->request->getAttribute('keyPath');
-		if(null !== $keyPath)
+		$keyPath = $this->request->getAttribute('keyPath', '');
+		if('' !== $keyPath)
 		{
 			curl_setopt_array($this->handler, array(
 				CURLOPT_SSLKEY			=> $keyPath,
@@ -290,6 +290,10 @@ class Curl implements IHandler
 		}
 	}
 	
+	/**
+	 * 处理设置项
+	 * @return void
+	 */
 	private function parseOptions()
     {
 		curl_setopt_array($this->handler, $this->request->getAttribute('options', []));
@@ -306,8 +310,8 @@ class Curl implements IHandler
 				// 自动获取文件名
 				$saveFilePath .= basename($this->url);
 			}
-			$this->saveFileFp = fopen($saveFilePath, isset($this->saveFileOption['fileMode']) ? $this->saveFileOption['fileMode'] : 'w+');
-			curl_setopt($this->handler, CURLOPT_FILE, $this->saveFileOption['fp']);
+			$this->saveFileFp = fopen($saveFilePath, $this->request->getAttribute('saveFileMode', 'w+'));
+			curl_setopt($this->handler, CURLOPT_FILE, $this->saveFileFp);
 		}
 	}
 	
@@ -319,11 +323,12 @@ class Curl implements IHandler
     {
 		if($this->request->getAttribute('useProxy', false))
 		{
-			$type = $this->request->getAttribute('proxy.type');
+			$type = $this->request->getAttribute('proxy.type', 'http');
 			curl_setopt_array($this->handler, array(
-				CURLOPT_PROXYAUTH	=> self::$proxyAuths[$this->request->getAttribute('proxy.auth')],
+				CURLOPT_PROXYAUTH	=> self::$proxyAuths[$this->request->getAttribute('proxy.auth', 'basic')],
 				CURLOPT_PROXY		=> $this->request->getAttribute('proxy.server'),
 				CURLOPT_PROXYPORT	=> $this->request->getAttribute('proxy.port'),
+				CURLOPT_PROXYUSERPWD=> $this->request->getAttribute('proxy.username', '') . ':' . $this->request->getAttribute('proxy.password', ''),
 				CURLOPT_PROXYTYPE	=> 'socks5' === $type ? (defined('CURLPROXY_SOCKS5_HOSTNAME') ? CURLPROXY_SOCKS5_HOSTNAME : self::$proxyType[$type]) : self::$proxyType[$type],
 			));
 		}
@@ -376,7 +381,7 @@ class Curl implements IHandler
 		$username = $this->request->getAttribute('username');
 		if(null != $username)
 		{
-			$userPwd = $usernamee . ':' . $this->request->getAttribute('password', '');
+			$userPwd = $username . ':' . $this->request->getAttribute('password', '');
 		}
 		else
 		{

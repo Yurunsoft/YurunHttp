@@ -20,6 +20,24 @@ class Swoole implements IHandler
 	 * @var \Yurun\Util\YurunHttp\Http\Response
 	 */
     private $result;
+
+	/**
+	 * 请求内容
+	 * @var \Yurun\Util\YurunHttp\Http\Request
+	 */
+    private $request;
+    
+    /**
+     * 设置客户端参数
+     * @var array
+     */
+    private $settings = [];
+
+    /**
+     * 请求头
+     * @var array
+     */
+    private $headers = [];
     
     /**
      * 发送请求
@@ -28,6 +46,8 @@ class Swoole implements IHandler
      */
     public function send($request)
     {
+        $this->request = $request;
+        $this->settings = $request->getAttribute('options', []);
         // 解析IP
         $ip = Coroutine::gethostbyname($request->getUri()->getHost());
         // 实例化
@@ -36,19 +56,32 @@ class Swoole implements IHandler
         // method
         $this->handler->setMethod($request->getMethod());
         // headers
-        $headers = [
+        $this->headers = [
             'Host'  =>  $request->getUri()->getHost(),
         ];
         foreach($request->getHeaders() as $name => $values)
         {
-            $headers[$name] = implode(',', $values);
+            $this->headers[$name] = implode(',', $values);
         }
-        $this->handler->setHeaders($headers);
+        $this->handler->setHeaders($this->headers);
         // cookie
         $this->handler->setCookies($request->getCookieParams());
+		$this->parseSSL();
+		$this->parseProxy();
+        $this->parseNetwork();
+        // 设置客户端参数
+        if(!empty($this->settings))
+        {
+            $this->settings['timeout'] = 10;
+            $this->handler->set($this->settings);
+        }
         // 发送
         $path = $request->getUri()->getPath();
-        $this->handler->execute('' === $path ? '/' : $path);
+        if('' === $path)
+        {
+            $path = '/';
+        }
+        $this->handler->execute($path);
     }
 
     /**
@@ -58,7 +91,7 @@ class Swoole implements IHandler
     public function recv()
     {
         $success = $this->handler->recv();
-        $this->result = new Response($this->handler->body, $this->handler->statusCode);
+        $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
 
         // headers
         foreach($this->handler->headers as $name => $value)
@@ -67,22 +100,32 @@ class Swoole implements IHandler
         }
 
         // cookies
-		$cookies = [];
-        foreach($this->handler->set_cookie_headers as $value)
+        $cookies = [];
+        if(isset($this->handler->set_cookie_headers))
         {
-            $list = explode(';', $value);
-			$count2 = count($list);
-			if(isset($list[0]))
-			{
-				list($cookieName, $value) = explode('=', $list[0], 2);
-				$cookieName = trim($cookieName);
-				$cookies[$cookieName] = array('value'=>$value);
-				for($j = 1; $j < $count2; ++$j)
-				{
-					$kv = explode('=', $list[$j], 2);
-					$cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
-				}
-			}
+            foreach($this->handler->set_cookie_headers as $value)
+            {
+                $list = explode(';', $value);
+                $count2 = count($list);
+                if(isset($list[0]))
+                {
+                    list($cookieName, $value) = explode('=', $list[0], 2);
+                    $cookieName = trim($cookieName);
+                    $cookies[$cookieName] = array('value'=>$value);
+                    for($j = 1; $j < $count2; ++$j)
+                    {
+                        $kv = explode('=', $list[$j], 2);
+                        $cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
+                    }
+                }
+            }
+        }
+        foreach($this->handler->cookies as $name => $value)
+        {
+            if(!isset($cookies[$name]))
+            {
+                $cookies[$name] = ['value'=>$value];
+            }
         }
 		$this->result = $this->result->withCookieOriginParams($cookies)
 									->withError($this->getErrorString($this->handler->errCode))
@@ -93,6 +136,86 @@ class Swoole implements IHandler
         return $this->result;
     }
 
+	/**
+	 * 处理加密访问
+	 * @return void
+	 */
+	private function parseSSL()
+    {
+        if($this->request->getAttribute('isVerifyCA', false))
+		{
+            $this->settings['ssl_verify_peer'] = true;
+            $caCert = $this->request->getAttribute('caCert');
+            if(null !== $caCert)
+            {
+                $this->settings['ssl_cafile'] = $caCert;
+            }
+		}
+		else
+		{
+            $this->settings['ssl_verify_peer'] = false;
+		}
+		$certPath = $this->request->getAttribute('certPath', '');
+		if('' !== $certPath)
+		{
+			$this->settings['ssl_cert_file'] = $certPath;
+		}
+		$keyPath = $this->request->getAttribute('keyPath' , '');
+		if('' !== $keyPath)
+		{
+			$this->settings['ssl_key_file'] = $keyPath;
+		}
+    }
+
+	/**
+	 * 处理代理
+	 * @return void
+	 */
+	private function parseProxy()
+    {
+        if($this->request->getAttribute('useProxy', false))
+		{
+            $type = $this->request->getAttribute('proxy.type');
+            switch($type)
+            {
+                case 'http':
+                    $this->settings['http_proxy_host'] = $this->request->getAttribute('proxy.server');
+                    $this->settings['http_proxy_port'] = $this->request->getAttribute('proxy.port');
+                    $this->settings['http_proxy_user'] = $this->request->getAttribute('proxy.username', '');
+                    $this->settings['http_proxy_password'] = $this->request->getAttribute('proxy.password', '');
+                    break;
+                case 'socks5':
+                    $this->settings['socks5_host'] = $this->request->getAttribute('proxy.server');
+                    $this->settings['socks5_port'] = $this->request->getAttribute('proxy.port');
+                    $this->settings['socks5_username'] = $this->request->getAttribute('proxy.username', '');
+                    $this->settings['socks5_password'] = $this->request->getAttribute('proxy.password', '');
+                    break;
+            }
+		}
+    }
+    
+	/**
+	 * 处理网络相关
+	 * @return void
+	 */
+	private function parseNetwork()
+	{
+        // 用户名密码认证处理
+		$username = $this->request->getAttribute('username');
+		if(null != $username)
+		{
+            $auth = base64_encode($username . ':' . $this->request->getAttribute('password', ''));
+            $this->headers['Authorization'] = 'Basic ' . $auth;
+        }
+        // 超时
+        $this->settings['timeout'] = $this->request->getAttribute('connectTimeout', 30000);
+    }
+
+    /**
+     * 获取错误码对应的错误信息
+     * @param int $errCode
+     * @return string
+     */
     private function getErrorString($errCode)
     {
         static $errors = [

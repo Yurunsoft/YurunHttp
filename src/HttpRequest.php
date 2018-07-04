@@ -167,18 +167,6 @@ class HttpRequest
 	public $keyPassword = null;
 
 	/**
-	 * 使用自定义实现的重定向，性能较差。如果不是环境不支持自动重定向，请勿设为true
-	 * @var bool
-	 */
-	public static $customLocation = false;
-
-	/**
-	 * 临时目录，有些特殊环境（如某国内虚拟主机）需要特别设置一下临时文件目录
-	 * @var string
-	 */
-	public static $tempDir;
-
-	/**
 	 * 代理认证方式
 	 */
 	public static $proxyAuths = array(
@@ -203,7 +191,8 @@ class HttpRequest
 	public function __construct()
 	{
 		$this->open();
-		$this->cookieFileName = tempnam(null === self::$tempDir ? sys_get_temp_dir() : self::$tempDir,'');
+		$tempDir = YurunHttp::getAttribute('tempDir');
+		$this->cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir,'');
 	}
 
 	/**
@@ -250,7 +239,7 @@ class HttpRequest
 
 	/**
 	 * 创建一个新会话，等同于new
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public static function newSession()
 	{
@@ -260,7 +249,7 @@ class HttpRequest
 	/**
 	 * 设置请求地址
 	 * @param string $url 请求地址
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function url($url)
 	{
@@ -271,7 +260,7 @@ class HttpRequest
 	/**
 	 * 设置发送内容，requestBody的别名
 	 * @param mixed $content 发送内容，可以是字符串、数组、HttpRequestMultipartBody
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function content($content)
 	{
@@ -281,7 +270,7 @@ class HttpRequest
 	/**
 	 * 设置参数，requestBody的别名
 	 * @param mixed $params 发送内容，可以是字符串、数组、HttpRequestMultipartBody
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function params($params)
 	{
@@ -291,7 +280,7 @@ class HttpRequest
 	/**
 	 * 设置请求主体
 	 * @param mixed $requestBody 发送内容，可以是字符串、数组、HttpRequestMultipartBody
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function requestBody($requestBody)
 	{
@@ -302,7 +291,7 @@ class HttpRequest
 	/**
 	 * 批量设置CURL的Option
 	 * @param array $options curl_setopt_array()所需要的第二个参数
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function options($options)
 	{
@@ -317,7 +306,7 @@ class HttpRequest
 	 * 设置CURL的Option
 	 * @param int $option 需要设置的CURLOPT_XXX选项
 	 * @param mixed $value 值
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function option($option, $value)
 	{
@@ -328,7 +317,7 @@ class HttpRequest
 	/**
 	 * 批量设置请求头
 	 * @param array $headers 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function headers($headers)
 	{
@@ -340,7 +329,7 @@ class HttpRequest
 	 * 设置请求头
 	 * @param string $header 请求头名称
 	 * @param string $value 值
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function header($header, $value)
 	{
@@ -351,7 +340,7 @@ class HttpRequest
 	/**
 	 * 设置Accept
 	 * @param string $accept
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function accept($accept)
 	{
@@ -362,7 +351,7 @@ class HttpRequest
 	/**
 	 * 设置Accept-Language
 	 * @param string $acceptLanguage
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function acceptLanguage($acceptLanguage)
 	{
@@ -373,7 +362,7 @@ class HttpRequest
 	/**
 	 * 设置Accept-Encoding
 	 * @param string $acceptEncoding 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function acceptEncoding($acceptEncoding)
 	{
@@ -384,7 +373,7 @@ class HttpRequest
 	/**
 	 * 设置Accept-Ranges
 	 * @param string $acceptRanges 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function acceptRanges($acceptRanges)
 	{
@@ -395,7 +384,7 @@ class HttpRequest
 	/**
 	 * 设置Cache-Control
 	 * @param string $cacheControl 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function cacheControl($cacheControl)
 	{
@@ -406,7 +395,7 @@ class HttpRequest
 	/**
 	 * 批量设置Cookies
 	 * @param array $cookies 键值对应数组
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function cookies($cookies)
 	{
@@ -418,7 +407,7 @@ class HttpRequest
 	 * 设置Cookie
 	 * @param string $name 名称
 	 * @param string $value 值
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function cookie($name, $value)
 	{
@@ -429,7 +418,7 @@ class HttpRequest
 	/**
 	 * 设置Content-Type
 	 * @param string $contentType 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function contentType($contentType)
 	{
@@ -440,7 +429,7 @@ class HttpRequest
 	/**
 	 * 设置Range
 	 * @param string $range 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function range($range)
 	{
@@ -451,7 +440,7 @@ class HttpRequest
 	/**
 	 * 设置Referer
 	 * @param string $referer 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function referer($referer)
 	{
@@ -462,7 +451,7 @@ class HttpRequest
 	/**
 	 * 设置User-Agent
 	 * @param string $userAgent 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function userAgent($userAgent)
 	{
@@ -473,7 +462,7 @@ class HttpRequest
 	/**
 	 * 设置User-Agent，userAgent的别名
 	 * @param string $userAgent 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function ua($userAgent)
 	{
@@ -483,7 +472,7 @@ class HttpRequest
 	/**
 	 * 设置失败重试次数，状态码非200时重试
 	 * @param string $retry 
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function retry($retry)
 	{
@@ -497,7 +486,7 @@ class HttpRequest
 	 * @param int $port 代理服务器端口
 	 * @param string $type 代理类型，支持：http、socks4、socks4a、socks5
 	 * @param string $auth 代理认证方式，支持：basic、ntlm。一般默认basic
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function proxy($server, $port, $type = 'http', $auth = 'basic')
 	{
@@ -512,10 +501,23 @@ class HttpRequest
 	}
 
 	/**
+	 * 代理认证
+	 *
+	 * @param string $username
+	 * @param string $password
+	 * @return static
+	 */
+	public function proxyAuth($username, $password)
+	{
+		$this->proxy['username'] = $username;
+		$this->proxy['password'] = $password;
+	}
+
+	/**
 	 * 设置超时时间
 	 * @param int $timeout 总超时时间，单位：毫秒
 	 * @param int $connectTimeout 连接超时时间，单位：毫秒
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function timeout($timeout = null, $connectTimeout = null)
 	{
@@ -534,7 +536,7 @@ class HttpRequest
 	 * 限速
 	 * @param int $download 下载速度，为0则不限制，单位：字节
 	 * @param int $upload 上传速度，为0则不限制，单位：字节
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function limitRate($download = 0, $upload = 0)
 	{
@@ -547,7 +549,7 @@ class HttpRequest
 	 * 设置用于连接中需要的用户名和密码
 	 * @param string $username 用户名
 	 * @param string $password 密码
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function userPwd($username, $password)
 	{
@@ -560,7 +562,7 @@ class HttpRequest
 	 * 保存至文件的设置
 	 * @param string $filePath 文件路径
 	 * @param string $fileMode 文件打开方式，默认w+
-	 * @return HttpRequest 
+	 * @return static
 	 */
 	public function saveFile($filePath, $fileMode = 'w+')
 	{
@@ -665,7 +667,31 @@ class HttpRequest
 	{
 		list($body, $files) = $this->parseRequestBody($requestBody);
 		$request = new Request($url, $this->headers, $body, $method);
-		$request->withUploadedFiles($files);
+		$request = $request->withUploadedFiles($files)
+							->withAttribute('maxRedirects', $this->maxRedirects)
+							->withAttribute('isVerifyCA', $this->isVerifyCA)
+							->withAttribute('caCert', $this->caCert)
+							->withAttribute('certPath', $this->certPath)
+							->withAttribute('certPassword', $this->certPassword)
+							->withAttribute('certType', $this->certType)
+							->withAttribute('keyPath', $this->keyPath)
+							->withAttribute('keyPassword', $this->keyPassword)
+							->withAttribute('keyType', $this->keyType)
+							->withAttribute('options', $this->options)
+							->withAttribute('saveFilePath', isset($this->saveFileOption['filePath']) ? $this->saveFileOption['filePath'] : null)
+							->withAttribute('useProxy', $this->useProxy)
+							->withAttribute('username', $this->username)
+							->withAttribute('password', $this->password)
+							->withAttribute('connectTimeout', $this->connectTimeout)
+							->withAttribute('timeout', $this->timeout)
+							->withAttribute('downloadSpeed', $this->downloadSpeed)
+							->withAttribute('uploadSpeed', $this->uploadSpeed)
+							->withAttribute('followLocation', $this->followLocation)
+							;
+		foreach($this->proxy as $name => $value)
+		{
+			$request = $request->withAttribute('proxy.' . $name, $value);
+		}
 		return YurunHttp::send($request);
 	}
 

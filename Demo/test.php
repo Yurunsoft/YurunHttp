@@ -4,5 +4,5 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 use Yurun\Util\HttpRequest;
 
 $http = HttpRequest::newSession();
-$response = $http->get('https://www.baidu.com/');
+$response = $http->get('http://www.baidu.com/');
 var_dump($response->body());
