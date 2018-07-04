@@ -2,11 +2,11 @@
 
 ## 简介
 
-一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法，简单易用。
+YurunHttp 是开源的PHP HTTP类库，支持链式操作，简单易用。
 
-支持所有常见的GET、POST、PUT、DELETE、UPDATE等请求方式，支持设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
+支持所有常见的GET、POST、PUT、DELETE、UPDATE等请求方式，支持文件上传、设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
 
-支持文件上传请求。
+支持Curl、Swoole 协程。
 
 我们有完善的在线技术文档：[http://doc.yurunsoft.com/YurunHttp](http://doc.yurunsoft.com/YurunHttp)
 
@@ -20,7 +20,7 @@
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "2.*"
+        "yurunsoft/yurun-http": "~3.0"
     }
 }
 ```
