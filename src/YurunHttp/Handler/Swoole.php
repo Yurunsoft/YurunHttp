@@ -6,6 +6,7 @@ use Swoole\Coroutine\Http\Client;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
 class Swoole implements IHandler
 {
@@ -43,57 +44,100 @@ class Swoole implements IHandler
     public function send($request)
     {
         $this->request = $request;
-        $this->settings = $this->request->getAttribute('options', []);
-        // 解析IP
-        $ip = Coroutine::gethostbyname($this->request->getUri()->getHost());
-        // 实例化
-        $this->handler = new Client($ip, $this->request->getUri()->getPort(), 'https' === $this->request->getUri()->getScheme());
-        $this->handler->setDefer();
-        // method
-        $this->handler->setMethod($this->request->getMethod());
-        // cookie
-        $this->handler->setCookies($this->request->getCookieParams());
-        // body
-        $files = $this->request->getUploadedFiles();
-        $body = (string)$this->request->getBody();
-        if(isset($files[0]))
-        {
-            foreach($files as $file)
-            {
-                $this->handler->addFile($file->getTempFileName(), basename($file->getClientFilename()), $file->getClientMediaType());
-            }
-            parse_str($body, $body);
-        }
-        $this->handler->setData($body);
-        // headers
-        $this->request = $this->request->withAddedHeader('Host', $request->getUri()->getHost());
-        if(!$this->request->hasHeader('Content-Type'))
-        {
-            $this->request = $this->request->withAddedHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
-        }
-        $headers = [];
-        foreach($this->request->getHeaders() as $name => $value)
-        {
-            $headers[$name] = implode(',', $value);
-        }
-        $this->handler->setHeaders($headers);
-        // 其它处理
-		$this->parseSSL();
-		$this->parseProxy();
-        $this->parseNetwork();
-        // 设置客户端参数
-        if(!empty($this->settings))
-        {
-            $this->settings['timeout'] = 10;
-            $this->handler->set($this->settings);
-        }
-        // 发送
-        $path = $this->request->getUri()->getPath();
-        if('' === $path)
-        {
-            $path = '/';
-        }
-        $this->handler->execute($path);
+        $uri = $this->request->getUri();
+        $isLocation = false;
+		$count = 0;
+        do{
+			$retry = $this->request->getAttribute('retry', 0);
+			for($i = 0; $i <= $retry; ++$i)
+			{
+                $this->settings = $this->request->getAttribute('options', []);
+                // 解析IP
+                $ip = Coroutine::gethostbyname($uri->getHost());
+                // 实例化
+                $this->handler = new Client($ip, $uri->getPort(), 'https' === $uri->getScheme());
+                $this->handler->setDefer();
+                // method
+                if($isLocation)
+                {
+                    $this->handler->setMethod('GET');
+                }
+                else
+                {
+                    $this->handler->setMethod($this->request->getMethod());
+                }
+                // cookie
+                $this->handler->setCookies($this->request->getCookieParams());
+                // body
+                if(!$isLocation)
+                {
+                    $files = $this->request->getUploadedFiles();
+                    $body = (string)$this->request->getBody();
+                    if(isset($files[0]))
+                    {
+                        foreach($files as $file)
+                        {
+                            $this->handler->addFile($file->getTempFileName(), basename($file->getClientFilename()), $file->getClientMediaType());
+                        }
+                        parse_str($body, $body);
+                    }
+                    $this->handler->setData($body);
+                }
+                // headers
+                $this->request = $this->request->withAddedHeader('Host', $uri->getHost());
+                if(!$this->request->hasHeader('Content-Type'))
+                {
+                    $this->request = $this->request->withAddedHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
+                }
+                $headers = [];
+                foreach($this->request->getHeaders() as $name => $value)
+                {
+                    $headers[$name] = implode(',', $value);
+                }
+                $this->handler->setHeaders($headers);
+                // 其它处理
+                $this->parseSSL();
+                $this->parseProxy();
+                $this->parseNetwork();
+                // 设置客户端参数
+                if(!empty($this->settings))
+                {
+                    $this->settings['timeout'] = 10;
+                    $this->handler->set($this->settings);
+                }
+                // 发送
+                $path = $uri->getPath();
+                if('' === $path)
+                {
+                    $path = '/';
+                }
+                if(null === ($saveFilePath = $this->request->getAttribute('saveFilePath')))
+                {
+                    $this->handler->execute($path);
+                }
+                else
+                {
+                    $this->handler->download($path, $saveFilePath);
+                }
+				$this->getResponse();
+				$statusCode = $this->result->getStatusCode();
+				// 状态码为5XX或者0才需要重试
+				if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
+				{
+					break;
+				}
+			}
+			if((301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
+			{
+				// 自己实现重定向
+                $uri = new Uri($this->result->getHeaderLine('location'));
+                $isLocation = true;
+			}
+			else
+			{
+				break;
+			}
+        }while(true);
     }
 
     /**
@@ -102,6 +146,16 @@ class Swoole implements IHandler
      */
     public function recv()
     {
+        return $this->result;
+    }
+
+	/**
+	 * 获取响应对象
+	 *
+	 * @return \Yurun\Util\YurunHttp\Http\Response
+	 */
+	private function getResponse()
+	{
         $success = $this->handler->recv();
         $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
 
