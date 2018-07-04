@@ -34,12 +34,6 @@ class Swoole implements IHandler
      * @var array
      */
     private $settings = [];
-
-    /**
-     * 请求头
-     * @var array
-     */
-    private $headers = [];
     
     /**
      * 发送请求
@@ -49,27 +43,19 @@ class Swoole implements IHandler
     public function send($request)
     {
         $this->request = $request;
-        $this->settings = $request->getAttribute('options', []);
+        $this->settings = $this->request->getAttribute('options', []);
         // 解析IP
-        $ip = Coroutine::gethostbyname($request->getUri()->getHost());
+        $ip = Coroutine::gethostbyname($this->request->getUri()->getHost());
         // 实例化
-        $this->handler = new Client($ip, $request->getUri()->getPort(), 'https' === $request->getUri()->getScheme());
+        $this->handler = new Client($ip, $this->request->getUri()->getPort(), 'https' === $this->request->getUri()->getScheme());
         $this->handler->setDefer();
         // method
-        $this->handler->setMethod($request->getMethod());
-        // headers
-        $this->headers = [
-            'Host'  =>  $request->getUri()->getHost(),
-        ];
-        foreach($request->getHeaders() as $name => $values)
-        {
-            $this->headers[$name] = implode(',', $values);
-        }
+        $this->handler->setMethod($this->request->getMethod());
         // cookie
-        $this->handler->setCookies($request->getCookieParams());
+        $this->handler->setCookies($this->request->getCookieParams());
         // body
-        $files = $request->getUploadedFiles();
-        $body = (string)$request->getBody();
+        $files = $this->request->getUploadedFiles();
+        $body = (string)$this->request->getBody();
         if(isset($files[0]))
         {
             foreach($files as $file)
@@ -79,7 +65,18 @@ class Swoole implements IHandler
             parse_str($body, $body);
         }
         $this->handler->setData($body);
-        $this->handler->setHeaders($this->headers);
+        // headers
+        $this->request = $this->request->withAddedHeader('Host', $request->getUri()->getHost());
+        if(!$this->request->hasHeader('Content-Type'))
+        {
+            $this->request = $this->request->withAddedHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
+        }
+        $headers = [];
+        foreach($this->request->getHeaders() as $name => $value)
+        {
+            $headers[$name] = implode(',', $value);
+        }
+        $this->handler->setHeaders($headers);
         // 其它处理
 		$this->parseSSL();
 		$this->parseProxy();
@@ -91,7 +88,7 @@ class Swoole implements IHandler
             $this->handler->set($this->settings);
         }
         // 发送
-        $path = $request->getUri()->getPath();
+        $path = $this->request->getUri()->getPath();
         if('' === $path)
         {
             $path = '/';
@@ -220,7 +217,7 @@ class Swoole implements IHandler
 		if(null != $username)
 		{
             $auth = base64_encode($username . ':' . $this->request->getAttribute('password', ''));
-            $this->headers['Authorization'] = 'Basic ' . $auth;
+            $this->request = $this->request->withAddedHeader('Authorization', 'Basic ' . $auth);
         }
         // 超时
         $this->settings['timeout'] = $this->request->getAttribute('connectTimeout', 30000);
