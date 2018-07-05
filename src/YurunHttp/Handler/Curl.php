@@ -69,16 +69,16 @@ class Curl implements IHandler
 		$this->handler = curl_init();
 		$tempDir = YurunHttp::getAttribute('tempDir');
 		$cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
-        $files = $request->getUploadedFiles();
-		$body = (string)$request->getBody();
+        $files = $this->request->getUploadedFiles();
+		$body = (string)$this->request->getBody();
 		if(isset($files[0]))
 		{
 			$body = FormDataBuilder::build($body, $files, $boundary);
-			$this->request = $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
+			$this->request = $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
 		}
 		$options = [
 			// 请求方法
-			CURLOPT_CUSTOMREQUEST	=> $request->getMethod(),
+			CURLOPT_CUSTOMREQUEST	=> $this->request->getMethod(),
 			// 返回内容
 			CURLOPT_RETURNTRANSFER	=> true,
 			// 返回header
@@ -94,7 +94,7 @@ class Curl implements IHandler
 			CURLOPT_MAXREDIRS		=> $this->request->getAttribute('maxRedirects', 10),
         ];
 		// 自动解压缩支持
-		$acceptEncoding = $request->getHeaderLine('Accept-Encoding');
+		$acceptEncoding = $this->request->getHeaderLine('Accept-Encoding');
 		if('' !== $acceptEncoding)
 		{
 			$options[CURLOPT_ENCODING] = $acceptEncoding;
@@ -111,7 +111,11 @@ class Curl implements IHandler
 		$this->parseCookies();
 		$this->parseNetwork();
 		$count = 0;
-		$url = (string)$request->getUri();
+        if([] !== ($queryParams = $this->request->getQueryParams()))
+        {
+			$this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
+        }
+		$url = (string)$this->request->getUri();
 		do{
 			curl_setopt($this->handler, CURLOPT_URL, $url);
 			$retry = $this->request->getAttribute('retry', 0);

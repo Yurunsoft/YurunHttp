@@ -44,6 +44,10 @@ class Swoole implements IHandler
     public function send($request)
     {
         $this->request = $request;
+        if([] !== ($queryParams = $this->request->getQueryParams()))
+        {
+			$this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
+        }
         $uri = $this->request->getUri();
         $isLocation = false;
 		$count = 0;
@@ -110,6 +114,11 @@ class Swoole implements IHandler
                 if('' === $path)
                 {
                     $path = '/';
+                }
+                $query = $uri->getQuery();
+                if('' !== $query)
+                {
+                    $path .= '?' . $query;
                 }
                 if(null === ($saveFilePath = $this->request->getAttribute('saveFilePath')))
                 {
