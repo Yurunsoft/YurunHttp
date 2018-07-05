@@ -1,5 +1,9 @@
 # YurunHttp
 
+[![Latest Version](https://img.shields.io/packagist/v/yurunsoft/yurun-http.svg)](https://packagist.org/packages/yurunsoft/yurun-http)
+[![IMI Doc](https://img.shields.io/badge/docs-passing-green.svg)](http://doc.yurunsoft.com/YurunHttp)
+[![IMI License](https://img.shields.io/github/license/Yurunsoft/YurunHttp.svg)](https://github.com/Yurunsoft/YurunHttp/blob/master/LICENSE)
+
 ## 简介
 
 YurunHttp 是开源的PHP HTTP类库，支持链式操作，简单易用。
