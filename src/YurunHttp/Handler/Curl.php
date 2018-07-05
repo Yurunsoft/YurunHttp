@@ -67,7 +67,7 @@ class Curl implements IHandler
     {
 		$this->request = $request;
 		$this->handler = curl_init();
-		$tempDir = YurunHttp::getAttribute('tempDir');
+		$tempDir = $this->request->getAttribute('tempDir');
 		$cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
         $files = $this->request->getUploadedFiles();
 		$body = (string)$this->request->getBody();

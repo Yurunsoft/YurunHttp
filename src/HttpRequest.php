@@ -40,12 +40,6 @@ class HttpRequest
 	public $cookies = array();
 
 	/**
-	 * 保存Cookie文件的文件名，为空不保存
-	 * @var string
-	 */
-	public $cookieFileName = '';
-
-	/**
 	 * 失败重试次数，默认为0
 	 * @var int
 	 */
@@ -191,8 +185,6 @@ class HttpRequest
 	public function __construct()
 	{
 		$this->open();
-		$tempDir = YurunHttp::getAttribute('tempDir');
-		$this->cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir,'');
 	}
 
 	/**
