@@ -259,7 +259,7 @@ class HttpRequest
 
 	/**
 	 * 设置发送内容，requestBody的别名
-	 * @param mixed $content 发送内容，可以是字符串、数组、HttpRequestMultipartBody
+	 * @param mixed $content 发送内容，可以是字符串、数组
 	 * @return static
 	 */
 	public function content($content)
@@ -269,7 +269,7 @@ class HttpRequest
 
 	/**
 	 * 设置参数，requestBody的别名
-	 * @param mixed $params 发送内容，可以是字符串、数组、HttpRequestMultipartBody
+	 * @param mixed $params 发送内容，可以是字符串、数组
 	 * @return static
 	 */
 	public function params($params)
@@ -279,7 +279,7 @@ class HttpRequest
 
 	/**
 	 * 设置请求主体
-	 * @param mixed $requestBody 发送内容，可以是字符串、数组、HttpRequestMultipartBody
+	 * @param mixed $requestBody 发送内容，可以是字符串、数组
 	 * @return static
 	 */
 	public function requestBody($requestBody)
@@ -659,7 +659,7 @@ class HttpRequest
 	/**
 	 * 发送请求，所有请求的老祖宗
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @param array $method 请求方法，GET、POST等
 	 * @return Response 
 	 */
@@ -699,7 +699,7 @@ class HttpRequest
 	/**
 	 * GET请求
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @return Response 
 	 */
 	public function get($url = null, $requestBody = null)
@@ -722,7 +722,7 @@ class HttpRequest
 	/**
 	 * POST请求
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @return Response 
 	 */
 	public function post($url = null, $requestBody = null)
@@ -733,7 +733,7 @@ class HttpRequest
 	/**
 	 * HEAD请求
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @return Response 
 	 */
 	public function head($url = null, $requestBody = null)
@@ -744,7 +744,7 @@ class HttpRequest
 	/**
 	 * PUT请求
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @return Response 
 	 */
 	public function put($url = null, $requestBody = null)
@@ -755,7 +755,7 @@ class HttpRequest
 	/**
 	 * PATCH请求
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @return Response 
 	 */
 	public function patch($url = null, $requestBody = null)
@@ -766,7 +766,7 @@ class HttpRequest
 	/**
 	 * DELETE请求
 	 * @param string $url 请求地址，如果为null则取url属性值
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @return Response 
 	 */
 	public function delete($url = null, $requestBody = null)
@@ -778,7 +778,7 @@ class HttpRequest
 	 * 直接下载文件
 	 * @param string $fileName 保存路径
 	 * @param string $url 下载文件地址
-	 * @param array $requestBody 发送内容，可以是字符串、数组、`HttpRequestMultipartBody`，如果为空则取content属性值
+	 * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
 	 * @param string $method 请求方法，GET、POST等，一般用GET
 	 * @return Response
 	 */

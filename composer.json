@@ -3,7 +3,6 @@
     "description": "一个基于PHP cURL的开源HTTP类库，支持链式操作，省去繁杂的cURL使用方法。(An open source HTTP class library based on PHP cURL, support chain operations, eliminating the use of miscellaneous cURL methods.)",
     "require": {
         "php": ">=5.4.0",
-        "yurunsoft/yurun-event" : "~2.0",
         "psr/http-message": "1.0.0"
     },
     "require-dev": {
