@@ -106,7 +106,7 @@ class Swoole implements IHandler
                 // 设置客户端参数
                 if(!empty($this->settings))
                 {
-                    $this->settings['timeout'] = 10;
+                    $this->settings['timeout'] = 30;
                     $this->handler->set($this->settings);
                 }
                 // 发送
