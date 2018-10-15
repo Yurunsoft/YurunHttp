@@ -163,20 +163,12 @@ class HttpRequest
 	/**
 	 * 代理认证方式
 	 */
-	public static $proxyAuths = array(
-		'basic'		=>	CURLAUTH_BASIC,
-		'ntlm'		=>	CURLAUTH_NTLM
-	);
+	public static $proxyAuths = array();
 
 	/**
 	 * 代理类型
 	 */
-	public static $proxyType = array(
-		'http'		=>	CURLPROXY_HTTP,
-		'socks4'	=>	CURLPROXY_SOCKS4,
-		'socks4a'	=>	6,	// CURLPROXY_SOCKS4A
-		'socks5'	=>	CURLPROXY_SOCKS5,
-	);
+	public static $proxyType = array();
 
 	/**
 	 * 构造方法
@@ -780,4 +772,21 @@ class HttpRequest
 		$this->saveFileOption = array();
 		return $result;
 	}
+}
+
+if(extension_loaded('curl'))
+{
+	// 代理认证方式
+	HttpRequest::$proxyAuths = array(
+		'basic'		=>	CURLAUTH_BASIC,
+		'ntlm'		=>	CURLAUTH_NTLM
+	);
+
+	// 代理类型
+	HttpRequest::$proxyType = array(
+		'http'		=>	CURLPROXY_HTTP,
+		'socks4'	=>	CURLPROXY_SOCKS4,
+		'socks4a'	=>	6,	// CURLPROXY_SOCKS4A
+		'socks5'	=>	CURLPROXY_SOCKS5,
+	);
 }
