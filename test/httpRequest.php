@@ -17,8 +17,8 @@ $http->header('aa', '1');
 
 // 批量设置 header
 $http->headers([
-	'bb'	=>	'2',
-	'cc'	=>	'3',
+    'bb'    =>    '2',
+    'cc'    =>    '3',
 ]);
 
 // 设置 cookie
@@ -26,8 +26,8 @@ $http->cookie('c1', 'abc1');
 
 // 批量设置 cookie
 $http->cookies([
-	'c2'	=>	'abc2',
-	'c3'	=>	'abc3',
+    'c2'    =>    'abc2',
+    'c3'    =>    'abc3',
 ]);
 
 // 限速，单位字节，为0不限制
@@ -66,15 +66,15 @@ $http->cookies([
 
 // get参数编码
 // $http->content([
-// 	'id'	=>	2,
-// 	'name'	=>	3,
+//     'id'    =>    2,
+//     'name'    =>    3,
 // ]);
 
 // 带参数+文件上传
 // $http->content([
-// 	'id'	=>	3,
-// 	'name'	=>	4,
-// 	new UploadedFile('1.txt', MediaType::TEXT_PLAIN, __FILE__),
+//     'id'    =>    3,
+//     'name'    =>    4,
+//     new UploadedFile('1.txt', MediaType::TEXT_PLAIN, __FILE__),
 // ]);
 
 // 也可以如下方式调用，$body可以是上面传入content()方法中的值

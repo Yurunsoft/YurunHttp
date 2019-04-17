@@ -63,9 +63,9 @@ abstract class YurunHttp
      * @return array
      */
     public static function getAttributes()
-	{
-		return static::$attributes;
-	}
+    {
+        return static::$attributes;
+    }
 
     /**
      * 获取全局属性值
@@ -74,7 +74,7 @@ abstract class YurunHttp
      * @return mixed
      */
     public static function getAttribute($name, $default = null)
-	{
+    {
         if(array_key_exists($name, static::$attributes))
         {
             return static::$attributes[$name];
@@ -83,7 +83,7 @@ abstract class YurunHttp
         {
             return $default;
         }
-	}
+    }
 
     /**
      * 设置全局属性值
@@ -92,8 +92,8 @@ abstract class YurunHttp
      * @return mixed
      */
     public static function setAttribute($name, $value)
-	{
+    {
         static::$attributes[$name] = $value;
-	}
+    }
 
 }

@@ -84,9 +84,9 @@ go('test');
 
 function test()
 {
-	$http = new HttpRequest;
-	$response = $http->get('http://www.baidu.com');
-	echo 'html:', PHP_EOL, $response->body();
+    $http = new HttpRequest;
+    $response = $http->get('http://www.baidu.com');
+    echo 'html:', PHP_EOL, $response->body();
 }
 ```
 

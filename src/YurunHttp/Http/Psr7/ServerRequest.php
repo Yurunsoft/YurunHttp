@@ -19,8 +19,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      * cookie数据
      * @var array
      */
-	protected $cookies = [];
-	
+    protected $cookies = [];
+    
     /**
      * get数据
      * @var array
@@ -43,8 +43,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      * 处理过的主体内容
      * @var null|array|object
      */
-	protected $parsedBody;
-	
+    protected $parsedBody;
+    
     /**
      * 属性数组
      *
@@ -70,9 +70,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-	public function getServerParams()
-	{
-		return $this->server;
+    public function getServerParams()
+    {
+        return $this->server;
     }
     
     /**
@@ -97,9 +97,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return array
      */
     public function getCookieParams()
-	{
-		return $this->cookies;
-	}
+    {
+        return $this->cookies;
+    }
 
     /**
      * Return an instance with the specified cookies.
@@ -119,7 +119,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      */
     public function withCookieParams(array $cookies)
-	{
+    {
         $self = clone $this;
         $self->cookies = $cookies;
         return $self;
@@ -149,9 +149,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return array
      */
     public function getQueryParams()
-	{
-		return $this->get;
-	}
+    {
+        return $this->get;
+    }
 
     /**
      * Return an instance with the specified query string arguments.
@@ -176,11 +176,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      */
     public function withQueryParams(array $query)
-	{
+    {
         $self = clone $this;
         $self->get = $query;
         return $self;
-	}
+    }
 
     /**
      * Retrieve normalized file upload data.
@@ -195,9 +195,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      *     array MUST be returned if no data is present.
      */
     public function getUploadedFiles()
-	{
-		return $this->files;
-	}
+    {
+        return $this->files;
+    }
 
     /**
      * Create a new instance with the specified uploaded files.
@@ -211,10 +211,10 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @throws \InvalidArgumentException if an invalid structure is provided.
      */
     public function withUploadedFiles(array $uploadedFiles)
-	{
+    {
         $self = clone $this;
         return $this->setUploadedFiles($self, $uploadedFiles);
-	}
+    }
 
     /**
      * Retrieve any parameters provided in the request body.
@@ -232,9 +232,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      *     These will typically be an array or object.
      */
     public function getParsedBody()
-	{
-		return $this->parsedBody;
-	}
+    {
+        return $this->parsedBody;
+    }
 
     /**
      * Return an instance with the specified body parameters.
@@ -265,11 +265,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      *     provided.
      */
     public function withParsedBody($data)
-	{
+    {
         $self = clone $this;
         $self->parsedBody = $data;
         return $self;
-	}
+    }
 
     /**
      * Retrieve attributes derived from the request.
@@ -283,9 +283,9 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return array Attributes derived from the request.
      */
     public function getAttributes()
-	{
-		return $this->attributes;
-	}
+    {
+        return $this->attributes;
+    }
 
     /**
      * Retrieve a single derived request attribute.
@@ -303,7 +303,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return mixed
      */
     public function getAttribute($name, $default = null)
-	{
+    {
         if(array_key_exists($name, $this->attributes))
         {
             return $this->attributes[$name];
@@ -312,7 +312,7 @@ class ServerRequest extends Request implements ServerRequestInterface
         {
             return $default;
         }
-	}
+    }
 
     /**
      * Return an instance with the specified derived request attribute.
@@ -330,11 +330,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      */
     public function withAttribute($name, $value)
-	{
+    {
         $self = clone $this;
         $self->attributes[$name] = $value;
         return $self;
-	}
+    }
 
     /**
      * Return an instance that removes the specified derived request attribute.
@@ -351,7 +351,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      */
     public function withoutAttribute($name)
-	{
+    {
         $self = clone $this;
         if(array_key_exists($name, $self->attributes))
         {

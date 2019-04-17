@@ -9,26 +9,26 @@ class MemoryStream implements StreamInterface
      * 内容
      * @var string
      */
-	protected $content;
+    protected $content;
 
     /**
      * 大小
      * @var int
      */
-	protected $size;
+    protected $size;
 
     /**
      * 当前位置
      *
      * @var int
      */
-	protected $position = 0;
+    protected $position = 0;
 
-	public function __construct($content = '')
-	{
-		$this->content = $content;
-		$this->size = strlen($content);
-	}
+    public function __construct($content = '')
+    {
+        $this->content = $content;
+        $this->size = strlen($content);
+    }
 
     /**
      * Reads all data from the stream into a string, from the beginning to end.
@@ -44,10 +44,10 @@ class MemoryStream implements StreamInterface
      * @see http://php.net/manual/en/language.oop5.magic.php#object.tostring
      * @return string
      */
-	public function __toString()
-	{
-		return $this->content;
-	}
+    public function __toString()
+    {
+        return $this->content;
+    }
 
     /**
      * Closes the stream and any underlying resources.
@@ -55,10 +55,10 @@ class MemoryStream implements StreamInterface
      * @return void
      */
     public function close()
-	{
-		$this->content = null;
-		$this->size = -1;
-	}
+    {
+        $this->content = null;
+        $this->size = -1;
+    }
 
     /**
      * Separates any underlying resources from the stream.
@@ -68,9 +68,9 @@ class MemoryStream implements StreamInterface
      * @return resource|null Underlying PHP stream, if any
      */
     public function detach()
-	{
-		return null;
-	}
+    {
+        return null;
+    }
 
     /**
      * Get the size of the stream if known.
@@ -78,9 +78,9 @@ class MemoryStream implements StreamInterface
      * @return int|null Returns the size in bytes if known, or null if unknown.
      */
     public function getSize()
-	{
-		return $this->size;
-	}
+    {
+        return $this->size;
+    }
 
     /**
      * Returns the current position of the file read/write pointer
@@ -89,9 +89,9 @@ class MemoryStream implements StreamInterface
      * @throws \RuntimeException on error.
      */
     public function tell()
-	{
-		return $this->position;
-	}
+    {
+        return $this->position;
+    }
 
     /**
      * Returns true if the stream is at the end of the stream.
@@ -99,9 +99,9 @@ class MemoryStream implements StreamInterface
      * @return bool
      */
     public function eof()
-	{
-		return $this->position > $this->size;
-	}
+    {
+        return $this->position > $this->size;
+    }
 
     /**
      * Returns whether or not the stream is seekable.
@@ -109,9 +109,9 @@ class MemoryStream implements StreamInterface
      * @return bool
      */
     public function isSeekable()
-	{
-		return true;
-	}
+    {
+        return true;
+    }
 
     /**
      * Seek to a position in the stream.
@@ -126,24 +126,24 @@ class MemoryStream implements StreamInterface
      * @throws \RuntimeException on failure.
      */
     public function seek($offset, $whence = SEEK_SET)
-	{
-		switch($whence)
-		{
-			case SEEK_SET:
-				if($offset < 0)
-				{
-					throw new \RuntimeException('offset failure');
-				}
-				$this->position = $offset;
-				break;
-			case SEEK_CUR:
-				$this->position += $offset;
-				break;
-			case SEEK_END:
-				$this->position = $this->size - 1 + $offset;
-				break;
-		}
-	}
+    {
+        switch($whence)
+        {
+            case SEEK_SET:
+                if($offset < 0)
+                {
+                    throw new \RuntimeException('offset failure');
+                }
+                $this->position = $offset;
+                break;
+            case SEEK_CUR:
+                $this->position += $offset;
+                break;
+            case SEEK_END:
+                $this->position = $this->size - 1 + $offset;
+                break;
+        }
+    }
 
     /**
      * Seek to the beginning of the stream.
@@ -156,9 +156,9 @@ class MemoryStream implements StreamInterface
      * @throws \RuntimeException on failure.
      */
     public function rewind()
-	{
-		$this->position = 0;
-	}
+    {
+        $this->position = 0;
+    }
 
     /**
      * Returns whether or not the stream is writable.
@@ -166,9 +166,9 @@ class MemoryStream implements StreamInterface
      * @return bool
      */
     public function isWritable()
-	{
-		return true;
-	}
+    {
+        return true;
+    }
 
     /**
      * Write data to the stream.
@@ -178,12 +178,12 @@ class MemoryStream implements StreamInterface
      * @throws \RuntimeException on failure.
      */
     public function write($string)
-	{
+    {
         $this->content = substr_replace($this->content, $string, $this->position, 0);
         $len = strlen($string);
         $this->position += $len;
         return $len;
-	}
+    }
 
     /**
      * Returns whether or not the stream is readable.
@@ -191,9 +191,9 @@ class MemoryStream implements StreamInterface
      * @return bool
      */
     public function isReadable()
-	{
-		return true;
-	}
+    {
+        return true;
+    }
 
     /**
      * Read data from the stream.
@@ -206,11 +206,11 @@ class MemoryStream implements StreamInterface
      * @throws \RuntimeException if an error occurs.
      */
     public function read($length)
-	{
-		$result = substr($this->content, $this->position, $length);
-		$this->position += $length;
-		return $result;
-	}
+    {
+        $result = substr($this->content, $this->position, $length);
+        $this->position += $length;
+        return $result;
+    }
 
     /**
      * Returns the remaining contents in a string
@@ -220,9 +220,9 @@ class MemoryStream implements StreamInterface
      *     reading.
      */
     public function getContents()
-	{
-		return $this->read($this->size - $this->position);
-	}
+    {
+        return $this->read($this->size - $this->position);
+    }
 
     /**
      * Get stream metadata as an associative array or retrieve a specific key.
@@ -237,7 +237,7 @@ class MemoryStream implements StreamInterface
      *     value is found, or null if the key is not found.
      */
     public function getMetadata($key = null)
-	{
-		return null;
-	}
+    {
+        return null;
+    }
 }

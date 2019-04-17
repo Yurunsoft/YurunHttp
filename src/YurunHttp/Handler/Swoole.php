@@ -17,17 +17,17 @@ class Swoole implements IHandler
      */
     private $handler;
 
-	/**
-	 * 请求结果
-	 *
-	 * @var \Yurun\Util\YurunHttp\Http\Response
-	 */
+    /**
+     * 请求结果
+     *
+     * @var \Yurun\Util\YurunHttp\Http\Response
+     */
     private $result;
 
-	/**
-	 * 请求内容
-	 * @var \Yurun\Util\YurunHttp\Http\Request
-	 */
+    /**
+     * 请求内容
+     * @var \Yurun\Util\YurunHttp\Http\Request
+     */
     private $request;
     
     /**
@@ -46,15 +46,15 @@ class Swoole implements IHandler
         $this->request = $request;
         if([] !== ($queryParams = $this->request->getQueryParams()))
         {
-			$this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
+            $this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
         }
         $uri = $this->request->getUri();
         $isLocation = false;
-		$count = 0;
+        $count = 0;
         do{
-			$retry = $this->request->getAttribute('retry', 0);
-			for($i = 0; $i <= $retry; ++$i)
-			{
+            $retry = $this->request->getAttribute('retry', 0);
+            for($i = 0; $i <= $retry; ++$i)
+            {
                 $this->settings = $this->request->getAttribute('options', []);
                 // 解析IP
                 $ip = Coroutine::gethostbyname($uri->getHost());
@@ -128,24 +128,24 @@ class Swoole implements IHandler
                 {
                     $this->handler->download($path, $saveFilePath);
                 }
-				$this->getResponse();
-				$statusCode = $this->result->getStatusCode();
-				// 状态码为5XX或者0才需要重试
-				if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
-				{
-					break;
-				}
-			}
-			if((301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
-			{
-				// 自己实现重定向
+                $this->getResponse();
+                $statusCode = $this->result->getStatusCode();
+                // 状态码为5XX或者0才需要重试
+                if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
+                {
+                    break;
+                }
+            }
+            if((301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
+            {
+                // 自己实现重定向
                 $uri = new Uri($this->result->getHeaderLine('location'));
                 $isLocation = true;
-			}
-			else
-			{
-				break;
-			}
+            }
+            else
+            {
+                break;
+            }
         }while(true);
     }
 
@@ -158,13 +158,13 @@ class Swoole implements IHandler
         return $this->result;
     }
 
-	/**
-	 * 获取响应对象
-	 *
-	 * @return \Yurun\Util\YurunHttp\Http\Response
-	 */
-	private function getResponse()
-	{
+    /**
+     * 获取响应对象
+     *
+     * @return \Yurun\Util\YurunHttp\Http\Response
+     */
+    private function getResponse()
+    {
         $success = $this->handler->recv();
         $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
         if($success)
@@ -211,45 +211,45 @@ class Swoole implements IHandler
         return $this->result;
     }
 
-	/**
-	 * 处理加密访问
-	 * @return void
-	 */
-	private function parseSSL()
+    /**
+     * 处理加密访问
+     * @return void
+     */
+    private function parseSSL()
     {
         if($this->request->getAttribute('isVerifyCA', false))
-		{
+        {
             $this->settings['ssl_verify_peer'] = true;
             $caCert = $this->request->getAttribute('caCert');
             if(null !== $caCert)
             {
                 $this->settings['ssl_cafile'] = $caCert;
             }
-		}
-		else
-		{
+        }
+        else
+        {
             $this->settings['ssl_verify_peer'] = false;
-		}
-		$certPath = $this->request->getAttribute('certPath', '');
-		if('' !== $certPath)
-		{
-			$this->settings['ssl_cert_file'] = $certPath;
-		}
-		$keyPath = $this->request->getAttribute('keyPath' , '');
-		if('' !== $keyPath)
-		{
-			$this->settings['ssl_key_file'] = $keyPath;
-		}
+        }
+        $certPath = $this->request->getAttribute('certPath', '');
+        if('' !== $certPath)
+        {
+            $this->settings['ssl_cert_file'] = $certPath;
+        }
+        $keyPath = $this->request->getAttribute('keyPath' , '');
+        if('' !== $keyPath)
+        {
+            $this->settings['ssl_key_file'] = $keyPath;
+        }
     }
 
-	/**
-	 * 处理代理
-	 * @return void
-	 */
-	private function parseProxy()
+    /**
+     * 处理代理
+     * @return void
+     */
+    private function parseProxy()
     {
         if($this->request->getAttribute('useProxy', false))
-		{
+        {
             $type = $this->request->getAttribute('proxy.type');
             switch($type)
             {
@@ -266,19 +266,19 @@ class Swoole implements IHandler
                     $this->settings['socks5_password'] = $this->request->getAttribute('proxy.password', '');
                     break;
             }
-		}
+        }
     }
     
-	/**
-	 * 处理网络相关
-	 * @return void
-	 */
-	private function parseNetwork()
-	{
+    /**
+     * 处理网络相关
+     * @return void
+     */
+    private function parseNetwork()
+    {
         // 用户名密码认证处理
-		$username = $this->request->getAttribute('username');
-		if(null != $username)
-		{
+        $username = $this->request->getAttribute('username');
+        if(null != $username)
+        {
             $auth = base64_encode($username . ':' . $this->request->getAttribute('password', ''));
             $this->request = $this->request->withAddedHeader('Authorization', 'Basic ' . $auth);
         }
