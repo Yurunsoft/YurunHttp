@@ -91,3 +91,9 @@ function test()
 ```
 
 具体详见`test`目录中的示例代码
+
+## 捐赠
+
+<img src="https://raw.githubusercontent.com/Yurunsoft/YurunHttp/master/res/pay.png"/>
+
+开源不求盈利，多少都是心意，生活不易，随缘随缘……
