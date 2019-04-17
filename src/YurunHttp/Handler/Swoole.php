@@ -167,47 +167,47 @@ class Swoole implements IHandler
 	{
         $success = $this->handler->recv();
         $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
-
-        // headers
-        foreach($this->handler->headers as $name => $value)
+        if($success)
         {
-            $this->result = $this->result->withHeader($name, $value);
-        }
-
-        // cookies
-        $cookies = [];
-        if(isset($this->handler->set_cookie_headers))
-        {
-            foreach($this->handler->set_cookie_headers as $value)
+            // headers
+            foreach($this->handler->headers as $name => $value)
             {
-                $list = explode(';', $value);
-                $count2 = count($list);
-                if(isset($list[0]))
+                $this->result = $this->result->withHeader($name, $value);
+            }
+
+            // cookies
+            $cookies = [];
+            if(isset($this->handler->set_cookie_headers))
+            {
+                foreach($this->handler->set_cookie_headers as $value)
                 {
-                    list($cookieName, $value) = explode('=', $list[0], 2);
-                    $cookieName = trim($cookieName);
-                    $cookies[$cookieName] = array('value'=>$value);
-                    for($j = 1; $j < $count2; ++$j)
+                    $list = explode(';', $value);
+                    $count2 = count($list);
+                    if(isset($list[0]))
                     {
-                        $kv = explode('=', $list[$j], 2);
-                        $cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
+                        list($cookieName, $value) = explode('=', $list[0], 2);
+                        $cookieName = trim($cookieName);
+                        $cookies[$cookieName] = array('value'=>$value);
+                        for($j = 1; $j < $count2; ++$j)
+                        {
+                            $kv = explode('=', $list[$j], 2);
+                            $cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
+                        }
                     }
                 }
             }
-        }
-        foreach($this->handler->cookies as $name => $value)
-        {
-            if(!isset($cookies[$name]))
+            foreach($this->handler->cookies as $name => $value)
             {
-                $cookies[$name] = ['value'=>$value];
+                if(!isset($cookies[$name]))
+                {
+                    $cookies[$name] = ['value'=>$value];
+                }
             }
+            $this->result = $this->result->withCookieOriginParams($cookies);
         }
-		$this->result = $this->result->withCookieOriginParams($cookies)
-									->withError($this->getErrorString($this->handler->errCode))
-                                    ->withErrno($this->handler->errCode);
-                                    
+        $this->result = $this->result->withError($this->getErrorString($this->handler->errCode))
+                                     ->withErrno($this->handler->errCode);
         $this->handler->close();
-
         return $this->result;
     }
 
