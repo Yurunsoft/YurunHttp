@@ -56,10 +56,8 @@ class Swoole implements IHandler
             for($i = 0; $i <= $retry; ++$i)
             {
                 $this->settings = $this->request->getAttribute('options', []);
-                // 解析IP
-                $ip = Coroutine::gethostbyname($uri->getHost());
                 // 实例化
-                $this->handler = new Client($ip, $uri->getPort(), 'https' === $uri->getScheme());
+                $this->handler = new Client($uri->getHost(), $uri->getPort(), 'https' === $uri->getScheme());
                 $this->handler->setDefer();
                 // method
                 if($isLocation)
