@@ -137,7 +137,27 @@ class Swoole implements IHandler
             if((301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
             {
                 // 自己实现重定向
-                $uri = new Uri($this->result->getHeaderLine('location'));
+                $location = $this->result->getHeaderLine('location');
+                $locationUri = new Uri($location);
+                if('' === $locationUri->getHost())
+                {
+                    if(!isset($location[0]))
+                    {
+                        return;
+                    }
+                    if('/' === $location[0])
+                    {
+                        $uri = $uri->withQuery('')->withPath($location);
+                    }
+                    else
+                    {
+                        $uri = new Uri(dirname($uri) . '/' . $location);
+                    }
+                }
+                else
+                {
+                    $uri = $locationUri;
+                }
                 $isLocation = true;
             }
             else
