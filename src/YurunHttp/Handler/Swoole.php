@@ -101,12 +101,6 @@ class Swoole implements IHandler
                 $this->parseSSL();
                 $this->parseProxy();
                 $this->parseNetwork();
-                // 设置客户端参数
-                if(!empty($this->settings))
-                {
-                    $this->settings['timeout'] = 30;
-                    $this->handler->set($this->settings);
-                }
                 // 发送
                 $path = $uri->getPath();
                 if('' === $path)
