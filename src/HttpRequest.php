@@ -10,6 +10,13 @@ use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 class HttpRequest
 {
     /**
+     * 处理器
+     *
+     * @var \Yurun\Util\YurunHttp\Handler\IHandler
+     */
+    private $handler;
+
+    /**
      * 需要请求的Url地址
      * @var string
      */
@@ -176,6 +183,8 @@ class HttpRequest
      */
     public function __construct()
     {
+        $handlerClass = YurunHttp::getDefaultHandler();
+        $this->handler = new $handlerClass;
         $this->open();
     }
 
@@ -677,7 +686,7 @@ class HttpRequest
         {
             $request = $request->withAttribute('proxy.' . $name, $value);
         }
-        return YurunHttp::send($request);
+        return YurunHttp::send($request, $this->handler);
     }
 
     /**

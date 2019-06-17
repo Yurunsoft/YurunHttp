@@ -58,6 +58,11 @@ class Curl implements IHandler
         'socks5'    =>  CURLPROXY_SOCKS5,
     );
 
+    public function __destruct()
+    {
+        curl_close($this->handler);
+    }
+
     /**
      * 发送请求
      * @param \Yurun\Util\YurunHttp\Http\Request $request
@@ -66,33 +71,38 @@ class Curl implements IHandler
     public function send($request)
     {
         $this->request = $request;
-        $this->handler = curl_init();
-        $tempDir = $this->request->getAttribute('tempDir');
-        $cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
+        if(!$this->handler)
+        {
+            $this->handler = curl_init();
+            $tempDir = $this->request->getAttribute('tempDir');
+            $cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
+            var_dump($cookieFileName);
+            $options = [
+                // 返回内容
+                CURLOPT_RETURNTRANSFER  => true,
+                // 返回header
+                CURLOPT_HEADER          => true,
+                // 保存cookie
+                CURLOPT_COOKIEFILE      => $cookieFileName,
+                CURLOPT_COOKIEJAR       => $cookieFileName,
+                // 自动重定向
+                CURLOPT_FOLLOWLOCATION  => $this->request->getAttribute('customLocation', false) ? false : $this->request->getAttribute('followLocation', true),
+                // 最大重定向次数
+                CURLOPT_MAXREDIRS       => $this->request->getAttribute('maxRedirects', 10),
+            ];
+        }
         $files = $this->request->getUploadedFiles();
         $body = (string)$this->request->getBody();
+        // 请求方法
+        $options[CURLOPT_CUSTOMREQUEST] = $this->request->getMethod();
+        // 发送内容
+        $options[CURLOPT_POSTFIELDS] = $body;
+        
         if(isset($files[0]))
         {
             $body = FormDataBuilder::build($body, $files, $boundary);
             $this->request = $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
         }
-        $options = [
-            // 请求方法
-            CURLOPT_CUSTOMREQUEST   => $this->request->getMethod(),
-            // 返回内容
-            CURLOPT_RETURNTRANSFER  => true,
-            // 返回header
-            CURLOPT_HEADER          => true,
-            // 发送内容
-            CURLOPT_POSTFIELDS      => $body,
-            // 保存cookie
-            CURLOPT_COOKIEFILE      => $cookieFileName,
-            CURLOPT_COOKIEJAR       => $cookieFileName,
-            // 自动重定向
-            CURLOPT_FOLLOWLOCATION  => $this->request->getAttribute('customLocation', false) ? false : $this->request->getAttribute('followLocation', true),
-            // 最大重定向次数
-            CURLOPT_MAXREDIRS       => $this->request->getAttribute('maxRedirects', 10),
-        ];
         // 自动解压缩支持
         $acceptEncoding = $this->request->getHeaderLine('Accept-Encoding');
         if('' !== $acceptEncoding)
@@ -215,8 +225,6 @@ class Curl implements IHandler
         $this->result = $this->result->withCookieOriginParams($cookies)
                                     ->withError(curl_error($this->handler))
                                     ->withErrno(curl_errno($this->handler));
-
-        curl_close($this->handler);
     }
     
     /**

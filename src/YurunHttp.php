@@ -2,6 +2,7 @@
 namespace Yurun\Util;
 
 use Yurun\Util\YurunHttp\Handler\Curl;
+use Yurun\Util\YurunHttp\Handler\IHandler;
 
 abstract class YurunHttp
 {
@@ -39,11 +40,18 @@ abstract class YurunHttp
      */
     public static function send($request, $handlerClass = null)
     {
-        if(null === $handlerClass)
+        if($handlerClass instanceof IHandler)
         {
-            $handlerClass = static::$defaultHandler;
+            $handler = $handlerClass;
         }
-        $handler = new $handlerClass();
+        else
+        {
+            if(null === $handlerClass)
+            {
+                $handlerClass = static::$defaultHandler;
+            }
+            $handler = new $handlerClass();
+        }
         $time = microtime(true);
         foreach(static::$attributes as $name => $value)
         {
