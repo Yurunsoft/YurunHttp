@@ -87,7 +87,7 @@ class Swoole implements IHandler
                     $this->handler->setData($body);
                 }
                 // headers
-                $this->request = $this->request->withAddedHeader('Host', $uri->getHost());
+                $this->request = $this->request->withAddedHeader('Host', $uri->getDomain());
                 if(!$this->request->hasHeader('Content-Type'))
                 {
                     $this->request = $this->request->withAddedHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
