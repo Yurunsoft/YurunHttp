@@ -57,7 +57,7 @@ class Swoole implements IHandler
             {
                 $this->settings = $this->request->getAttribute('options', []);
                 // 实例化
-                $this->handler = new Client($uri->getHost(), $uri->getPort(), 'https' === $uri->getScheme());
+                $this->handler = new Client($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
                 $this->handler->setDefer();
                 // method
                 if($isLocation)
@@ -133,7 +133,7 @@ class Swoole implements IHandler
                     break;
                 }
             }
-            if((301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
+            if($statusCode >= 300 && $statusCode < 400 && ++$count <= $this->request->getAttribute('maxRedirects', 10))
             {
                 // 自己实现重定向
                 $location = $this->result->getHeaderLine('location');
