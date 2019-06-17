@@ -51,6 +51,7 @@ class Swoole implements IHandler
         $uri = $this->request->getUri();
         $isLocation = false;
         $count = 0;
+        $statusCode = 0;
         do{
             $retry = $this->request->getAttribute('retry', 0);
             for($i = 0; $i <= $retry; ++$i)
@@ -60,7 +61,7 @@ class Swoole implements IHandler
                 $this->handler = new Client($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
                 $this->handler->setDefer();
                 // method
-                if($isLocation)
+                if($isLocation && in_array($statusCode, [301, 302, 303]))
                 {
                     $this->handler->setMethod('GET');
                 }
