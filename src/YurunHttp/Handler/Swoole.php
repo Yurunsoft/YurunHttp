@@ -52,14 +52,22 @@ class Swoole implements IHandler
         $isLocation = false;
         $count = 0;
         $statusCode = 0;
+        $lastSSL = null;
         do{
             $retry = $this->request->getAttribute('retry', 0);
             for($i = 0; $i <= $retry; ++$i)
             {
                 $this->settings = $this->request->getAttribute('options', []);
                 // 实例化
-                $this->handler = new Client($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
-                $this->handler->setDefer();
+                $host = $uri->getHost();
+                $port = Uri::getServerPort($uri);
+                $ssl = 'https' === $uri->getScheme();
+                if(!$this->handler || $this->handler->host != $host || $this->handler->port != $port || $ssl !== $lastSSL)
+                {
+                    $lastSSL = $ssl;
+                    $this->handler = new Client($host, $port, $ssl);
+                    $this->handler->setDefer();
+                }
                 // method
                 if($isLocation && in_array($statusCode, [301, 302, 303]))
                 {
