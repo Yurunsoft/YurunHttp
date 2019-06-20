@@ -1,8 +1,8 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
-use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp;
+use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
@@ -60,7 +60,11 @@ class Curl implements IHandler
 
     public function __destruct()
     {
-        curl_close($this->handler);
+        if($this->handler)
+        {
+            curl_close($this->handler);
+            $this->handler = null;
+        }
     }
 
     /**
@@ -76,7 +80,6 @@ class Curl implements IHandler
             $this->handler = curl_init();
             $tempDir = $this->request->getAttribute('tempDir');
             $cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
-            var_dump($cookieFileName);
             $options = [
                 // 返回内容
                 CURLOPT_RETURNTRANSFER  => true,

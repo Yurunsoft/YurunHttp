@@ -183,8 +183,6 @@ class HttpRequest
      */
     public function __construct()
     {
-        $handlerClass = YurunHttp::getDefaultHandler();
-        $this->handler = new $handlerClass;
         $this->open();
     }
 
@@ -202,6 +200,8 @@ class HttpRequest
      */
     public function open()
     {
+        $handlerClass = YurunHttp::getDefaultHandler();
+        $this->handler = new $handlerClass;
         $this->retry = 0;
         $this->headers = $this->options = array();
         $this->url = $this->content = '';
@@ -227,7 +227,7 @@ class HttpRequest
      */
     public function close()
     {
-        
+        $this->handler = null;
     }
 
     /**

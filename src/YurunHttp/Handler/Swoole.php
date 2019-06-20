@@ -3,10 +3,10 @@ namespace Yurun\Util\YurunHttp\Handler;
 
 use Swoole\Coroutine;
 use Swoole\Coroutine\Http\Client;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
-use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
 class Swoole implements IHandler
 {
@@ -36,6 +36,15 @@ class Swoole implements IHandler
      */
     private $settings = [];
     
+    public function __destruct()
+    {
+        if($this->handler)
+        {
+            $this->handler->close();
+            $this->handler = null;
+        }
+    }
+
     /**
      * 发送请求
      * @param \Yurun\Util\YurunHttp\Http\Request $request
