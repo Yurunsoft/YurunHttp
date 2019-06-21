@@ -136,6 +136,6 @@ abstract class StatusCode
      */
     public static function getReasonPhrase($value)
     {
-        return static::$reasonPhrases[$value] ?? 'Unknown';
+        return isset(static::$reasonPhrases[$value]) ? static::$reasonPhrases[$value] : 'Unknown';
     }
 }
