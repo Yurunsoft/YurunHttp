@@ -79,15 +79,13 @@ class Curl implements IHandler
         {
             $this->handler = curl_init();
             $tempDir = $this->request->getAttribute('tempDir');
-            $cookieFileName = tempnam(null === $tempDir ? sys_get_temp_dir() : $tempDir, '');
             $options = [
                 // 返回内容
                 CURLOPT_RETURNTRANSFER  => true,
                 // 返回header
                 CURLOPT_HEADER          => true,
                 // 保存cookie
-                CURLOPT_COOKIEFILE      => $cookieFileName,
-                CURLOPT_COOKIEJAR       => $cookieFileName,
+                CURLOPT_COOKIEJAR       => 'php://memory',
                 // 自动重定向
                 CURLOPT_FOLLOWLOCATION  => $this->request->getAttribute('customLocation', false) ? false : $this->request->getAttribute('followLocation', true),
                 // 最大重定向次数
