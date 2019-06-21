@@ -1,11 +1,9 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
-use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
-
 
 class Curl implements IHandler
 {
@@ -189,15 +187,11 @@ class Curl implements IHandler
         $this->result = new Response($body, curl_getinfo($this->handler, CURLINFO_HTTP_CODE));
 
         // headers
-        $rawHeaders = explode("\r\n\r\n", trim($headerContent), 2);
+        $rawHeaders = explode("\r\n\r\n", trim($headerContent));
         $requestCount = count($rawHeaders);
-        for($i = 0; $i < $requestCount; ++$i)
-        {
-            $allHeaders[] = $this->parseHeaderOneRequest($rawHeaders[$i]);
-        }
         if($requestCount > 0)
         {
-            $headers = $allHeaders[$requestCount - 1];
+            $headers = $this->parseHeaderOneRequest($rawHeaders[$requestCount - 1]);
             foreach($headers as $name => $value)
             {
                 $this->result = $this->result->withAddedHeader($name, $value);
