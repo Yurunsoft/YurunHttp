@@ -3,7 +3,6 @@ namespace Yurun\Util\YurunHttp\Test;
 
 use PHPUnit\Framework\TestCase;
 use Yurun\Util\YurunHttp;
-use Yurun\Util\YurunHttp\Handler\Curl;
 
 abstract class BaseTest extends TestCase
 {
@@ -16,7 +15,7 @@ abstract class BaseTest extends TestCase
 
     protected function call($callable)
     {
-        YurunHttp::setDefaultHandler(Curl::class);
+        YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Curl');
         $callable();
     }
 
