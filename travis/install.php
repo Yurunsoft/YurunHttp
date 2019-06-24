@@ -5,8 +5,8 @@ Args::init();
 $nproc = Args::get('nproc');
 $versionName = Args::get('version-name');
 
-define('PHP_70_SWOOLE_VERSION', '4.3.5');
-define('OTHER_SWOOLE_VERSION', '4.3.5');
+define('PHP_70_SWOOLE_VERSION', 'v4.3.5');
+define('OTHER_SWOOLE_VERSION', 'v4.3.5');
 
 if(version_compare(PHP_VERSION, '7.0', '>='))
 {
