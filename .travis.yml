@@ -10,8 +10,8 @@ install:
   - echo "extension = swoole.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 before_script:
-  - composer config -g process-timeout 9000 && composer update
   - phpenv config-rm xdebug.ini
+  - composer update
 
 script:
   - composer test
