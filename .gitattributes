@@ -5,3 +5,4 @@
 /tests export-ignore
 /examples export-ignore
 /res export-ignore
+/travis export-ignore
