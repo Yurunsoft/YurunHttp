@@ -6,10 +6,13 @@ use Swoole\Coroutine\Http\Client;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
+use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
 class Swoole implements IHandler
 {
+    use TCookieManager;
+
     /**
      * Swoole 协程客户端对象
      *
@@ -35,7 +38,12 @@ class Swoole implements IHandler
      * @var array
      */
     private $settings = [];
-    
+
+    public function __construct()
+    {
+        $this->initCookieManager();
+    }
+
     public function __destruct()
     {
         if($this->handler)
@@ -87,7 +95,7 @@ class Swoole implements IHandler
                     $this->handler->setMethod($this->request->getMethod());
                 }
                 // cookie
-                $this->handler->setCookies($this->request->getCookieParams());
+                $this->parseCookies();
                 // body
                 if(!$isLocation)
                 {
@@ -194,6 +202,21 @@ class Swoole implements IHandler
     }
 
     /**
+     * 处理cookie
+     * @return void
+     */
+    private function parseCookies()
+    {
+        $cookieParams = $this->request->getCookieParams();
+        foreach($cookieParams as $name => $value)
+        {
+            $this->cookieManager->setCookie($name, $value);
+        }
+        $cookies = $this->cookieManager->getRequestCookies($this->request->getUri());
+        $this->handler->setCookies($cookies);
+    }
+
+    /**
      * 获取响应对象
      *
      * @return \Yurun\Util\YurunHttp\Http\Response
@@ -216,26 +239,8 @@ class Swoole implements IHandler
             {
                 foreach($this->handler->set_cookie_headers as $value)
                 {
-                    $list = explode(';', $value);
-                    $count2 = count($list);
-                    if(isset($list[0]))
-                    {
-                        list($cookieName, $value) = explode('=', $list[0], 2);
-                        $cookieName = trim($cookieName);
-                        $cookies[$cookieName] = array('value'=>$value);
-                        for($j = 1; $j < $count2; ++$j)
-                        {
-                            $kv = explode('=', $list[$j], 2);
-                            $cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
-                        }
-                    }
-                }
-            }
-            foreach($this->handler->cookies as $name => $value)
-            {
-                if(!isset($cookies[$name]))
-                {
-                    $cookies[$name] = ['value'=>$value];
+                    $cookieItem = $this->cookieManager->addSetCookie($value);
+                    $cookies[$cookieItem->name] = (array)$cookieItem;
                 }
             }
             $this->result = $this->result->withCookieOriginParams($cookies);

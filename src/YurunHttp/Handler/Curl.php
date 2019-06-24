@@ -4,9 +4,12 @@ namespace Yurun\Util\YurunHttp\Handler;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Traits\TCookieManager;
 
 class Curl implements IHandler
 {
+    use TCookieManager;
+
     /**
      * 请求结果
      *
@@ -55,6 +58,11 @@ class Curl implements IHandler
         'socks4a'   =>  6, // CURLPROXY_SOCKS4A
         'socks5'    =>  CURLPROXY_SOCKS5,
     );
+
+    public function __construct()
+    {
+        $this->initCookieManager();
+    }
 
     public function __destruct()
     {
@@ -203,19 +211,8 @@ class Curl implements IHandler
         $count = preg_match_all('/set-cookie\s*:\s*([^\r\n]+)/i', $headerContent, $matches);
         for($i = 0; $i < $count; ++$i)
         {
-            $list = explode(';', $matches[1][$i]);
-            $count2 = count($list);
-            if(isset($list[0]))
-            {
-                list($cookieName, $value) = explode('=', $list[0], 2);
-                $cookieName = trim($cookieName);
-                $cookies[$cookieName] = array('value'=>$value);
-                for($j = 1; $j < $count2; ++$j)
-                {
-                    $kv = explode('=', $list[$j], 2);
-                    $cookies[$cookieName][trim($kv[0])] = isset($kv[1]) ? $kv[1] : true;
-                }
-            }
+            $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
+            $cookies[$cookieItem->name] = (array)$cookieItem;
         }
         $this->result = $this->result->withCookieOriginParams($cookies)
                                     ->withError(curl_error($this->handler))
@@ -380,12 +377,12 @@ class Curl implements IHandler
      */
     private function parseCookies()
     {
-        $content = '';
         foreach($this->request->getCookieParams() as $name => $value)
         {
-            $content .= "{$name}={$value}; ";
+            $this->cookieManager->setCookie($name, $value);
         }
-        curl_setopt($this->handler, CURLOPT_COOKIE, $content);
+        $cookie = $this->cookieManager->getRequestCookieString($this->request->getUri());
+        curl_setopt($this->handler, CURLOPT_COOKIE, $cookie);
     }
     
     /**

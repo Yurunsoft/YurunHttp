@@ -127,4 +127,29 @@ class HttpRequestTest extends BaseTest
         });
     }
 
+    /**
+     * Cookie Manager
+     *
+     * @return void
+     */
+    public function testCookieManager()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            
+            $http->get($this->host . '?a=setCookie');
+
+            sleep(1);
+
+            $response = $http->get($this->host . '?a=info');
+            $data = $response->json(true);
+
+            $compareCookie = [
+                'a' =>  '1',
+                'c' =>  '3',
+            ];
+
+            $this->assertEquals($data['cookie'], $compareCookie);
+        });
+    }
 }
