@@ -152,4 +152,66 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals($data['cookie'], $compareCookie);
         });
     }
+
+    /**
+     * AutoRedirect
+     *
+     * @return void
+     */
+    public function testAutoRedirect()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            
+            foreach([301, 302] as $statusCode)
+            {
+                $time = time();
+                $response = $http->post($this->host . '?a=redirect' . $statusCode, 'time=' . $time);
+                $data = $response->json(true);
+                $this->assertEquals('GET', $data['server']['REQUEST_METHOD'], $statusCode . ' method error');
+            }
+            
+            foreach([307, 308] as $statusCode)
+            {
+                $time = time();
+                $response = $http->post($this->host . '?a=redirect' . $statusCode, 'time=' . $time);
+                $data = $response->json(true);
+                $this->assertEquals('POST', $data['server']['REQUEST_METHOD'], $statusCode . ' method error');
+            }
+
+        });
+    }
+
+    /**
+     * disableAutoRedirect
+     *
+     * @return void
+     */
+    public function testDisableAutoRedirect()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $http->followLocation = false;
+            
+            $response = $http->post($this->host . '?a=redirect301');
+            $this->assertEquals('/?a=info', $response->getHeaderLine('location'));
+        });
+    }
+
+    /**
+     * Limit MaxRedirects
+     *
+     * @return void
+     */
+    public function testLimitMaxRedirects()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $http->maxRedirects = 0;
+
+            $response = $http->post($this->host . '?a=redirect301');
+            $this->assertEquals('Maximum (0) redirects followed', $response->error());
+        });
+    }
+
 }

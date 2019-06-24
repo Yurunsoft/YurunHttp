@@ -76,8 +76,6 @@ function test()
                         ->withAttribute('downloadSpeed', 30000)
                         // 上传限速，单位：字节，仅Curl有效
                         ->withAttribute('uploadSpeed', 30000)
-                        // 临时文件目录，仅Curl有效，如果出现奇怪的问题，不妨手动设置下临时目录
-                        ->withAttribute('tempDir', null)
                         ;
     $response = YurunHttp::send($request);
     var_dump($response);

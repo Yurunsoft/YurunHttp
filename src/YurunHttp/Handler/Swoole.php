@@ -159,36 +159,42 @@ class Swoole implements IHandler
                     break;
                 }
             }
-            if($statusCode >= 300 && $statusCode < 400 && ++$count <= $this->request->getAttribute('maxRedirects', 10))
+            if($statusCode >= 300 && $statusCode < 400 && $this->request->getAttribute('followLocation', true))
             {
-                // 自己实现重定向
-                $location = $this->result->getHeaderLine('location');
-                $locationUri = new Uri($location);
-                if('' === $locationUri->getHost())
+                if(++$count <= ($maxRedirects = $this->request->getAttribute('maxRedirects', 10)))
                 {
-                    if(!isset($location[0]))
+                    // 自己实现重定向
+                    $location = $this->result->getHeaderLine('location');
+                    $locationUri = new Uri($location);
+                    if('' === $locationUri->getHost())
                     {
-                        return;
-                    }
-                    if('/' === $location[0])
-                    {
-                        $uri = $uri->withQuery('')->withPath($location);
+                        if(!isset($location[0]))
+                        {
+                            return;
+                        }
+                        if('/' === $location[0])
+                        {
+                            $uri = $uri->withQuery('')->withPath($location);
+                        }
+                        else
+                        {
+                            $uri = new Uri(dirname($uri) . '/' . $location);
+                        }
                     }
                     else
                     {
-                        $uri = new Uri(dirname($uri) . '/' . $location);
+                        $uri = $locationUri;
                     }
+                    $isLocation = true;
+                    continue;
                 }
                 else
                 {
-                    $uri = $locationUri;
+                    $this->result = $this->result->withErrno(-1)
+                                                 ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                 }
-                $isLocation = true;
             }
-            else
-            {
-                break;
-            }
+            break;
         }while(true);
     }
 

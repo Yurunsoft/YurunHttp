@@ -84,7 +84,6 @@ class Curl implements IHandler
         if(!$this->handler)
         {
             $this->handler = curl_init();
-            $tempDir = $this->request->getAttribute('tempDir');
             $options = [
                 // 返回内容
                 CURLOPT_RETURNTRANSFER  => true,
@@ -92,17 +91,15 @@ class Curl implements IHandler
                 CURLOPT_HEADER          => true,
                 // 保存cookie
                 CURLOPT_COOKIEJAR       => 'php://memory',
-                // 自动重定向
-                CURLOPT_FOLLOWLOCATION  => $this->request->getAttribute('customLocation', false) ? false : $this->request->getAttribute('followLocation', true),
-                // 最大重定向次数
-                CURLOPT_MAXREDIRS       => $this->request->getAttribute('maxRedirects', 10),
             ];
         }
+        // 自动重定向
+        $options[CURLOPT_FOLLOWLOCATION] = $this->request->getAttribute('customLocation', false) ? false : $this->request->getAttribute('followLocation', true);
+        $options[CURLOPT_MAXREDIRS] = $this->request->getAttribute('maxRedirects', 10);
+
+        // 发送内容
         $files = $this->request->getUploadedFiles();
         $body = (string)$this->request->getBody();
-        // 请求方法
-        $options[CURLOPT_CUSTOMREQUEST] = $this->request->getMethod();
-        // 发送内容
         $options[CURLOPT_POSTFIELDS] = $body;
         
         if(isset($files[0]))
@@ -133,8 +130,19 @@ class Curl implements IHandler
             $this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
         }
         $url = (string)$this->request->getUri();
+        $isLocation = false;
+        $statusCode = 0;
         do{
             curl_setopt($this->handler, CURLOPT_URL, $url);
+            // 请求方法
+            if($isLocation && in_array($statusCode, [301, 302, 303]))
+            {
+                $options[CURLOPT_CUSTOMREQUEST] = 'GET';
+            }
+            else
+            {
+                $options[CURLOPT_CUSTOMREQUEST] = $this->request->getMethod();
+            }
             $retry = $this->request->getAttribute('retry', 0);
             for($i = 0; $i <= $retry; ++$i)
             {
@@ -149,6 +157,7 @@ class Curl implements IHandler
             }
             if($this->request->getAttribute('customLocation', false) && (301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
             {
+                $isLocation = true;
                 // 自己实现重定向
                 $url = $this->result->getHeaderLine('location');
             }

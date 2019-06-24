@@ -1,6 +1,5 @@
 <?php
 $action = isset($_GET['a']) ? $_GET['a'] : null;
-// sleep(1);
 switch($action)
 {
     case 'info':
@@ -21,6 +20,25 @@ switch($action)
         setcookie('e', '5', 0, '/', 'localhost');
         setcookie('f', '6', 0, '/', '', true);
         break;
+    case 'redirect301':
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location:/?a=info');
+        exit;
+        break;
+    case 'redirect302':
+        header('HTTP/1.1 302 Found');
+        header('Location:/?a=info');
+        exit;
+        break;
+    case 'redirect307':
+        header('HTTP/1.1 307 Temporary Redirect');
+        header('Location:/?a=info');
+        exit;
+        break;
+    case 'redirect308':
+        header('HTTP/1.1 308 Permanent Redirect');
+        header('Location:/?a=info');
+        exit;
     default:
         // 默认
         echo 'YurunHttp';
