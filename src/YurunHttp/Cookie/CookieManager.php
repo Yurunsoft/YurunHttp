@@ -128,14 +128,11 @@ class CookieManager
      */
     public function getRequestCookies($uri)
     {
-        if(version_compare(SWOOLE_VERSION, '4.3.5', '<='))
+        $result = [];
+        if([] !== $result)
         {
             // Fix bug: https://github.com/swoole/swoole-src/pull/2644
             $result = json_decode('[]', true);
-        }
-        else
-        {
-            $result = [];
         }
         $uriDomain = Uri::getDomain($uri);
         $uriPath = $uri->getPath();
