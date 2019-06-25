@@ -1,22 +1,3 @@
 #!/usr/bin/env php
 <?php
-if(function_exists('\go'))
-{
-    $exit = 0;
-    go(function() use(&$exit){
-        go(function () use(&$exit){
-            global $argc, $argv;
-            try {
-                require dirname(__DIR__) . '/vendor/bin/phpunit';
-            } catch(\Swoole\ExitException $ex) {
-                $exit = $ex->getStatus();
-            }
-        });
-    });
-    Swoole\Event::wait();
-    exit($exit);
-}
-else
-{
-    require dirname(__DIR__) . '/vendor/bin/phpunit';
-}
+require dirname(__DIR__) . '/vendor/bin/phpunit';

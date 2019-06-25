@@ -2,6 +2,7 @@
 namespace Yurun\Util\YurunHttp\Test\Traits;
 
 use Yurun\Util\YurunHttp;
+use Swoole\Coroutine;
 
 trait TSwooleHandlerTest
 {
@@ -11,7 +12,30 @@ trait TSwooleHandlerTest
         {
             $this->markTestSkipped('Does not installed ext/swoole');
         }
-        YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Swoole');
-        $callable();
+        $throwable = null;
+        $end = false;
+        go(function() use($callable, &$throwable, &$end){
+            try {
+                YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Swoole');
+                $callable();
+            } catch(\Throwable $th) {
+                $throwable = $th;
+            } finally {
+                $end = true;
+            }
+        });
+        while(!$end)
+        {
+            swoole_event_dispatch();
+        }
+        if($throwable)
+        {
+            throw $throwable;
+        }
+        else
+        {
+            $this->assertEquals(1, 1);
+        }
     }
+
 }
