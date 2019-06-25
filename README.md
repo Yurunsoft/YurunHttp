@@ -16,7 +16,7 @@ YurunHttp 是开源的PHP HTTP类库，支持链式操作，简单易用。
 
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
-同时欢迎各位加入技术支持群74401592[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://shang.qq.com/wpa/qunwpa?idkey=e2e6b49e9a648aae5285b3aba155d59107bb66fde02e229e078bd7359cac8ac3)，如有问题可以及时解答和修复。
+同时欢迎各位加入技术支持群17916227[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://jq.qq.com/?_wv=1027&k=5wXf4Zq)，如有问题可以及时解答和修复。
 
 个人精力有限，欢迎各位来提交PR（[码云](https://gitee.com/yurunsoft/YurunHttp)/[Github](https://github.com/Yurunsoft/YurunHttp)），一起完善YurunHttp，让它能够更加好用。
 
@@ -26,7 +26,7 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "~3.0"
+        "yurunsoft/yurun-http": "~3.1"
     }
 }
 ```
