@@ -7,7 +7,7 @@
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "~2.0",
-        "phpunit/phpunit": "~4"
+        "phpunit/phpunit": ">=4 <8"
     },
     "type": "library",
     "license": "MIT",
