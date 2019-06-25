@@ -8,7 +8,7 @@
 
 YurunHttp 是开源的PHP HTTP类库，支持链式操作，简单易用。
 
-支持所有常见的GET、POST、PUT、DELETE、UPDATE等请求方式，支持上传下载、设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
+支持所有常见的GET、POST、PUT、DELETE、UPDATE等请求方式，支持浏览器级别 Cookies 管理、上传下载、设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
 
 3.0 版完美支持Curl、Swoole 协程。
 
@@ -90,7 +90,7 @@ function test()
 }
 ```
 
-具体详见`test`目录中的示例代码
+具体详见`examples`目录中的示例代码
 
 ## 捐赠
 
