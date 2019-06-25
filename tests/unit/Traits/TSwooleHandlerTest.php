@@ -20,9 +20,8 @@ trait TSwooleHandlerTest
                 $callable();
             } catch(\Throwable $th) {
                 $throwable = $th;
-            } finally {
-                $end = true;
             }
+            $end = true;
         });
         while(!$end)
         {
