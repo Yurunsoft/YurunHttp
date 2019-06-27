@@ -48,7 +48,14 @@ class CookieItem
      */
     public $secure = false;
 
-    public function __construct($name, $value, $expires = 0, $path = '/', $domain = '', $secure = false)
+    /**
+     * 是否禁止 js 操作该 Cookie
+     *
+     * @var boolean
+     */
+    public $httpOnly = false;
+
+    public function __construct($name, $value, $expires = 0, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
         $this->name = $name;
         $this->value = $value;
@@ -56,6 +63,7 @@ class CookieItem
         $this->path = $path;
         $this->domain = $domain;
         $this->secure = $secure;
+        $this->httpOnly = $httpOnly;
     }
 
     /**
@@ -108,10 +116,10 @@ class CookieItem
             {
                 if('' !== $boolItemName)
                 {
-                    $data[$boolItemName] = true;
+                    $data[strtolower($boolItemName)] = true;
                 }
             }
-            $object = new static($name, $value, $expires, isset($data['path']) ? $data['path'] : '/', isset($data['domain']) ? $data['domain'] : '', isset($data['secure']) ? $data['secure'] : false);
+            $object = new static($name, $value, $expires, isset($data['path']) ? $data['path'] : '/', isset($data['domain']) ? $data['domain'] : '', isset($data['secure']) ? $data['secure'] : false, isset($data['httponly']) ? $data['httponly'] : false);
             return $object;
         }
         else

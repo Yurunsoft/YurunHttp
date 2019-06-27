@@ -94,11 +94,12 @@ class CookieManager
      * @param string $path
      * @param string $domain
      * @param boolean $secure
+     * @param boolean $httpOnly
      * @return \Yurun\Util\YurunHttp\Cookie\CookieItem
      */
-    public function setCookie($name, $value, $expires = 0, $path = '/', $domain = '', $secure = false)
+    public function setCookie($name, $value, $expires = 0, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
-        $item = new CookieItem($name, $value, $expires, $path, $domain, $secure);
+        $item = new CookieItem($name, $value, $expires, $path, $domain, $secure, $httpOnly);
         if(($id = $this->findCookie($item)) > 0)
         {
             $this->updateCookie($id, $item);
@@ -173,6 +174,24 @@ class CookieManager
             $content .= "{$name}={$value}; ";
         }
         return $content;
+    }
+
+    /**
+     * 获取 CookieItem
+     *
+     * @param string $name
+     * @param string $domain
+     * @param string $path
+     * @return \Yurun\Util\YurunHttp\Cookie\CookieItem
+     */
+    public function getCookieItem($name, $domain = '', $path = '/')
+    {
+        if(isset($this->relationMap[$domain][$path][$name]))
+        {
+            $id = $this->relationMap[$domain][$path][$name];
+            return $this->cookieList[$id];
+        }
+        return null;
     }
 
     /**

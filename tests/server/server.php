@@ -19,6 +19,7 @@ switch($action)
         setcookie('d', '4', 0, '/a');
         setcookie('e', '5', 0, '/', 'localhost');
         setcookie('f', '6', 0, '/', '', true);
+        setcookie('g', '7', 0, '/', '', true, true);
         break;
     case 'redirect301':
         header('HTTP/1.1 301 Moved Permanently');

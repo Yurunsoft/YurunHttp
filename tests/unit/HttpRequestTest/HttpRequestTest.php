@@ -150,6 +150,16 @@ class HttpRequestTest extends BaseTest
             ];
 
             $this->assertEquals($data['cookie'], $compareCookie);
+
+            $cookieManager = $http->getHandler()->getCookieManager();
+
+            $cookieItem = $cookieManager->getCookieItem('a');
+            $this->assertNotNull($cookieItem);
+            $this->assertEquals(false, $cookieItem->httpOnly);
+
+            $cookieItem = $cookieManager->getCookieItem('g');
+            $this->assertNotNull($cookieItem);
+            $this->assertEquals(true, $cookieItem->httpOnly);
         });
     }
 
