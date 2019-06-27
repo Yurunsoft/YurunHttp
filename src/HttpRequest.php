@@ -1,9 +1,6 @@
 <?php
 namespace Yurun\Util;
 
-use Yurun\Util\YurunHttp\Http\Psr7\Uri;
-use Yurun\Util\YurunHttp\Http\Response;
-use Yurun\Util\YurunHttp\Stream\MemoryStream;
 use Yurun\Util\YurunHttp\Http\Request;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 
@@ -588,7 +585,7 @@ class HttpRequest
      * @param string $path 一个包含 PEM 格式证书的文件名
      * @param string $type 证书类型，支持的格式有”PEM”(默认值),“DER”和”ENG”
      * @param string $password 使用证书需要的密码
-     * @return HttpRequest
+     * @return static
      */
     public function sslCert($path, $type = null, $password = null)
     {
@@ -609,7 +606,7 @@ class HttpRequest
      * @param string $path 包含 SSL 私钥的文件名
      * @param string $type certType规定的私钥的加密类型，支持的密钥类型为”PEM”(默认值)、”DER”和”ENG”
      * @param string $password SSL私钥的密码
-     * @return HttpRequest
+     * @return static
      */
     public function sslKey($path, $type = null, $password = null)
     {
@@ -664,7 +661,7 @@ class HttpRequest
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      * @param array $method 请求方法，GET、POST等
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function send($url = null, $requestBody = null, $method = 'GET')
     {
@@ -703,7 +700,7 @@ class HttpRequest
      * GET请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response 
      */
     public function get($url = null, $requestBody = null)
     {
@@ -726,7 +723,7 @@ class HttpRequest
      * POST请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function post($url = null, $requestBody = null)
     {
@@ -737,7 +734,7 @@ class HttpRequest
      * HEAD请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function head($url = null, $requestBody = null)
     {
@@ -748,7 +745,7 @@ class HttpRequest
      * PUT请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function put($url = null, $requestBody = null)
     {
@@ -759,7 +756,7 @@ class HttpRequest
      * PATCH请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function patch($url = null, $requestBody = null)
     {
@@ -770,7 +767,7 @@ class HttpRequest
      * DELETE请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @return Response 
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function delete($url = null, $requestBody = null)
     {
@@ -783,7 +780,7 @@ class HttpRequest
      * @param string $url 下载文件地址
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      * @param string $method 请求方法，GET、POST等，一般用GET
-     * @return Response
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function download($fileName, $url = null, $requestBody = null, $method = 'GET')
     {

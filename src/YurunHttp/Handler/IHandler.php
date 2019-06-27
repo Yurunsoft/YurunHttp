@@ -1,8 +1,6 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
-use Yurun\Util\YurunHttp\Http\Psr7\Response;
-
 interface IHandler
 {
     /**

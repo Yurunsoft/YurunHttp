@@ -1,7 +1,6 @@
 <?php
 namespace Yurun\Util\YurunHttp\Cookie;
 
-use Psr\Http\Message\UriInterface;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
 class CookieManager

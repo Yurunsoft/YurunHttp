@@ -1,11 +1,9 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
-use Swoole\Coroutine;
 use Swoole\Coroutine\Http\Client;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
-use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
