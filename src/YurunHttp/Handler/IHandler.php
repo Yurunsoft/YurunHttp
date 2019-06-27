@@ -17,4 +17,12 @@ interface IHandler
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public function recv();
+
+    /**
+     * Get cookie 管理器
+     *
+     * @return  \Yurun\Util\YurunHttp\Cookie\CookieManager
+     */ 
+    public function getCookieManager();
+
 }

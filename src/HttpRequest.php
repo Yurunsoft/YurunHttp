@@ -240,6 +240,16 @@ class HttpRequest
     }
 
     /**
+     * 获取处理器
+     *
+     * @return \Yurun\Util\YurunHttp\Handler\IHandler
+     */
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
+    /**
      * 设置请求地址
      * @param string $url 请求地址
      * @return static
