@@ -1,21 +1,56 @@
+sudo: required
 language: php
-dist: trusty
 
 php:
   - '5.4'
+    env: PHPUNIT_VERSION="4"
   - '5.5'
+    env: PHPUNIT_VERSION="4"
   - '5.6'
+    env: PHPUNIT_VERSION="5"
   - '7.0'
+    env: SWOOLE_VERSION="v4.3.5"
   - '7.1'
+    env: SWOOLE_VERSION="v4.3.5"
   - '7.2'
+    env: SWOOLE_VERSION="v4.3.5"
   - '7.3'
+    env: SWOOLE_VERSION="v4.3.5"
+  - '7.1'
+    env: SWOOLE_VERSION="v4.4.0"
+  - '7.2'
+    env: SWOOLE_VERSION="v4.4.0"
+  - '7.3'
+    env: SWOOLE_VERSION="v4.4.0"
+  - '7.1'
+    env: SWOOLE_VERSION="master"
+  - '7.2'
+    env: SWOOLE_VERSION="master"
+  - '7.3'
+    env: SWOOLE_VERSION="master"
+  - php: '7.4snapshot'
+    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
+  - php: 'nightly'
+    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
+  allow_failures:
+  - env: SWOOLE_VERSION="master"
+  - php: nightly
+  - php: 7.4snapshot
 
 install:
-  - php ./travis/install.php -nproc $(nproc) -version-name $(phpenv version-name)
+  - if [[ $SWOOLE_VERSION ]]; then
+      wget https://github.com/swoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz -O swoole.tar.gz && mkdir -p swoole && tar -xf swoole.tar.gz -C swoole --strip-components=1 && rm swoole.tar.gz && cd swoole && phpize && ./configure && make -j && make install && cd -;
+      echo "extension = swoole.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+    fi
 
 before_script:
-  - phpenv config-rm xdebug.ini
+  - if [[ $DISABLE_XDEBUG != false ]]; then
+      phpenv config-rm xdebug.ini;
+    fi
+  - if [[ $PHPUNIT_VERSION ]]; then
+      curl -sSfL -o ~/.phpenv/versions/$(phpenv version-name)/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar;
+    fi
   - composer update
 
 script:
-  - composer test
+  - composer install-test-no-dev
