@@ -17,11 +17,11 @@ php:
   - '7.3'
     env: SWOOLE_VERSION="v4.3.5"
   - '7.1'
-    env: SWOOLE_VERSION="v4.4.0"
+    env: SWOOLE_VERSION="v4.4.1"
   - '7.2'
-    env: SWOOLE_VERSION="v4.4.0"
+    env: SWOOLE_VERSION="v4.4.1"
   - '7.3'
-    env: SWOOLE_VERSION="v4.4.0"
+    env: SWOOLE_VERSION="v4.4.1"
   - '7.1'
     env: SWOOLE_VERSION="master"
   - '7.2'
@@ -50,7 +50,6 @@ before_script:
   - if [[ $PHPUNIT_VERSION ]]; then
       curl -sSfL -o ~/.phpenv/versions/$(phpenv version-name)/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar;
     fi
-  - composer update
 
 script:
   - composer install-test-no-dev
