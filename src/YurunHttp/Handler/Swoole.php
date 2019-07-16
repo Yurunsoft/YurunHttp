@@ -4,12 +4,13 @@ namespace Yurun\Util\YurunHttp\Handler;
 use Swoole\Coroutine\Http\Client;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
+use Yurun\Util\YurunHttp\Traits\THandler;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
 class Swoole implements IHandler
 {
-    use TCookieManager;
+    use TCookieManager, THandler;
 
     /**
      * Swoole 协程客户端对象
@@ -162,27 +163,7 @@ class Swoole implements IHandler
                 if(++$count <= ($maxRedirects = $this->request->getAttribute('maxRedirects', 10)))
                 {
                     // 自己实现重定向
-                    $location = $this->result->getHeaderLine('location');
-                    $locationUri = new Uri($location);
-                    if('' === $locationUri->getHost())
-                    {
-                        if(!isset($location[0]))
-                        {
-                            return;
-                        }
-                        if('/' === $location[0])
-                        {
-                            $uri = $uri->withQuery('')->withPath($location);
-                        }
-                        else
-                        {
-                            $uri = new Uri(dirname($uri) . '/' . $location);
-                        }
-                    }
-                    else
-                    {
-                        $uri = $locationUri;
-                    }
+                    $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $uri);
                     $isLocation = true;
                     continue;
                 }
