@@ -3,40 +3,40 @@ language: php
 
 matrix:
   include:
-    - php: '5.4'
-      env: PHPUNIT_VERSION="4"
-    - php: '5.5'
-      env: PHPUNIT_VERSION="4"
-    - php: '5.6'
-      env: PHPUNIT_VERSION="5"
-    - php: '7.0'
-      env: SWOOLE_VERSION="v4.3.5"
-    - php: '7.1'
-      env: SWOOLE_VERSION="v4.3.5"
-    - php: '7.2'
-      env: SWOOLE_VERSION="v4.3.5"
-    - php: '7.3'
-      env: SWOOLE_VERSION="v4.3.5"
-    - php: '7.1'
-      env: SWOOLE_VERSION="v4.4.1"
-    - php: '7.2'
-      env: SWOOLE_VERSION="v4.4.1"
-    - php: '7.3'
-      env: SWOOLE_VERSION="v4.4.1"
-    - php: '7.1'
-      env: SWOOLE_VERSION="master"
-    - php: '7.2'
-      env: SWOOLE_VERSION="master"
-    - php: '7.3'
-      env: SWOOLE_VERSION="master"
-    - php: '7.4snapshot'
-      env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
-    - php: 'nightly'
-      env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
-    allow_failures:
-    - env: SWOOLE_VERSION="master"
-    - php: nightly
-    - php: 7.4snapshot
+  - php: '5.4'
+    env: PHPUNIT_VERSION="4"
+  - php: '5.5'
+    env: PHPUNIT_VERSION="4"
+  - php: '5.6'
+    env: PHPUNIT_VERSION="5"
+  - php: '7.0'
+    env: SWOOLE_VERSION="v4.3.5"
+  - php: '7.1'
+    env: SWOOLE_VERSION="v4.3.5"
+  - php: '7.2'
+    env: SWOOLE_VERSION="v4.3.5"
+  - php: '7.3'
+    env: SWOOLE_VERSION="v4.3.5"
+  - php: '7.1'
+    env: SWOOLE_VERSION="v4.4.1"
+  - php: '7.2'
+    env: SWOOLE_VERSION="v4.4.1"
+  - php: '7.3'
+    env: SWOOLE_VERSION="v4.4.1"
+  - php: '7.1'
+    env: SWOOLE_VERSION="master"
+  - php: '7.2'
+    env: SWOOLE_VERSION="master"
+  - php: '7.3'
+    env: SWOOLE_VERSION="master"
+  - php: '7.4snapshot'
+    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
+  - php: 'nightly'
+    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
+  allow_failures:
+  - env: SWOOLE_VERSION="master"
+  - php: nightly
+  - php: 7.4snapshot
 
 install:
   - if [[ $SWOOLE_VERSION ]]; then
