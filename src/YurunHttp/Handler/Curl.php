@@ -1,14 +1,16 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
-use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Traits\THandler;
 
 class Curl implements IHandler
 {
-    use TCookieManager;
+    use TCookieManager, THandler;
 
     /**
      * 请求结果
@@ -94,13 +96,11 @@ class Curl implements IHandler
             ];
         }
         // 自动重定向
-        $options[CURLOPT_FOLLOWLOCATION] = $this->request->getAttribute('customLocation', false) ? false : $this->request->getAttribute('followLocation', true);
         $options[CURLOPT_MAXREDIRS] = $this->request->getAttribute('maxRedirects', 10);
 
         // 发送内容
         $files = $this->request->getUploadedFiles();
         $body = (string)$this->request->getBody();
-        $options[CURLOPT_POSTFIELDS] = $body;
         
         if(isset($files[0]))
         {
@@ -129,20 +129,35 @@ class Curl implements IHandler
         {
             $this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
         }
-        $url = (string)$this->request->getUri();
+        $uri = $this->request->getUri();
         $isLocation = false;
         $statusCode = 0;
+        $lastMethod = null;
+        $copyHandler = curl_copy_handle($this->handler);
         do{
-            curl_setopt($this->handler, CURLOPT_URL, $url);
+            $requestOptions = [
+                CURLOPT_URL     =>  (string)$uri,
+            ];
             // 请求方法
             if($isLocation && in_array($statusCode, [301, 302, 303]))
             {
-                $options[CURLOPT_CUSTOMREQUEST] = 'GET';
+                $method = 'GET';
             }
             else
             {
-                $options[CURLOPT_CUSTOMREQUEST] = $this->request->getMethod();
+                $method = $this->request->getMethod();
             }
+            if('GET' !== $method)
+            {
+                $requestOptions[CURLOPT_POSTFIELDS] = $body;
+            }
+            $requestOptions[CURLOPT_CUSTOMREQUEST] = $method;
+            if($lastMethod && 'GET' !== $lastMethod && 'GET' === $method)
+            {
+                $this->handler = curl_copy_handle($copyHandler);
+            }
+            $lastMethod = $requestOptions[CURLOPT_CUSTOMREQUEST];
+            curl_setopt_array($this->handler, $requestOptions);
             $retry = $this->request->getAttribute('retry', 0);
             for($i = 0; $i <= $retry; ++$i)
             {
@@ -155,16 +170,21 @@ class Curl implements IHandler
                     break;
                 }
             }
-            if($this->request->getAttribute('customLocation', false) && (301 === $statusCode || 302 === $statusCode) && ++$count <= $this->request->getAttribute('maxRedirects', 10))
+            if($this->request->getAttribute('followLocation', true) && ($statusCode >= 300 && $statusCode < 400))
             {
-                $isLocation = true;
-                // 自己实现重定向
-                $url = $this->result->getHeaderLine('location');
+                if(++$count <= ($maxRedirects = $this->request->getAttribute('maxRedirects', 10)))
+                {
+                    $isLocation = true;
+                    $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $uri);
+                    continue;
+                }
+                else
+                {
+                    $this->result = $this->result->withErrno(-1)
+                                                 ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                }
             }
-            else
-            {
-                break;
-            }
+            break;
         }while(true);
         // 关闭保存至文件的句柄
         if(null !== $this->saveFileFp)
