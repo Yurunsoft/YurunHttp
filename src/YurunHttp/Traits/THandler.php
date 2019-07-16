@@ -27,7 +27,7 @@ trait THandler
             }
             else
             {
-                $uri = new Uri(dirname($uri) . '/' . $location);
+                $uri = new Uri(dirname($currentUri) . '/' . $location);
             }
         }
         else
