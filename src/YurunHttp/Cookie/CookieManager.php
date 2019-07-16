@@ -128,7 +128,7 @@ class CookieManager
      */
     public function getRequestCookies($uri)
     {
-        if(SWOOLE_VERSION < 4.4)
+        if(defined('SWOOLE_VERSION') && SWOOLE_VERSION < 4.4)
         {
             // Fix bug: https://github.com/swoole/swoole-src/pull/2644
             $result = json_decode('[]', true);
