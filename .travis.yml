@@ -60,6 +60,7 @@ before_script:
   - ls -al
   - pwd
   - php -v
+  - php -m
   - php --ri curl;
   - php --ri openssl;
 
