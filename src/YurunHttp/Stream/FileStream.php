@@ -303,7 +303,12 @@ class FileStream implements StreamInterface
         }
     }
 
-    public function getUri(): Uri
+    /**
+     * Get Uri
+     *
+     * @return \Yurun\Util\YurunHttp\Http\Psr7\Uri
+     */
+    public function getUri()
     {
         return $this->uri;
     }
