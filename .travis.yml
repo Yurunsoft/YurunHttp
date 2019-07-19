@@ -39,6 +39,15 @@ matrix:
   - php: nightly
   - php: 7.4snapshot
 
+env:
+  global:
+    - HTTP_SERVER_HOST=http://127.0.0.1:8898/
+
+addons:
+  apt:
+    packages:
+    - nginx
+
 install:
   - if [[ $SWOOLE_VERSION ]]; then
       wget https://github.com/swoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz -O swoole.tar.gz && mkdir -p swoole && tar -xf swoole.tar.gz -C swoole --strip-components=1 && rm swoole.tar.gz && cd swoole && phpize && ./configure --enable-openssl && make -j && make install && cd -;
@@ -53,6 +62,9 @@ before_script:
   - if [[ $PHPUNIT_VERSION ]]; then
       curl -sSfL -o ~/.phpenv/versions/$(phpenv version-name)/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar;
     fi
+  - sudo cp $TRAVIS_BUILD_DIR/travis-ci/default.vhost /etc/nginx/sites-available/default.vhost
+  - sudo ln -s /etc/nginx/sites-available/default.vhost /etc/nginx/sites-enabled/default.vhost
+  - sudo service nginx reload
   - date
   - env
   - uname -a

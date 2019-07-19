@@ -11,11 +11,15 @@ abstract class BaseTest extends TestCase
      *
      * @var string
      */
-    protected $host = 'http://127.0.0.1:8899/';
+    protected $host;
+
+    public function __construct()
+    {
+        $this->host = testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8899/');
+    }
 
     protected function call($callable)
     {
-        usleep(100000); // test: 等待 100 ms
         YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Curl');
         $callable();
     }
