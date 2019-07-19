@@ -83,7 +83,7 @@ class HttpRequest
      * 总超时时间，单位：毫秒
      * @var int
      */
-    public $timeout = 0;
+    public $timeout = 30000;
 
     /**
      * 下载限速，为0则不限制，单位：字节
