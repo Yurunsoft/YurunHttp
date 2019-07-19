@@ -210,7 +210,7 @@ class HttpRequest
         $this->isVerifyCA = false;
         $this->caCert = null;
         $this->connectTimeout = 30000;
-        $this->timeout = 0;
+        $this->timeout = 30000;
         $this->downloadSpeed = null;
         $this->uploadSpeed = null;
         $this->username = null;
