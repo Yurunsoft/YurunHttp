@@ -15,6 +15,7 @@ abstract class BaseTest extends TestCase
 
     protected function call($callable)
     {
+        usleep(100000); // test: 等待 100 ms
         YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Curl');
         $callable();
     }
