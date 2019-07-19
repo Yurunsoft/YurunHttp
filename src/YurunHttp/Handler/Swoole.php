@@ -81,6 +81,10 @@ class Swoole implements IHandler
                 if(!$this->handler || $this->handler->host != $host || $this->handler->port != $port || $ssl !== $lastSSL)
                 {
                     $lastSSL = $ssl;
+                    if($this->handler)
+                    {
+                        $this->handler->close();
+                    }
                     $this->handler = new Client($host, $port, $ssl);
                     $this->handler->setDefer();
                 }
