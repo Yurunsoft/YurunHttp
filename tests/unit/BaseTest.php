@@ -11,7 +11,7 @@ abstract class BaseTest extends TestCase
      *
      * @var string
      */
-    protected $host = 'http://127.0.0.1:8899/';
+    protected $host = 'https://test.yurunsoft.com/';
 
     protected function call($callable)
     {

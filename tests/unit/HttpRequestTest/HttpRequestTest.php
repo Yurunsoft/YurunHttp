@@ -114,28 +114,28 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    /**
-     * $_COOKIE
-     *
-     * @return void
-     */
-    public function testCookieParams()
-    {
-        $this->call(function(){
-            $http = new HttpRequest;
-            $time = time();
-            $hash = uniqid();
-            $response = $http->cookie('hash', $hash)
-                                ->cookies([
-                                    'time'  =>  $time,
-                                ])
-                                ->get($this->host . '?a=info');
-            $this->assertResponse($response);
-            $data = $response->json(true);
-            $this->assertEquals($time, isset($data['cookie']['time']) ? $data['cookie']['time'] : null);
-            $this->assertEquals($hash, isset($data['cookie']['hash']) ? $data['cookie']['hash'] : null);
-        });
-    }
+    // /**
+    //  * $_COOKIE
+    //  *
+    //  * @return void
+    //  */
+    // public function testCookieParams()
+    // {
+    //     $this->call(function(){
+    //         $http = new HttpRequest;
+    //         $time = time();
+    //         $hash = uniqid();
+    //         $response = $http->cookie('hash', $hash)
+    //                             ->cookies([
+    //                                 'time'  =>  $time,
+    //                             ])
+    //                             ->get($this->host . '?a=info');
+    //         $this->assertResponse($response);
+    //         $data = $response->json(true);
+    //         $this->assertEquals($time, isset($data['cookie']['time']) ? $data['cookie']['time'] : null);
+    //         $this->assertEquals($hash, isset($data['cookie']['hash']) ? $data['cookie']['hash'] : null);
+    //     });
+    // }
 
     /**
      * Request Header
@@ -175,42 +175,42 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    /**
-     * Cookie Manager
-     *
-     * @return void
-     */
-    public function testCookieManager()
-    {
-        $this->call(function(){
-            $http = new HttpRequest;
+    // /**
+    //  * Cookie Manager
+    //  *
+    //  * @return void
+    //  */
+    // public function testCookieManager()
+    // {
+    //     $this->call(function(){
+    //         $http = new HttpRequest;
             
-            $http->get($this->host . '?a=setCookie');
+    //         $http->get($this->host . '?a=setCookie');
 
-            sleep(1);
+    //         sleep(1);
 
-            $response = $http->get($this->host . '?a=info');
-            $this->assertResponse($response);
-            $data = $response->json(true);
+    //         $response = $http->get($this->host . '?a=info');
+    //         $this->assertResponse($response);
+    //         $data = $response->json(true);
 
-            $compareCookie = [
-                'a' =>  '1',
-                'c' =>  '3',
-            ];
+    //         $compareCookie = [
+    //             'a' =>  '1',
+    //             'c' =>  '3',
+    //         ];
 
-            $this->assertEquals($data['cookie'], $compareCookie);
+    //         $this->assertEquals($data['cookie'], $compareCookie);
 
-            $cookieManager = $http->getHandler()->getCookieManager();
+    //         $cookieManager = $http->getHandler()->getCookieManager();
 
-            $cookieItem = $cookieManager->getCookieItem('a');
-            $this->assertNotNull($cookieItem);
-            $this->assertEquals(false, $cookieItem->httpOnly);
+    //         $cookieItem = $cookieManager->getCookieItem('a');
+    //         $this->assertNotNull($cookieItem);
+    //         $this->assertEquals(false, $cookieItem->httpOnly);
 
-            $cookieItem = $cookieManager->getCookieItem('g');
-            $this->assertNotNull($cookieItem);
-            $this->assertEquals(true, $cookieItem->httpOnly);
-        });
-    }
+    //         $cookieItem = $cookieManager->getCookieItem('g');
+    //         $this->assertNotNull($cookieItem);
+    //         $this->assertEquals(true, $cookieItem->httpOnly);
+    //     });
+    // }
 
     /**
      * AutoRedirect
