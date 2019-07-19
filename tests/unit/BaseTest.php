@@ -19,4 +19,15 @@ abstract class BaseTest extends TestCase
         $callable();
     }
 
+    /**
+     * 断言响应
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Response $response
+     * @return void
+     */
+    protected function assertResponse($response)
+    {
+        $this->assertEquals(0, $response->errno(), $response->error());
+    }
+
 }

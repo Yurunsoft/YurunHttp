@@ -18,6 +18,7 @@ class HttpRequestTest extends BaseTest
         $this->call(function(){
             $http = new HttpRequest;
             $response = $http->get($this->host);
+            $this->assertResponse($response);
             $this->assertEquals($response->body(), 'YurunHttp');
         });
     }
@@ -32,6 +33,7 @@ class HttpRequestTest extends BaseTest
         $this->call(function(){
             $http = new HttpRequest;
             $response = $http->get($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertArrayHasKey('get', $data);
         });
@@ -48,6 +50,7 @@ class HttpRequestTest extends BaseTest
             $http = new HttpRequest;
             $time = time();
             $response = $http->get($this->host . '?a=info&time=' . $time);
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
             $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
@@ -68,6 +71,7 @@ class HttpRequestTest extends BaseTest
                 'a'     =>  'info',
                 'time'  =>  $time,
             ]);
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
             $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
@@ -87,6 +91,7 @@ class HttpRequestTest extends BaseTest
             $response = $http->post($this->host . '?a=info', [
                 'time'  =>  $time,
             ]);
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals('POST', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
             $this->assertEquals($time, isset($data['post']['time']) ? $data['post']['time'] : null);
@@ -103,6 +108,7 @@ class HttpRequestTest extends BaseTest
         $this->call(function(){
             $http = new HttpRequest;
             $response = $http->put($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals('PUT', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
         });
@@ -124,6 +130,7 @@ class HttpRequestTest extends BaseTest
                                     'time'  =>  $time,
                                 ])
                                 ->get($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals($time, isset($data['cookie']['time']) ? $data['cookie']['time'] : null);
             $this->assertEquals($hash, isset($data['cookie']['hash']) ? $data['cookie']['hash'] : null);
@@ -146,6 +153,7 @@ class HttpRequestTest extends BaseTest
                                     'time'  =>  $time,
                                 ])
                                 ->get($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals($time, isset($data['server']['HTTP_TIME']) ? $data['server']['HTTP_TIME'] : null);
             $this->assertEquals($hash, isset($data['server']['HTTP_HASH']) ? $data['server']['HTTP_HASH'] : null);
@@ -162,6 +170,7 @@ class HttpRequestTest extends BaseTest
         $this->call(function(){
             $http = new HttpRequest;
             $response = $http->get($this->host . '?a=info');
+            $this->assertResponse($response);
             $this->assertEquals('one suo', $response->getHeaderLine('Yurun-Http'));
         });
     }
@@ -181,6 +190,7 @@ class HttpRequestTest extends BaseTest
             sleep(1);
 
             $response = $http->get($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
 
             $compareCookie = [
@@ -216,6 +226,7 @@ class HttpRequestTest extends BaseTest
             {
                 $time = time();
                 $response = $http->post($this->host . '?a=redirect' . $statusCode, 'time=' . $time);
+                $this->assertResponse($response);
                 $data = $response->json(true);
                 $this->assertEquals('GET', $data['server']['REQUEST_METHOD'], $statusCode . ' method error');
             }
@@ -224,6 +235,7 @@ class HttpRequestTest extends BaseTest
             {
                 $time = time();
                 $response = $http->post($this->host . '?a=redirect' . $statusCode, 'time=' . $time);
+                $this->assertResponse($response);
                 $data = $response->json(true);
                 $this->assertEquals('POST', $data['server']['REQUEST_METHOD'], $statusCode . ' method error');
             }
@@ -243,6 +255,7 @@ class HttpRequestTest extends BaseTest
             $http->followLocation = false;
             
             $response = $http->post($this->host . '?a=redirect301');
+            $this->assertResponse($response);
             $this->assertEquals('/?a=info', $response->getHeaderLine('location'));
         });
     }
@@ -277,6 +290,7 @@ class HttpRequestTest extends BaseTest
                 $file,
             ]);
             $response = $http->post($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
 
             var_dump($data['files']);
@@ -307,6 +321,7 @@ class HttpRequestTest extends BaseTest
                 $file2,
             ]);
             $response = $http->post($this->host . '?a=info');
+            $this->assertResponse($response);
             $data = $response->json(true);
 
             var_dump($data['files']);
