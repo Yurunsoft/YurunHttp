@@ -5,11 +5,17 @@ switch($action)
     case 'info':
         header('Content-Type: application/json');
         header('Yurun-Http: one suo');
+        $files = $_FILES;
+        foreach($files as &$file)
+        {
+            $file['hash'] = md5(file_get_contents($file['tmp_name']));
+        }
         echo json_encode([
             'get'       =>  $_GET,
             'post'      =>  $_POST,
             'cookie'    =>  $_COOKIE,
             'server'    =>  $_SERVER,
+            'files'     =>  $files,
         ]);
         break;
     case 'setCookie':

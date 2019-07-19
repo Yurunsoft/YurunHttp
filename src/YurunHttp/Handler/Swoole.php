@@ -96,12 +96,14 @@ class Swoole implements IHandler
                 // cookie
                 $this->parseCookies();
                 // body
+                $hasFile = false;
                 if(!$isLocation)
                 {
                     $files = $this->request->getUploadedFiles();
                     $body = (string)$this->request->getBody();
                     if(isset($files[0]))
                     {
+                        $hasFile = true;
                         foreach($files as $file)
                         {
                             $this->handler->addFile($file->getTempFileName(), basename($file->getClientFilename()), $file->getClientMediaType());
@@ -112,7 +114,7 @@ class Swoole implements IHandler
                 }
                 // headers
                 $this->request = $this->request->withAddedHeader('Host', Uri::getDomain($uri));
-                if(!$this->request->hasHeader('Content-Type'))
+                if(!$hasFile && !$this->request->hasHeader('Content-Type'))
                 {
                     $this->request = $this->request->withAddedHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
                 }
