@@ -62,7 +62,7 @@ before_script:
   - if [[ $PHPUNIT_VERSION ]]; then
       curl -sSfL -o ~/.phpenv/versions/$(phpenv version-name)/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar;
     fi
-  - sudo cp $TRAVIS_BUILD_DIR/travis-ci/default.vhost /etc/nginx/sites-available/default.vhost
+  - sudo cp $TRAVIS_BUILD_DIR/.travis/default.vhost /etc/nginx/sites-available/default.vhost
   - sudo ln -s /etc/nginx/sites-available/default.vhost /etc/nginx/sites-enabled/default.vhost
   - sudo service nginx reload
   - date
