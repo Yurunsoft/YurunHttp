@@ -278,6 +278,9 @@ class HttpRequestTest extends BaseTest
             ]);
             $response = $http->post($this->host . '?a=info');
             $data = $response->json(true);
+
+            var_dump($data['files']);
+
             $this->assertTrue(isset($data['files']['file']));
             $file = $data['files']['file'];
             $content = file_get_contents(__FILE__);
@@ -305,6 +308,8 @@ class HttpRequestTest extends BaseTest
             ]);
             $response = $http->post($this->host . '?a=info');
             $data = $response->json(true);
+
+            var_dump($data['files']);
 
             $this->assertTrue(isset($data['files']['file1']));
             $file1 = $data['files']['file1'];
