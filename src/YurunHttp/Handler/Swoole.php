@@ -311,6 +311,8 @@ class Swoole implements IHandler
         }
         // 超时
         $this->settings['timeout'] = $this->request->getAttribute('timeout', 30000) / 1000;
+        // 长连接
+        $this->settings['keep_alive'] = $this->request->getAttribute('keep_alive', true);
     }
 
     /**
