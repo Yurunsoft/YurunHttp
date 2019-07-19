@@ -117,10 +117,10 @@ class Swoole implements IHandler
                     $this->handler->setData($body);
                 }
                 // headers
-                $this->request = $this->request->withAddedHeader('Host', Uri::getDomain($uri));
+                $this->request = $this->request->withHeader('Host', Uri::getDomain($uri));
                 if(!$hasFile && !$this->request->hasHeader('Content-Type'))
                 {
-                    $this->request = $this->request->withAddedHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
+                    $this->request = $this->request->withHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
                 }
                 $headers = [];
                 foreach($this->request->getHeaders() as $name => $value)
@@ -311,7 +311,7 @@ class Swoole implements IHandler
         if(null != $username)
         {
             $auth = base64_encode($username . ':' . $this->request->getAttribute('password', ''));
-            $this->request = $this->request->withAddedHeader('Authorization', 'Basic ' . $auth);
+            $this->request = $this->request->withHeader('Authorization', 'Basic ' . $auth);
         }
         // 超时
         $this->settings['timeout'] = $this->request->getAttribute('timeout', 30000) / 1000;
