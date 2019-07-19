@@ -25,7 +25,7 @@ abstract class FormDataBuilder
         }
         foreach($files as $file)
         {
-            $result .= sprintf("--%s\r\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: application/octet-stream\r\n\r\n", $boundary, $file->getClientFilename(), basename($file->getClientFilename())) . $file->getStream()->getContents() . "\r\n";
+            $result .= sprintf("--%s\r\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: %s\r\n\r\n", $boundary, $file->getClientFilename(), basename($file->getClientFilename()), $file->getClientMediaType()) . $file->getStream()->getContents() . "\r\n";
         }
         $result .= sprintf("--%s--\r\n\r\n", $boundary);
         return $result;
