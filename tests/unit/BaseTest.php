@@ -13,8 +13,9 @@ abstract class BaseTest extends TestCase
      */
     protected $host;
 
-    public function __construct()
+    public function __construct($name = null, array $data = [], $dataName = '')
     {
+        parent::__construct($name, $data, $dataName);
         $this->host = testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8899/');
     }
 
