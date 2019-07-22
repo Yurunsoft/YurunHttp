@@ -1,6 +1,16 @@
 <?php
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+function testEnv($name, $default = null)
+{
+    $result = getenv($name);
+    if(false === $result)
+    {
+        return $default;
+    }
+    return $result;
+}
+
 // start server
 $cmd = __DIR__ . '/server/start-server.sh';
 echo 'Starting test server...', PHP_EOL;
