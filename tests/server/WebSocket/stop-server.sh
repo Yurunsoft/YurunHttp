@@ -10,7 +10,7 @@ if [ -f $pidFile ];then
         ret=$(ps --no-heading ${LINE} | wc -l)
         if [[ "$ret" = "1" ]]; then
             echo "PID: ${LINE}"
-            kill -9 ${LINE}
+            kill -15 ${LINE}
         fi
         break
     done
