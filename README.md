@@ -10,15 +10,13 @@ YurunHttp 是开源的PHP HTTP类库，支持链式操作，简单易用。
 
 支持所有常见的GET、POST、PUT、DELETE、UPDATE等请求方式，支持浏览器级别 Cookies 管理、上传下载、设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
 
-3.0 版完美支持Curl、Swoole 协程。
-
-我们有完善的在线技术文档：[http://doc.yurunsoft.com/YurunHttp](http://doc.yurunsoft.com/YurunHttp)
+3.0 版完美支持Curl、Swoole 协程；3.2 版支持 Swoole WebSocket 客户端。
 
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
-同时欢迎各位加入技术支持群17916227[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://jq.qq.com/?_wv=1027&k=5wXf4Zq)，如有问题可以及时解答和修复。
+欢迎各位加入技术支持群17916227[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://jq.qq.com/?_wv=1027&k=5wXf4Zq)，如有问题可以及时解答和修复。
 
-个人精力有限，欢迎各位来提交PR（[码云](https://gitee.com/yurunsoft/YurunHttp)/[Github](https://github.com/Yurunsoft/YurunHttp)），一起完善YurunHttp，让它能够更加好用。
+更加欢迎各位来提交PR（[码云](https://gitee.com/yurunsoft/YurunHttp)/[Github](https://github.com/Yurunsoft/YurunHttp)），一起完善YurunHttp，让它能够更加好用。
 
 ## Composer
 
@@ -26,7 +24,7 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "~3.1"
+        "yurunsoft/yurun-http": "~3.2"
     }
 }
 ```
@@ -36,6 +34,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 之后你便可以使用 `include "vendor/autoload.php";` 来自动加载类。（ps：不要忘了namespace）
 
 ## 用法
+
+更加详细的用法请看 `examples` 目录中的示例代码
 
 ### 简单调用
 
@@ -90,7 +90,24 @@ function test()
 }
 ```
 
-具体详见`examples`目录中的示例代码
+### WebSocket Client
+
+```php
+YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
+go(function(){
+    $url = 'ws://127.0.0.1:1234/';
+    $http = new HttpRequest;
+    $client = $http->websocket($url);
+    if(!$client->isConnected())
+    {
+        throw new \RuntimeException('Connect failed');
+    }
+    $client->send('data');
+    $recv = $client->recv();
+    var_dump('recv:', $recv);
+    $client->close();
+});
+```
 
 ## 捐赠
 
