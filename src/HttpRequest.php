@@ -657,13 +657,14 @@ class HttpRequest
     }
 
     /**
-     * 发送请求，所有请求的老祖宗
+     * 构建请求类
+     *
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      * @param array $method 请求方法，GET、POST等
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Request
      */
-    public function send($url = null, $requestBody = null, $method = 'GET')
+    public function buildRequest($url = null, $requestBody = null, $method = 'GET')
     {
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody);
         $request = new Request($url, $this->headers, $body, $method);
@@ -693,6 +694,19 @@ class HttpRequest
         {
             $request = $request->withAttribute('proxy.' . $name, $value);
         }
+        return $request;
+    }
+
+    /**
+     * 发送请求，所有请求的老祖宗
+     * @param string $url 请求地址，如果为null则取url属性值
+     * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param array $method 请求方法，GET、POST等
+     * @return \Yurun\Util\YurunHttp\Http\Response
+     */
+    public function send($url = null, $requestBody = null, $method = 'GET')
+    {
+        $request = $this->buildRequest($url, $requestBody, $method);
         return YurunHttp::send($request, $this->handler);
     }
 
@@ -788,6 +802,19 @@ class HttpRequest
         $this->saveFileOption = array();
         return $result;
     }
+
+    /**
+     * WebSocket
+     *
+     * @param string $url
+     * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
+     */
+    public function websocket($url = null)
+    {
+        $request = $this->buildRequest($url);
+        return YurunHttp::websocket($request, $this->handler);
+    }
+
 }
 
 if(extension_loaded('curl'))

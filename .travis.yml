@@ -33,7 +33,7 @@ matrix:
   - php: '7.4snapshot'
     env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
   - php: 'nightly'
-    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7" INSTALL_REDIS_EXT=true
   allow_failures:
   - env: SWOOLE_VERSION="master"
   - php: nightly
@@ -42,6 +42,10 @@ matrix:
 env:
   global:
     - HTTP_SERVER_HOST=http://127.0.0.1:8898/
+    - WS_SERVER_HOST=ws://127.0.0.1:8900/
+
+services:
+  - redis-server
 
 addons:
   apt:
@@ -49,6 +53,16 @@ addons:
     - nginx
 
 install:
+  - if [[ $INSTALL_REDIS_EXT == true ]]; then
+      wget https://github.com/phpredis/phpredis/archive/develop.zip;
+      unzip develop.zip;
+      cd phpredis-develop;
+      phpize;
+      ./configure;
+      make && make install;
+      cd ../;
+    fi
+  - echo "extension = redis.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - if [[ $SWOOLE_VERSION ]]; then
       wget https://github.com/swoole/swoole-src/archive/$SWOOLE_VERSION.tar.gz -O swoole.tar.gz && mkdir -p swoole && tar -xf swoole.tar.gz -C swoole --strip-components=1 && rm swoole.tar.gz && cd swoole && phpize && ./configure --enable-openssl && make -j && make install && cd -;
       echo "extension = swoole.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini;
@@ -73,6 +87,7 @@ before_script:
   - pwd
   - php -v
   - php -m
+  - php --ri redis
   - php --ri curl;
   - php --ri openssl;
 

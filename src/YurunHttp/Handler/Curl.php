@@ -443,4 +443,27 @@ class Curl implements IHandler
             CURLOPT_USERPWD                 => $userPwd,
         ));
     }
+
+    /**
+     * 连接 WebSocket
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient $websocketClient
+     * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
+     */
+    public function websocket($request, $websocketClient = null)
+    {
+        throw new \RuntimeException('Curl Handler does not support WebSocket');
+    }
+
+    /**
+     * 获取原始处理器对象
+     *
+     * @return mixed
+     */
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
 }

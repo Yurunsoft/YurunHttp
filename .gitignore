@@ -1,5 +1,8 @@
 .idea
-/vendor/
 /composer.lock
 /tests/server/*.pid
 *.log
+/tests/server/WebSocket/.runtime
+logs
+vendor
+*.pid

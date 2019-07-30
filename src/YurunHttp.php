@@ -36,6 +36,7 @@ abstract class YurunHttp
     /**
      * 发送请求并获取结果
      * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param \Yurun\Util\YurunHttp\Handler\IHandler|string $handlerClass
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
     public static function send($request, $handlerClass = null)
@@ -64,6 +65,41 @@ abstract class YurunHttp
         $response = $handler->recv();
         $response = $response->withTotalTime(microtime(true) - $time);
         return $response;
+    }
+
+    /**
+     * 发起 WebSocket 连接
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param \Yurun\Util\YurunHttp\Handler\IHandler|string $handlerClass
+     * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
+     */
+    public static function websocket($request, $handlerClass = null)
+    {
+        if($handlerClass instanceof IHandler)
+        {
+            $handler = $handlerClass;
+        }
+        else
+        {
+            if(null === $handlerClass)
+            {
+                $handlerClass = static::$defaultHandler;
+            }
+            $handler = new $handlerClass();
+        }
+        $time = microtime(true);
+        foreach(static::$attributes as $name => $value)
+        {
+            if(null === $request->getAttribute($name))
+            {
+                $request = $request->withAttribute($name, $value);
+            }
+        }
+        $websocketClient = $handler->websocket($request);
+        $response = $websocketClient->getHttpResponse()->withTotalTime(microtime(true) - $time);
+        $websocketClient->init($handler, $request, $response);
+        return $websocketClient;
     }
 
     /**

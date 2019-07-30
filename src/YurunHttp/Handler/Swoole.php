@@ -7,6 +7,7 @@ use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\Traits\THandler;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Exception\WebSocketException;
 
 class Swoole implements IHandler
 {
@@ -69,6 +70,7 @@ class Swoole implements IHandler
         $count = 0;
         $statusCode = 0;
         $lastSSL = null;
+        $isWebSocket = $request->getAttribute('__websocket');
         do{
             $retry = $this->request->getAttribute('retry', 0);
             for($i = 0; $i <= $retry; ++$i)
@@ -148,7 +150,14 @@ class Swoole implements IHandler
                 {
                     $path .= '?' . $query;
                 }
-                if(null === ($saveFilePath = $this->request->getAttribute('saveFilePath')))
+                if($isWebSocket)
+                {
+                    if(!$this->handler->upgrade($path))
+                    {
+                        throw new WebSocketException(sprintf('WebSocket connect faled, errorCode: %s', $this->handler->errCode), $this->handler->errCode);
+                    }
+                }
+                else if(null === ($saveFilePath = $this->request->getAttribute('saveFilePath')))
                 {
                     $this->handler->execute($path);
                 }
@@ -156,7 +165,7 @@ class Swoole implements IHandler
                 {
                     $this->handler->download($path, $saveFilePath);
                 }
-                $this->getResponse();
+                $this->getResponse($isWebSocket);
                 $statusCode = $this->result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
                 if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
@@ -164,7 +173,7 @@ class Swoole implements IHandler
                     break;
                 }
             }
-            if($statusCode >= 300 && $statusCode < 400 && $this->request->getAttribute('followLocation', true))
+            if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $this->request->getAttribute('followLocation', true))
             {
                 if(++$count <= ($maxRedirects = $this->request->getAttribute('maxRedirects', 10)))
                 {
@@ -181,6 +190,25 @@ class Swoole implements IHandler
             }
             break;
         }while(true);
+    }
+
+
+    /**
+     * 连接 WebSocket
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient $websocketClient
+     * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
+     */
+    public function websocket($request, $websocketClient = null)
+    {
+        if(!$websocketClient)
+        {
+            $websocketClient = new \Yurun\Util\YurunHttp\WebSocket\Swoole;
+        }
+        $this->send($request->withAttribute('__websocket', true));
+        $websocketClient->init($this, $request, $this->result);
+        return $websocketClient;
     }
 
     /**
@@ -212,9 +240,9 @@ class Swoole implements IHandler
      *
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse()
+    private function getResponse($isWebSocket)
     {
-        $success = $this->handler->recv();
+        $success = $isWebSocket ? true : $this->handler->recv();
         $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
         if($success)
         {
@@ -238,7 +266,6 @@ class Swoole implements IHandler
         }
         $this->result = $this->result->withError($this->getErrorString($this->handler->errCode))
                                      ->withErrno($this->handler->errCode);
-        $this->handler->close();
         return $this->result;
     }
 
@@ -452,4 +479,15 @@ class Swoole implements IHandler
         ];
         return isset($errors[$errCode]) ? $errors[$errCode] : '';
     }
+
+    /**
+     * 获取原始处理器对象
+     *
+     * @return mixed
+     */
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
 }
