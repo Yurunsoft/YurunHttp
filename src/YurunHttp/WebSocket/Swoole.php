@@ -120,7 +120,7 @@ class Swoole implements IWebSocketClient
         $result = $this->handler->push($data);
         if(!$result)
         {
-            throw new WebSocketException(sprintf('Send Failed, errorCode: %s', $this->handler->errCode), $this->handler->errCode);
+            throw new WebSocketException(sprintf('Send Failed, error: %s, errorCode: %s', socket_strerror($this->handler->errCode), $this->handler->errCode), $this->handler->errCode);
         }
         return $result;
     }
@@ -135,7 +135,7 @@ class Swoole implements IWebSocketClient
         $result = $this->handler->recv();
         if(!$result)
         {
-            throw new WebSocketException(sprintf('Recv Failed, errorCode: %s', $this->handler->errCode), $this->handler->errCode);
+            throw new WebSocketException(sprintf('Recv Failed, error: %s, errorCode: %s', socket_strerror($this->handler->errCode), $this->handler->errCode), $this->handler->errCode);
         }
         return $result->data;
     }
