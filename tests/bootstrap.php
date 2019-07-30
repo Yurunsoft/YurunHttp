@@ -39,7 +39,7 @@ else
 if(SWOOLE_ON)
 {
     // WebSocket Server
-    $cmd = __DIR__ . '/server/WebSocket/bin/start.sh';
+    $cmd = __DIR__ . '/server/WebSocket/start-server.sh';
     echo 'Starting WebSocket server...', PHP_EOL;
     echo `{$cmd}`, PHP_EOL;
     $serverStarted = false;
@@ -72,7 +72,7 @@ register_shutdown_function(function(){
 
     if(SWOOLE_ON)
     {
-        $cmd = __DIR__ . '/server/WebSocket/bin/stop.sh';
+        $cmd = __DIR__ . '/server/WebSocket/stop-server.sh';
         echo 'Stoping WebSocket server...', PHP_EOL;
         echo `{$cmd}`, PHP_EOL;
         echo 'WebSocket Server stoped!', PHP_EOL;
