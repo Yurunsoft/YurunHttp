@@ -102,7 +102,7 @@ class Curl implements IHandler
         $files = $this->request->getUploadedFiles();
         $body = (string)$this->request->getBody();
         
-        if(isset($files[0]))
+        if(!empty($files))
         {
             $body = FormDataBuilder::build($body, $files, $boundary);
             $this->request = $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);

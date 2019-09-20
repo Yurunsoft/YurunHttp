@@ -285,9 +285,9 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function(){
             $http = new HttpRequest;
-            $file = new UploadedFile('file', MediaType::TEXT_HTML, __FILE__);
+            $file = new UploadedFile(basename(__FILE__), MediaType::TEXT_HTML, __FILE__);
             $http->content([
-                $file,
+                'file'  => $file,
             ]);
             $response = $http->post($this->host . '?a=info');
             $this->assertResponse($response);
@@ -312,11 +312,11 @@ class HttpRequestTest extends BaseTest
         $this->call(function(){
             $http = new HttpRequest;
             $file2Path = __DIR__ . '/1.txt';
-            $file1 = new UploadedFile('file1', MediaType::TEXT_HTML, __FILE__);
-            $file2 = new UploadedFile('file2', MediaType::TEXT_PLAIN, $file2Path);
+            $file1 = new UploadedFile(basename(__FILE__), MediaType::TEXT_HTML, __FILE__);
+            $file2 = new UploadedFile('1.txt', MediaType::TEXT_PLAIN, $file2Path);
             $http->content([
-                $file1,
-                $file2,
+                'file1' => $file1,
+                'file2' => $file2,
             ]);
             $response = $http->post($this->host . '?a=info');
             $this->assertResponse($response);

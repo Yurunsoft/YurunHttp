@@ -640,7 +640,7 @@ class HttpRequest
             {
                 if($v instanceof UploadedFile)
                 {
-                    $files[] = $v;
+                    $files[$k] = $v;
                 }
                 else
                 {

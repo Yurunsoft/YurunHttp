@@ -369,15 +369,15 @@ class ServerRequest extends Request implements ServerRequestInterface
     protected function setUploadedFiles(self $object, array $files)
     {
         $object->files = [];
-        foreach($files as $file)
+        foreach($files as $name => $file)
         {
             if($file instanceof UploadedFile)
             {
-                $object->files[] = $file;
+                $object->files[$name] = $file;
             }
             else
             {
-                $object->files[] = new UploadedFile($file['name'], $file['type'], $file['tmp_name'], $file['size'], $file['error']);
+                $object->files[$name] = new UploadedFile($file['name'], $file['type'], $file['tmp_name'], $file['size'], $file['error']);
             }
         }
         return $object;

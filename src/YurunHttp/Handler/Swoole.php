@@ -107,12 +107,12 @@ class Swoole implements IHandler
                 {
                     $files = $this->request->getUploadedFiles();
                     $body = (string)$this->request->getBody();
-                    if(isset($files[0]))
+                    if(!empty($files))
                     {
                         $hasFile = true;
-                        foreach($files as $file)
+                        foreach($files as $name => $file)
                         {
-                            $this->handler->addFile($file->getTempFileName(), basename($file->getClientFilename()), $file->getClientMediaType());
+                            $this->handler->addFile($file->getTempFileName(), $name, $file->getClientMediaType(), basename($file->getClientFilename()));
                         }
                         parse_str($body, $body);
                     }
