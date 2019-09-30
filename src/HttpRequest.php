@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util;
 
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Request;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 
@@ -790,7 +791,7 @@ class HttpRequest
 
     /**
      * 直接下载文件
-     * @param string $fileName 保存路径
+     * @param string $fileName 保存路径，如果以 .* 结尾，则根据 Content-Type 自动决定扩展名
      * @param string $url 下载文件地址
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      * @param string $method 请求方法，GET、POST等，一般用GET
@@ -798,7 +799,22 @@ class HttpRequest
      */
     public function download($fileName, $url = null, $requestBody = null, $method = 'GET')
     {
+        static $autoExtFlag = '.*';
+        if($isAutoExt = (substr($fileName, -strlen($autoExtFlag)) === $autoExtFlag))
+        {
+            $basename = substr($fileName, 0, -2);
+            $fileName = $basename . '.tmp';
+        }
         $result = $this->saveFile($fileName)->send($url, $requestBody, $method);
+        if($isAutoExt)
+        {
+            $ext = MediaType::getExt($result->getHeaderLine('Content-Type'));
+            if(null === $ext)
+            {
+                $ext = 'file';
+            }
+            rename($fileName, $basename . '.' . $ext);
+        }
         $this->saveFileOption = array();
         return $result;
     }

@@ -44,6 +44,13 @@ class Curl implements IHandler
     private $saveFileFp;
 
     /**
+     * 下载文件上时，header 写入的文件句柄
+     *
+     * @var resource
+     */
+    private $headerFileFp;
+
+    /**
      * 代理认证方式
      */
     public static $proxyAuths = array(
@@ -162,6 +169,13 @@ class Curl implements IHandler
             for($i = 0; $i <= $retry; ++$i)
             {
                 $this->curlResult = curl_exec($this->handler);
+                // 下载文件特别处理 header
+                if($this->headerFileFp)
+                {
+                    fseek($this->headerFileFp, 0);
+                    $length = curl_getinfo($this->handler, CURLINFO_HEADER_SIZE);
+                    $this->curlResult = fread($this->headerFileFp, $length);
+                }
                 $this->getResponse();
                 $statusCode = $this->result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
@@ -191,6 +205,11 @@ class Curl implements IHandler
         {
             fclose($this->saveFileFp);
             $this->saveFileFp = null;
+        }
+        if(null !== $this->headerFileFp)
+        {
+            fclose($this->headerFileFp);
+            $this->headerFileFp = null;
         }
     }
 
@@ -343,10 +362,6 @@ class Curl implements IHandler
         // 请求结果保存为文件
         if(null !== ($saveFilePath = $this->request->getAttribute('saveFilePath')))
         {
-            curl_setopt_array($this->handler, array(
-                CURLOPT_HEADER          => false,
-                CURLOPT_RETURNTRANSFER  => false,
-            ));
             $last = substr($saveFilePath, -1, 1);
             if('/' === $last || '\\' === $last)
             {
@@ -354,7 +369,13 @@ class Curl implements IHandler
                 $saveFilePath .= basename($this->url);
             }
             $this->saveFileFp = fopen($saveFilePath, $this->request->getAttribute('saveFileMode', 'w+'));
-            curl_setopt($this->handler, CURLOPT_FILE, $this->saveFileFp);
+            $this->headerFileFp = fopen('php://memory', 'w+');
+            curl_setopt_array($this->handler, array(
+                CURLOPT_HEADER          => false,
+                CURLOPT_RETURNTRANSFER  => false,
+                CURLOPT_FILE            => $this->saveFileFp,
+                CURLOPT_WRITEHEADER     => $this->headerFileFp,
+            ));
         }
     }
     

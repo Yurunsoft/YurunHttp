@@ -337,4 +337,47 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals(MediaType::TEXT_PLAIN, $file2['type']);
         });
     }
+
+    /**
+     * Download file
+     *
+     * @return void
+     */
+    public function testDownload()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $fileName = __DIR__ . '/download.txt';
+            if(is_file($fileName))
+            {
+                unlink($fileName);
+            }
+            $this->assertFalse(is_file($fileName));
+            $http->download($fileName, $this->host . '?a=download1', 'yurunhttp=nb', 'POST');
+            $this->assertTrue(is_file($fileName));
+            $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+        });
+    }
+
+    /**
+     * Download file auto extension
+     *
+     * @return void
+     */
+    public function testDownloadAutoExt()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $fileName = __DIR__ . '/download.html';
+            if(is_file($fileName))
+            {
+                unlink($fileName);
+            }
+            $this->assertFalse(is_file($fileName));
+            $http->download(__DIR__ . '/download.*', $this->host . '?a=download2', 'yurunhttp=nb', 'POST');
+            $this->assertTrue(is_file($fileName));
+            $this->assertEquals('<h1>YurunHttp Hello World</h1>', file_get_contents($fileName));
+        });
+    }
+
 }
