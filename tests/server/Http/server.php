@@ -47,13 +47,13 @@ switch($action)
         header('Location:/?a=info');
         exit;
     case 'download1':
-        if('nb' === ($_POST['yurunhttp'] ?? null) && 'POST' === $_SERVER['REQUEST_METHOD'])
+        if('nb' === (isset($_POST['yurunhttp']) ? $_POST['yurunhttp'] : null) && 'POST' === $_SERVER['REQUEST_METHOD'])
         {
             echo 'YurunHttp Hello World';
         }
         break;
     case 'download2':
-        if('nb' === ($_POST['yurunhttp'] ?? null) && 'POST' === $_SERVER['REQUEST_METHOD'])
+        if('nb' === (isset($_POST['yurunhttp']) ? $_POST['yurunhttp'] : null) && 'POST' === $_SERVER['REQUEST_METHOD'])
         {
             echo '<h1>YurunHttp Hello World</h1>';
         }
