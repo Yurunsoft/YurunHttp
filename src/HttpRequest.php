@@ -626,9 +626,10 @@ class HttpRequest
     /**
      * 处理请求主体
      * @param string|array $requestBody
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return array
      */
-    protected function parseRequestBody($requestBody)
+    protected function parseRequestBody($requestBody, $contentType)
     {
         $body = $files = [];
         if(is_string($requestBody))
@@ -637,18 +638,26 @@ class HttpRequest
         }
         else if(is_array($requestBody))
         {
-            foreach($requestBody as $k => $v)
+            switch($contentType)
             {
-                if($v instanceof UploadedFile)
-                {
-                    $files[$k] = $v;
-                }
-                else
-                {
-                    $body[$k] = $v;
-                }
+                case 'json':
+                    $body = json_encode($requestBody);
+                    $this->header('Content-Type', MediaType::APPLICATION_JSON);
+                    break;
+                default:
+                    foreach($requestBody as $k => $v)
+                    {
+                        if($v instanceof UploadedFile)
+                        {
+                            $files[$k] = $v;
+                        }
+                        else
+                        {
+                            $body[$k] = $v;
+                        }
+                    }
+                    $body = http_build_query($body, '', '&');
             }
-            $body = http_build_query($body, '', '&');
         }
         else
         {
@@ -663,11 +672,12 @@ class HttpRequest
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      * @param array $method 请求方法，GET、POST等
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Request
      */
-    public function buildRequest($url = null, $requestBody = null, $method = 'GET')
+    public function buildRequest($url = null, $requestBody = null, $method = 'GET', $contentType = null)
     {
-        list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody);
+        list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
         $request = new Request($url, $this->headers, $body, $method);
         $request = $request->withUploadedFiles($files)
                             ->withCookieParams($this->cookies)
@@ -703,11 +713,12 @@ class HttpRequest
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      * @param array $method 请求方法，GET、POST等
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function send($url = null, $requestBody = null, $method = 'GET')
+    public function send($url = null, $requestBody = null, $method = 'GET', $contentType = null)
     {
-        $request = $this->buildRequest($url, $requestBody, $method);
+        $request = $this->buildRequest($url, $requestBody, $method, $contentType);
         return YurunHttp::send($request, $this->handler);
     }
 
@@ -738,11 +749,12 @@ class HttpRequest
      * POST请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function post($url = null, $requestBody = null)
+    public function post($url = null, $requestBody = null, $contentType = null)
     {
-        return $this->send($url, $requestBody, 'POST');
+        return $this->send($url, $requestBody, 'POST', $contentType);
     }
 
     /**
@@ -760,33 +772,36 @@ class HttpRequest
      * PUT请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function put($url = null, $requestBody = null)
+    public function put($url = null, $requestBody = null, $contentType = null)
     {
-        return $this->send($url, $requestBody, 'PUT');
+        return $this->send($url, $requestBody, 'PUT', $contentType);
     }
 
     /**
      * PATCH请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function patch($url = null, $requestBody = null)
+    public function patch($url = null, $requestBody = null, $contentType = null)
     {
-        return $this->send($url, $requestBody, 'PATCH');
+        return $this->send($url, $requestBody, 'PATCH', $contentType);
     }
 
     /**
      * DELETE请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function delete($url = null, $requestBody = null)
+    public function delete($url = null, $requestBody = null, $contentType = null)
     {
-        return $this->send($url, $requestBody, 'DELETE');
+        return $this->send($url, $requestBody, 'DELETE', $contentType);
     }
 
     /**

@@ -58,6 +58,9 @@ switch($action)
             echo '<h1>YurunHttp Hello World</h1>';
         }
         break;
+    case 'body':
+        echo file_get_contents('php://input');
+        break;
     default:
         // 默认
         echo 'YurunHttp';
