@@ -380,4 +380,23 @@ class HttpRequestTest extends BaseTest
         });
     }
 
+    /**
+     * body
+     *
+     * @return void
+     */
+    public function testBody()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $data = [
+                'id'    =>  1,
+                'name'  =>  'YurunHttp',
+            ];
+            $response = $http->post($this->host . '?a=body', $data, 'json');
+            $this->assertResponse($response);
+            $this->assertEquals(json_encode($data), $response->body());
+        });
+    }
+
 }

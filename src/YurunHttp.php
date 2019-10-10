@@ -12,6 +12,11 @@ abstract class YurunHttp
      */
     private static $defaultHandler = 'Yurun\Util\YurunHttp\Handler\Curl';
 
+    /**
+     * 属性
+     *
+     * @var array
+     */
     private static $attributes = [];
 
     /**
