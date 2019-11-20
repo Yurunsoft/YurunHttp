@@ -182,6 +182,7 @@ class MemoryStream implements StreamInterface
         $this->content = substr_replace($this->content, $string, $this->position, 0);
         $len = strlen($string);
         $this->position += $len;
+        $this->size += $len;
         return $len;
     }
 
