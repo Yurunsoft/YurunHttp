@@ -27,7 +27,12 @@ trait THandler
             }
             else
             {
-                $uri = new Uri(dirname($currentUri) . '/' . $location);
+                $path = dirname($currentUri);
+                if('\\' === DIRECTORY_SEPARATOR && false !== strpos($path, DIRECTORY_SEPARATOR))
+                {
+                    $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+                }
+                $uri = new Uri($path . '/' . $location);
             }
         }
         else
