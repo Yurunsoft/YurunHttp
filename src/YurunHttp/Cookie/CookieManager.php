@@ -238,6 +238,10 @@ class CookieManager
         if($uriPathDSCount > $cookiePathDSCount)
         {
             $path = dirname($uriPath, $uriPathDSCount - $cookiePathDSCount);
+            if('\\' === DIRECTORY_SEPARATOR && false !== strpos($path, DIRECTORY_SEPARATOR))
+            {
+                $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+            }
             return $path === $cookiePath;
         }
         else
