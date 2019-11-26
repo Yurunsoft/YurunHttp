@@ -55,6 +55,13 @@ class Swoole implements IHandler
      */
     private $http2Request;
 
+    /**
+     * 上一个请求是否为SSL
+     *
+     * @var bool
+     */
+    private $lastSSL;
+
     public function __construct()
     {
         $this->initCookieManager();
@@ -85,7 +92,6 @@ class Swoole implements IHandler
         $isLocation = false;
         $count = 0;
         $statusCode = 0;
-        $lastSSL = null;
         if($this->isHttp2 = '2.0' === $this->request->getProtocolVersion())
         {
             $this->http2Request = new Http2Request;
@@ -100,9 +106,9 @@ class Swoole implements IHandler
                 $host = $uri->getHost();
                 $port = Uri::getServerPort($uri);
                 $ssl = 'https' === $uri->getScheme();
-                if(!$this->handler || $this->handler->host != $host || $this->handler->port != $port || $ssl !== $lastSSL)
+                if(!$this->handler || $this->handler->host != $host || $this->handler->port != $port || $ssl !== $this->lastSSL)
                 {
-                    $lastSSL = $ssl;
+                    $this->lastSSL = $ssl;
                     if($this->handler)
                     {
                         $this->handler->close();
