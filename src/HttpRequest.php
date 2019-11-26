@@ -139,7 +139,6 @@ class HttpRequest
      * 一个包含 PEM 格式证书的文件名
      * @var string
      */
-    
     public $certPath = '';
     /**
      * 使用证书需要的密码
@@ -164,6 +163,13 @@ class HttpRequest
      * @var string
      */
     public $keyPassword = null;
+
+    /**
+     * Http 协议版本
+     *
+     * @var string
+     */
+    public $protocolVersion = '1.1';
 
     /**
      * 代理认证方式
@@ -700,6 +706,7 @@ class HttpRequest
                             ->withAttribute('downloadSpeed', $this->downloadSpeed)
                             ->withAttribute('uploadSpeed', $this->uploadSpeed)
                             ->withAttribute('followLocation', $this->followLocation)
+                            ->withProtocolVersion($this->protocolVersion)
                             ;
         foreach($this->proxy as $name => $value)
         {

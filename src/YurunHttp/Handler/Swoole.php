@@ -2,6 +2,8 @@
 namespace Yurun\Util\YurunHttp\Handler;
 
 use Swoole\Coroutine\Http\Client;
+use Swoole\Http2\Request as Http2Request;
+use Swoole\Coroutine\Http2\Client as Http2Client;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\Traits\THandler;
@@ -16,7 +18,7 @@ class Swoole implements IHandler
     /**
      * Swoole 协程客户端对象
      *
-     * @var \Swoole\Coroutine\Http\Client
+     * @var \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client
      */
     private $handler;
 
@@ -38,6 +40,20 @@ class Swoole implements IHandler
      * @var array
      */
     private $settings = [];
+
+    /**
+     * 是否为 http2 请求
+     *
+     * @var bool
+     */
+    private $isHttp2;
+
+    /**
+     * Http2 请求对象
+     *
+     * @var \Swoole\Http2\Request
+     */
+    private $http2Request;
 
     public function __construct()
     {
@@ -70,6 +86,10 @@ class Swoole implements IHandler
         $count = 0;
         $statusCode = 0;
         $lastSSL = null;
+        if($this->isHttp2 = '2.0' === $this->request->getProtocolVersion())
+        {
+            $this->http2Request = new Http2Request;
+        }
         $isWebSocket = $request->getAttribute('__websocket');
         do{
             $retry = $this->request->getAttribute('retry', 0);
@@ -87,17 +107,36 @@ class Swoole implements IHandler
                     {
                         $this->handler->close();
                     }
-                    $this->handler = new Client($host, $port, $ssl);
-                    $this->handler->setDefer();
+                    if($this->isHttp2)
+                    {
+                        $this->handler = new Http2Client($host, $port, $ssl);
+                        if(!$this->handler->connect())
+                        {
+                            throw new \RuntimeException(sprintf('Http2 connect failed!errCode: %s, errMsg:%', $this->handler->errCode, socket_strerror($this->handler->errCode)));
+                        }
+                    }
+                    else
+                    {
+                        $this->handler = new Client($host, $port, $ssl);
+                        $this->handler->setDefer();
+                    }
                 }
                 // method
                 if($isLocation && in_array($statusCode, [301, 302, 303]))
                 {
-                    $this->handler->setMethod('GET');
+                    $method = 'GET';
                 }
                 else
                 {
-                    $this->handler->setMethod($this->request->getMethod());
+                    $method = $this->request->getMethod();
+                }
+                if($this->isHttp2)
+                {
+                    $this->http2Request->method = $method;
+                }
+                else
+                {
+                    $this->handler->setMethod($method);
                 }
                 // cookie
                 $this->parseCookies();
@@ -109,6 +148,10 @@ class Swoole implements IHandler
                     $body = (string)$this->request->getBody();
                     if(!empty($files))
                     {
+                        if($this->isHttp2)
+                        {
+                            throw new \RuntimeException('Http2 swoole handler does not support upload file');
+                        }
                         $hasFile = true;
                         foreach($files as $name => $file)
                         {
@@ -116,7 +159,23 @@ class Swoole implements IHandler
                         }
                         parse_str($body, $body);
                     }
-                    $this->handler->setData($body);
+                    if($this->isHttp2)
+                    {
+                        $this->http2Request->data = $body;
+                    }
+                    else
+                    {
+                        $this->handler->setData($body);
+                    }
+                }
+                // 其它处理
+                $this->parseSSL();
+                $this->parseProxy();
+                $this->parseNetwork();
+                // 设置客户端参数
+                if(!empty($this->settings))
+                {
+                    $this->handler->set($this->settings);
                 }
                 // headers
                 $this->request = $this->request->withHeader('Host', Uri::getDomain($uri));
@@ -129,15 +188,13 @@ class Swoole implements IHandler
                 {
                     $headers[$name] = implode(',', $value);
                 }
-                $this->handler->setHeaders($headers);
-                // 其它处理
-                $this->parseSSL();
-                $this->parseProxy();
-                $this->parseNetwork();
-                // 设置客户端参数
-                if(!empty($this->settings))
+                if($this->isHttp2)
                 {
-                    $this->handler->set($this->settings);
+                    $this->http2Request->headers = $headers;
+                }
+                else
+                {
+                    $this->handler->setHeaders($headers);
                 }
                 // 发送
                 $path = $uri->getPath();
@@ -152,6 +209,10 @@ class Swoole implements IHandler
                 }
                 if($isWebSocket)
                 {
+                    if($this->isHttp2)
+                    {
+                        throw new \RuntimeException('Http2 swoole handler does not support websocket');
+                    }
                     if(!$this->handler->upgrade($path))
                     {
                         throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', socket_strerror($this->handler->errCode), $this->handler->errCode), $this->handler->errCode);
@@ -159,10 +220,22 @@ class Swoole implements IHandler
                 }
                 else if(null === ($saveFilePath = $this->request->getAttribute('saveFilePath')))
                 {
-                    $this->handler->execute($path);
+                    if($this->isHttp2)
+                    {
+                        $this->http2Request->path = $path;
+                        $this->handler->send($this->http2Request);
+                    }
+                    else
+                    {
+                        $this->handler->execute($path);
+                    }
                 }
                 else
                 {
+                    if($this->isHttp2)
+                    {
+                        throw new \RuntimeException('Http2 swoole handler does not support download file');
+                    }
                     $this->handler->download($path, $saveFilePath);
                 }
                 $this->getResponse($isWebSocket);
@@ -191,7 +264,6 @@ class Swoole implements IHandler
             break;
         }while(true);
     }
-
 
     /**
      * 连接 WebSocket
@@ -232,7 +304,19 @@ class Swoole implements IHandler
             $this->cookieManager->setCookie($name, $value);
         }
         $cookies = $this->cookieManager->getRequestCookies($this->request->getUri());
-        $this->handler->setCookies($cookies);
+        if($this->isHttp2)
+        {
+            $cookie = [];
+            foreach($cookies as $name => $value)
+            {
+                $cookie[] = $name . '=' . urlencode($value);
+            }
+            $this->request = $this->request->withHeader('cookie', implode(',', $cookie));
+        }
+        else
+        {
+            $this->handler->setCookies($cookies);
+        }
     }
 
     /**
@@ -242,27 +326,57 @@ class Swoole implements IHandler
      */
     private function getResponse($isWebSocket)
     {
-        $success = $isWebSocket ? true : $this->handler->recv();
-        $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
-        if($success)
+        if($this->isHttp2)
         {
-            // headers
-            foreach($this->handler->headers as $name => $value)
+            $response = $this->handler->recv();
+            $success = false !== $response;
+            $this->result = new Response($success ? $response->data: '', $success ? $response->statusCode : 0);
+            if($success)
             {
-                $this->result = $this->result->withHeader($name, $value);
-            }
-
-            // cookies
-            $cookies = [];
-            if(isset($this->handler->set_cookie_headers))
-            {
-                foreach($this->handler->set_cookie_headers as $value)
+                // headers
+                foreach($response->headers as $name => $value)
                 {
-                    $cookieItem = $this->cookieManager->addSetCookie($value);
-                    $cookies[$cookieItem->name] = (array)$cookieItem;
+                    $this->result = $this->result->withHeader($name, $value);
                 }
+
+                // cookies
+                $cookies = [];
+                if(isset($response->set_cookie_headers))
+                {
+                    foreach($response->set_cookie_headers as $value)
+                    {
+                        $cookieItem = $this->cookieManager->addSetCookie($value);
+                        $cookies[$cookieItem->name] = (array)$cookieItem;
+                    }
+                }
+                $this->result = $this->result->withCookieOriginParams($cookies);
+
             }
-            $this->result = $this->result->withCookieOriginParams($cookies);
+        }
+        else
+        {
+            $success = $isWebSocket ? true : $this->handler->recv();
+            $this->result = new Response((string)$this->handler->body, $this->handler->statusCode);
+            if($success)
+            {
+                // headers
+                foreach($this->handler->headers as $name => $value)
+                {
+                    $this->result = $this->result->withHeader($name, $value);
+                }
+
+                // cookies
+                $cookies = [];
+                if(isset($this->handler->set_cookie_headers))
+                {
+                    foreach($this->handler->set_cookie_headers as $value)
+                    {
+                        $cookieItem = $this->cookieManager->addSetCookie($value);
+                        $cookies[$cookieItem->name] = (array)$cookieItem;
+                    }
+                }
+                $this->result = $this->result->withCookieOriginParams($cookies);
+            }
         }
         $this->result = $this->result->withError(socket_strerror($this->handler->errCode))
                                      ->withErrno($this->handler->errCode);

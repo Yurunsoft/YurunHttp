@@ -46,7 +46,7 @@ if(SWOOLE_ON)
     for($i = 0; $i < 10; ++$i)
     {
         @file_get_contents(str_replace('ws://', 'http://', testEnv('WS_SERVER_HOST', 'ws://127.0.0.1:8900/')));
-        if(isset($http_response_header) && 'HTTP/1.1 400 Bad Request' === $http_response_header[0])
+        if(isset($http_response_header[0]) && 'HTTP/1.1 400 Bad Request' === $http_response_header[0])
         {
             $serverStarted = true;
             break;
@@ -60,6 +60,30 @@ if(SWOOLE_ON)
     else
     {
         throw new \RuntimeException('WebSocekt server start failed');
+    }
+
+    // Http2 Server
+    $cmd = __DIR__ . '/server/Http2/start-server.sh';
+    echo 'Starting Http2 server...', PHP_EOL;
+    echo `{$cmd}`, PHP_EOL;
+    $serverStarted = false;
+    for($i = 0; $i < 10; ++$i)
+    {
+        @file_get_contents(testEnv('HTTP2_SERVER_HOST', 'http://127.0.0.1:8901/'));
+        if(isset($http_response_header[0]) && 'HTTP/1.1 200 OK' === $http_response_header[0])
+        {
+            $serverStarted = true;
+            break;
+        }
+        sleep(1);
+    }
+    if($serverStarted)
+    {
+        echo 'Http2 server started!', PHP_EOL;
+    }
+    else
+    {
+        throw new \RuntimeException('Http2 server start failed');
     }
 }
 
@@ -76,5 +100,10 @@ register_shutdown_function(function(){
         echo 'Stoping WebSocket server...', PHP_EOL;
         echo `{$cmd}`, PHP_EOL;
         echo 'WebSocket Server stoped!', PHP_EOL;
+
+        $cmd = __DIR__ . '/server/Http2/stop-server.sh';
+        echo 'Stoping Http2 server...', PHP_EOL;
+        echo `{$cmd}`, PHP_EOL;
+        echo 'Http2 Server stoped!', PHP_EOL;
     }
 });
