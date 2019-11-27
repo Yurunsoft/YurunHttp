@@ -14,6 +14,7 @@ class SwooleHttp2Test extends BaseTest
         $this->call(function(){
             $http = new HttpRequest;
             $http->protocolVersion = '2.0';
+            $http->timeout = 3000;
 
             $date = strtotime('2017-03-24 17:12:14');
             $response = $http->post($this->http2Host, [

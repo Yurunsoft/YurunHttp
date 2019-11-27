@@ -4,4 +4,10 @@ __DIR__=$(cd `dirname $0`; pwd)
 
 ${__DIR__}/stop-server.sh
 
-nohup /usr/bin/env php $__DIR__/ws-server.php > /dev/null 2>&1 & echo $! > "$__DIR__/server.pid"
+if [[ $TRAVIS ]]; then
+phpPath="/opt/swoole/bin/php"
+else
+phpPath="/usr/bin/env php"
+fi
+
+nohup $phpPath $__DIR__/ws-server.php > /dev/null 2>&1 & echo $! > "$__DIR__/server.pid"
