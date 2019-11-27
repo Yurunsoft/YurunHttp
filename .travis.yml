@@ -69,6 +69,7 @@ install:
       echo "extension = swoole.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini;
       php --ri swoole;
       wget https://github.com/Yurunsoft/swoole-binary/releases/download/v4.4.12/swoole_4.4.12_e48bc457_x86-64_linux.tar.xz;
+      mkdir -p /opt/swoole;
       tar -C /opt/swoole -xvf swoole_4.4.12_e48bc457_x86-64_linux.tar.xz;
       /opt/swoole/bin/php --ri swoole;
     fi
