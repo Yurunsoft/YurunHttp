@@ -10,4 +10,4 @@ else
 phpPath="/usr/bin/env php"
 fi
 
-nohup $phpPath $__DIR__/ws-server.php > /dev/null 2>&1 & echo $! > "$__DIR__/server.pid"
+nohup $phpPath $__DIR__/http2-server.php > /dev/null 2>&1 & echo $! > "$__DIR__/server.pid"

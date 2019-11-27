@@ -142,8 +142,28 @@ class Curl implements IHandler
         $lastMethod = null;
         $copyHandler = curl_copy_handle($this->handler);
         do{
+            switch($request->getProtocolVersion())
+            {
+                case '1.0':
+                    $httpVersion = CURL_HTTP_VERSION_1;
+                    break;
+                case '2.0':
+                    $ssl = 'https' === $uri->getScheme();
+                    if($ssl)
+                    {
+                        $httpVersion = CURL_HTTP_VERSION_2TLS;
+                    }
+                    else
+                    {
+                        $httpVersion = CURL_HTTP_VERSION_2;
+                    }
+                    break;
+                default:
+                    $httpVersion = CURL_HTTP_VERSION_1_1;
+            }
             $requestOptions = [
-                CURLOPT_URL     =>  (string)$uri,
+                CURLOPT_URL             =>  (string)$uri,
+                CURLOPT_HTTP_VERSION    =>  $httpVersion,
             ];
             // 请求方法
             if($isLocation && in_array($statusCode, [301, 302, 303]))

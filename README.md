@@ -6,11 +6,9 @@
 
 ## 简介
 
-YurunHttp 是开源的PHP HTTP类库，支持链式操作，简单易用。
+YurunHttp 是开源的 PHP HTTP 类库，支持链式操作，简单易用。
 
-支持所有常见的GET、POST、PUT、DELETE、UPDATE等请求方式，支持浏览器级别 Cookies 管理、上传下载、设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
-
-3.0 版完美支持Curl、Swoole 协程；3.2 版支持 Swoole WebSocket 客户端。
+支持所有常见的 GET、POST、PUT、DELETE、UPDATE 等请求方式，支持 Http2、浏览器级别 Cookies 管理、上传下载、设置和读取header、Cookie、请求参数、失败重试、限速、代理、证书等。
 
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
@@ -18,13 +16,32 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 更加欢迎各位来提交PR（[码云](https://gitee.com/yurunsoft/YurunHttp)/[Github](https://github.com/Yurunsoft/YurunHttp)），一起完善YurunHttp，让它能够更加好用。
 
+## 重大版本更新日志
+
+> 每个小版本的更新日志请移步到 Release 查看
+
+v3.3.0 新增支持 `Http2` 客户端
+
+v3.2.0 新增支持 `Swoole WebSocket` 客户端
+
+v3.1.0 引入浏览器级别 `Cookies` 管理
+
+v3.0.0 新增支持 `Swoole` 协程
+
+v2.0.0 黑历史，不告诉你
+
+v1.3.1 支持 `Composer`
+
+v1.0-1.3 初期版本迭代
+
 ## Composer
 
 本项目可以使用composer安装，遵循psr-4自动加载规则，在你的 `composer.json` 中加入下面的内容
+
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "~3.2"
+        "yurunsoft/yurun-http": "^3.3.0"
     }
 }
 ```
@@ -108,6 +125,22 @@ go(function(){
     $client->close();
 });
 ```
+
+### Http2 支持
+
+```php
+$http = new HttpRequest;
+$http->protocolVersion = '2.0'; // 这句是关键
+$response = $http->get('https://wiki.swoole.com/');
+```
+
+Curl、Swoole Handler 都支持 Http2，但需要注意的是编译时都需要带上启用 Http2 的参数。
+
+查看是否支持：
+
+Curl: `php --ri curl`
+
+Swoole: `php --ri swoole`
 
 ## 捐赠
 
