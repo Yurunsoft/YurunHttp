@@ -730,6 +730,22 @@ class HttpRequest
     }
 
     /**
+     * 发送 Http2 请求不调用 recv()
+     * @param string $url 请求地址，如果为null则取url属性值
+     * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param array $method 请求方法，GET、POST等
+     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @return \Yurun\Util\YurunHttp\Http\Response
+     */
+    public function sendHttp2WithoutRecv($url = null, $requestBody = null, $method = 'GET', $contentType = null)
+    {
+        $request = $this->buildRequest($url, $requestBody, $method, $contentType)
+                        ->withProtocolVersion('2.0')
+                        ->withAttribute('http2_not_recv', true);
+        return YurunHttp::send($request, $this->handler);
+    }
+
+    /**
      * GET请求
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值

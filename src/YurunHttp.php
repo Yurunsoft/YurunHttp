@@ -68,6 +68,10 @@ abstract class YurunHttp
         }
         $handler->send($request);
         $response = $handler->recv();
+        if(!$response)
+        {
+            return $response;
+        }
         $response = $response->withTotalTime(microtime(true) - $time);
         return $response;
     }

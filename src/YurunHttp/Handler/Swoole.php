@@ -245,6 +245,10 @@ class Swoole implements IHandler
                     $this->handler->download($path, $saveFilePath);
                 }
                 $this->getResponse($isWebSocket);
+                if(!$this->result)
+                {
+                    return;
+                }
                 $statusCode = $this->result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
                 if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
@@ -334,29 +338,35 @@ class Swoole implements IHandler
     {
         if($this->isHttp2)
         {
-            $response = $this->handler->recv();
-            $success = false !== $response;
-            $this->result = new Response($success ? $response->data: '', $success ? $response->statusCode : 0);
-            if($success)
+            if($this->request->getAttribute('http2_not_recv'))
             {
-                // headers
-                foreach($response->headers as $name => $value)
+                return null;
+            }
+            else
+            {
+                $response = $this->handler->recv();
+                $success = false !== $response;
+                $this->result = new Response($success ? $response->data: '', $success ? $response->statusCode : 0);
+                if($success)
                 {
-                    $this->result = $this->result->withHeader($name, $value);
-                }
-
-                // cookies
-                $cookies = [];
-                if(isset($response->set_cookie_headers))
-                {
-                    foreach($response->set_cookie_headers as $value)
+                    // headers
+                    foreach($response->headers as $name => $value)
                     {
-                        $cookieItem = $this->cookieManager->addSetCookie($value);
-                        $cookies[$cookieItem->name] = (array)$cookieItem;
+                        $this->result = $this->result->withHeader($name, $value);
                     }
-                }
-                $this->result = $this->result->withCookieOriginParams($cookies);
 
+                    // cookies
+                    $cookies = [];
+                    if(isset($response->set_cookie_headers))
+                    {
+                        foreach($response->set_cookie_headers as $value)
+                        {
+                            $cookieItem = $this->cookieManager->addSetCookie($value);
+                            $cookies[$cookieItem->name] = (array)$cookieItem;
+                        }
+                    }
+                    $this->result = $this->result->withCookieOriginParams($cookies);
+                }
             }
         }
         else
