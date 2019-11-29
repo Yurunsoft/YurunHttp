@@ -277,6 +277,24 @@ class HttpRequestTest extends BaseTest
     }
 
     /**
+     * Redirect Other
+     *
+     * @return void
+     */
+    public function testRedirectOther()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+
+            $response = $http->post($this->host . '?a=redirectOther');
+            $data = $response->json(true);
+            $this->assertEquals([
+                'id'    =>  '1',
+            ], $data['args'] ?? null);
+        });
+    }
+
+    /**
      * Upload single file
      *
      * @return void

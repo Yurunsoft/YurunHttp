@@ -2,6 +2,7 @@
 namespace Yurun\Util\YurunHttp\WebSocket;
 
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
 class Swoole implements IWebSocketClient
 {
@@ -29,7 +30,7 @@ class Swoole implements IWebSocketClient
     /**
      * Http Handler
      *
-     * @var \Yurun\Util\YurunHttp\Handler\IHandler
+     * @var \Yurun\Util\YurunHttp\Handler\Swoole
      */
     private $httpHandler;
 
@@ -43,7 +44,7 @@ class Swoole implements IWebSocketClient
     /**
      * 初始化
      *
-     * @param \Yurun\Util\YurunHttp\Handler\IHandler $httpHandler
+     * @param \Yurun\Util\YurunHttp\Handler\Swoole $httpHandler
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param \Yurun\Util\YurunHttp\Http\Response $response
      * @return void
@@ -53,7 +54,8 @@ class Swoole implements IWebSocketClient
         $this->httpHandler = $httpHandler;
         $this->request = $request;
         $this->response = $response;
-        $this->handler = $this->httpHandler->getHandler();
+        $uri = $request->getUri();
+        $this->handler = $this->httpHandler->getHttpConnectionManager()->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
         $this->connected = true;
     }
 

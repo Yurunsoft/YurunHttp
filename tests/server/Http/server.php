@@ -46,6 +46,10 @@ switch($action)
         header('HTTP/1.1 308 Permanent Redirect');
         header('Location:/?a=info');
         exit;
+    case 'redirectOther':
+        header('HTTP/1.1 302 Found');
+        header('Location:https://www.httpbin.org/get?id=1');
+        exit;
     case 'download1':
         if('nb' === (isset($_POST['yurunhttp']) ? $_POST['yurunhttp'] : null) && 'POST' === $_SERVER['REQUEST_METHOD'])
         {
