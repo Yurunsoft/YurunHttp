@@ -228,6 +228,10 @@ class Swoole implements IHandler
                 }
                 $connection->download($path, $saveFilePath);
             }
+            if($isHttp2 && $request->getAttribute(Attributes::HTTP2_NOT_RECV))
+            {
+                return $result;
+            }
             $this->getResponse($connection, $isWebSocket, $isHttp2);
             $statusCode = $this->result->getStatusCode();
             // 状态码为5XX或者0才需要重试

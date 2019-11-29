@@ -159,6 +159,11 @@ abstract class Attributes
     const CUSTOM_LOCATION = 'customLocation';
 
     /**
+     * http2 请求不调用 recv()
+     */
+    const HTTP2_NOT_RECV = 'http2_not_recv';
+
+    /**
      * 重定向计数
      */
     const PRIVATE_REDIRECT_COUNT = '__redirectCount';

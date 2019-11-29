@@ -1,9 +1,10 @@
 <?php
 namespace Yurun\Util;
 
-use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Request;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
+use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 
 class HttpRequest
 {
@@ -741,7 +742,7 @@ class HttpRequest
     {
         $request = $this->buildRequest($url, $requestBody, $method, $contentType)
                         ->withProtocolVersion('2.0')
-                        ->withAttribute('http2_not_recv', true);
+                        ->withAttribute(Attributes::HTTP2_NOT_RECV, true);
         return YurunHttp::send($request, $this->handler);
     }
 
