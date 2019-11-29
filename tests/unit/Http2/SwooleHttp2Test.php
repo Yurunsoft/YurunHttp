@@ -75,7 +75,7 @@ class SwooleHttp2Test extends BaseTest
                     $this->assertGreaterThan(0, $streamId);
                     $response = $client->recv($streamId, 3);
                     $data = $response->json(true);
-                    $this->assertEquals($fd, $data['fd'] ?? null);
+                    $this->assertEquals($fd, isset($data['fd']) ? $data['fd'] : null);
                     $channel->push(1);
                 });
             }

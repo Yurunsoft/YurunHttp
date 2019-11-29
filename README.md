@@ -20,7 +20,9 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 > 每个小版本的更新日志请移步到 Release 查看
 
-v3.3.0 新增支持 `Http2` 客户端
+v3.4.0 新增支持 `Http2` 全双工用法
+
+v3.3.0 新增支持 `Http2` 兼容用法
 
 v3.2.0 新增支持 `Swoole WebSocket` 客户端
 
@@ -41,7 +43,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^3.3.0"
+        "yurunsoft/yurun-http": "^3.4.0"
     }
 }
 ```
@@ -126,7 +128,7 @@ go(function(){
 });
 ```
 
-### Http2 支持
+### Http2 兼容用法
 
 ```php
 $http = new HttpRequest;
@@ -141,6 +143,40 @@ Curl、Swoole Handler 都支持 Http2，但需要注意的是编译时都需要�
 Curl: `php --ri curl`
 
 Swoole: `php --ri swoole`
+
+### Http2 全双工用法
+
+> 该用法仅支持 Swoole
+
+```php
+$uri = new Uri('https://wiki.swoole.com/');
+
+// 客户端初始化和连接
+$client = new \Yurun\Util\YurunHttp\Http2\SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+$client->connect();
+
+// 请求构建
+$httpRequest = new HttpRequest;
+$request = $httpRequest->header('aaa', 'bbb')->buildRequest($uri, [
+    'date'  =>  $i,
+], 'POST', 'json');
+
+for($i = 0; $i < 10; ++$i)
+{
+    go(function() use($client, $request){
+        // 发送（支持在多个协程执行）
+        $streamId = $client->send($request);
+        var_dump('send:' . $streamId);
+
+        // 接收（支持在多个协程执行）
+        $response = $client->recv($streamId, 3);
+        $content = $response->body();
+        var_dump($response);
+    });
+}
+```
+
+> 具体用法请看 `examples/http2Client.php`
 
 ## 捐赠
 
