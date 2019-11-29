@@ -81,7 +81,8 @@ class Curl implements IHandler
     {
         if(null === static::$defaultUA)
         {
-            static::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Curl/%s', YurunHttp::VERSION, curl_version()['version'] ?? 'unknown');
+            $version = curl_version();
+            static::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Curl/%s', YurunHttp::VERSION, isset($version['version']) ? $version['version'] : 'unknown');
         }
         $this->initCookieManager();
     }

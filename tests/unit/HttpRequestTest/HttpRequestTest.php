@@ -290,7 +290,7 @@ class HttpRequestTest extends BaseTest
             $data = $response->json(true);
             $this->assertEquals([
                 'id'    =>  '1',
-            ], $data['args'] ?? null);
+            ], isset($data['args']) ? $data['args'] : null);
         });
     }
 
