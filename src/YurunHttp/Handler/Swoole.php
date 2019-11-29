@@ -2,6 +2,7 @@
 namespace Yurun\Util\YurunHttp\Handler;
 
 use Yurun\Util\YurunHttp;
+use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Swoole\Http2\Request as Http2Request;
@@ -93,7 +94,7 @@ class Swoole implements IHandler
         $this->parseCookies($request, $connection, $http2Request);
         // body
         $hasFile = false;
-        $redirectCount = $request->getAttribute('__redirectCount', 0);
+        $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
         if($redirectCount <= 0)
         {
             $files = $request->getUploadedFiles();
@@ -125,7 +126,7 @@ class Swoole implements IHandler
         $this->parseProxy($request);
         $this->parseNetwork($request);
         // 设置客户端参数
-        $settings = $request->getAttribute('options', []);
+        $settings = $request->getAttribute(Attributes::OPTIONS, []);
         if($settings)
         {
             $connection->set($settings);
@@ -138,7 +139,7 @@ class Swoole implements IHandler
         }
         if(!$request->hasHeader('User-Agent'))
         {
-            $request = $request->withHeader('User-Agent', $request->getAttribute('userAgent', static::$defaultUA));
+            $request = $request->withHeader('User-Agent', $request->getAttribute(Attributes::USER_AGENT, static::$defaultUA));
         }
         $headers = [];
         foreach($request->getHeaders() as $name => $value)
@@ -177,10 +178,10 @@ class Swoole implements IHandler
             $connection = $this->httpConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
             $connection->setDefer(true);
         }
-        $redirectCount = $request->getAttribute('__redirectCount', 0);
+        $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
         $statusCode = 0;
-        $isWebSocket = $request->getAttribute('__websocket');
-        $retry = $request->getAttribute('retry', 0);
+        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET);
+        $retry = $request->getAttribute(Attributes::RETRY, 0);
         for($i = 0; $i <= $retry; ++$i)
         {
             // 构建
@@ -207,7 +208,7 @@ class Swoole implements IHandler
                     throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', socket_strerror($connection->errCode), $connection->errCode), $connection->errCode);
                 }
             }
-            else if(null === ($saveFilePath = $request->getAttribute('saveFilePath')))
+            else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
             {
                 if($isHttp2)
                 {
@@ -227,10 +228,6 @@ class Swoole implements IHandler
                 }
                 $connection->download($path, $saveFilePath);
             }
-            if($isHttp2 && $request->getAttribute('http2_not_recv'))
-            {
-                return $result;
-            }
             $this->getResponse($connection, $isWebSocket, $isHttp2);
             $statusCode = $this->result->getStatusCode();
             // 状态码为5XX或者0才需要重试
@@ -239,9 +236,9 @@ class Swoole implements IHandler
                 break;
             }
         }
-        if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute('followLocation', true))
+        if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true))
         {
-            if(++$redirectCount <= ($maxRedirects = $request->getAttribute('maxRedirects', 10)))
+            if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
             {
                 // 自己实现重定向
                 $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $uri);
@@ -253,7 +250,7 @@ class Swoole implements IHandler
                 {
                     $method = $request->getMethod();
                 }
-                return $this->send($request->withMethod($method)->withUri($uri)->withAttribute('__redirectCount', $redirectCount));
+                return $this->send($request->withMethod($method)->withUri($uri)->withAttribute(Attributes::PRIVATE_REDIRECT_COUNT, $redirectCount));
             }
             else
             {
@@ -278,7 +275,7 @@ class Swoole implements IHandler
         {
             $websocketClient = new \Yurun\Util\YurunHttp\WebSocket\Swoole;
         }
-        $this->send($request->withAttribute('__websocket', true));
+        $this->send($request->withAttribute(Attributes::PRIVATE_WEBSOCKET, true));
         $websocketClient->init($this, $request, $this->result);
         return $websocketClient;
     }
@@ -409,11 +406,11 @@ class Swoole implements IHandler
      */
     private function parseSSL(&$request)
     {
-        $settings = $request->getAttribute('options', []);
-        if($request->getAttribute('isVerifyCA', false))
+        $settings = $request->getAttribute(Attributes::OPTIONS, []);
+        if($request->getAttribute(Attributes::IS_VERIFY_CA, false))
         {
             $settings['ssl_verify_peer'] = true;
-            $caCert =$request->getAttribute('caCert');
+            $caCert =$request->getAttribute(Attributes::CA_CERT);
             if(null !== $caCert)
             {
                 $settings['ssl_cafile'] = $caCert;
@@ -423,17 +420,17 @@ class Swoole implements IHandler
         {
             $settings['ssl_verify_peer'] = false;
         }
-        $certPath = $request->getAttribute('certPath', '');
+        $certPath = $request->getAttribute(Attributes::CERT_PATH, '');
         if('' !== $certPath)
         {
             $settings['ssl_cert_file'] = $certPath;
         }
-        $keyPath = $request->getAttribute('keyPath' , '');
+        $keyPath = $request->getAttribute(Attributes::KEY_PATH , '');
         if('' !== $keyPath)
         {
             $settings['ssl_key_file'] = $keyPath;
         }
-        $request = $request->withAttribute('options', $settings);
+        $request = $request->withAttribute(Attributes::OPTIONS, $settings);
     }
 
     /**
@@ -443,27 +440,27 @@ class Swoole implements IHandler
      */
     private function parseProxy(&$request)
     {
-        $settings = $request->getAttribute('options', []);
-        if($request->getAttribute('useProxy', false))
+        $settings = $request->getAttribute(Attributes::OPTIONS, []);
+        if($request->getAttribute(Attributes::USE_PROXY, false))
         {
-            $type = $request->getAttribute('proxy.type');
+            $type = $request->getAttribute(Attributes::PROXY_TYPE);
             switch($type)
             {
                 case 'http':
-                    $settings['http_proxy_host'] = $request->getAttribute('proxy.server');
-                    $settings['http_proxy_port'] = $request->getAttribute('proxy.port');
-                    $settings['http_proxy_user'] = $request->getAttribute('proxy.username', '');
-                    $settings['http_proxy_password'] = $request->getAttribute('proxy.password', '');
+                    $settings['http_proxy_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
+                    $settings['http_proxy_port'] = $request->getAttribute(Attributes::PROXY_PORT);
+                    $settings['http_proxy_user'] = $request->getAttribute(Attributes::PROXY_USERNAME, '');
+                    $settings['http_proxy_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, '');
                     break;
                 case 'socks5':
-                    $settings['socks5_host'] = $request->getAttribute('proxy.server');
-                    $settings['socks5_port'] = $request->getAttribute('proxy.port');
-                    $settings['socks5_username'] = $request->getAttribute('proxy.username', '');
-                    $settings['socks5_password'] = $request->getAttribute('proxy.password', '');
+                    $settings['socks5_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
+                    $settings['socks5_port'] = $request->getAttribute(Attributes::PROXY_PORT);
+                    $settings['socks5_username'] = $request->getAttribute(Attributes::PROXY_USERNAME, '');
+                    $settings['socks5_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, '');
                     break;
             }
         }
-        $request = $request->withAttribute('options', $settings);
+        $request = $request->withAttribute(Attributes::OPTIONS, $settings);
     }
     
     /**
@@ -473,19 +470,19 @@ class Swoole implements IHandler
      */
     private function parseNetwork(&$request)
     {
-        $settings = $request->getAttribute('options', []);
+        $settings = $request->getAttribute(Attributes::OPTIONS, []);
         // 用户名密码认证处理
-        $username = $request->getAttribute('username');
+        $username = $request->getAttribute(Attributes::USERNAME);
         if(null != $username)
         {
-            $auth = base64_encode($username . ':' . $request->getAttribute('password', ''));
+            $auth = base64_encode($username . ':' . $request->getAttribute(Attributes::PASSWORD, ''));
             $request = $request->withHeader('Authorization', 'Basic ' . $auth);
         }
         // 超时
-        $settings['timeout'] = $request->getAttribute('timeout', 30000) / 1000;
+        $settings['timeout'] = $request->getAttribute(Attributes::TIMEOUT, 30000) / 1000;
         // 长连接
-        $settings['keep_alive'] = $request->getAttribute('keep_alive', true);
-        $request = $request->withAttribute('options', $settings);
+        $settings['keep_alive'] = $request->getAttribute(Attributes::KEEP_ALIVE, true);
+        $request = $request->withAttribute(Attributes::OPTIONS, $settings);
     }
 
     /**
