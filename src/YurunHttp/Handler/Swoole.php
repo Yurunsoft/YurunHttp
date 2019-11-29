@@ -1,22 +1,19 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
-use Swoole\Coroutine\Http\Client;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Swoole\Http2\Request as Http2Request;
 use Yurun\Util\YurunHttp\Traits\THandler;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
-use Swoole\Coroutine\Http2\Client as Http2Client;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
-use Yurun\Util\YurunHttp\Handler\Swoole\TSwooleHttp2;
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
 use Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager;
 use Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager;
 
 class Swoole implements IHandler
 {
-    use TCookieManager, THandler, TSwooleHttp2;
+    use TCookieManager, THandler;
 
     /**
      * Http 连接管理器
@@ -50,7 +47,6 @@ class Swoole implements IHandler
     {
         $this->httpConnectionManager->close();
         $this->http2ConnectionManager->close();
-        $this->stopRecvCo();
     }
 
     /**
@@ -323,6 +319,9 @@ class Swoole implements IHandler
         $result = new Response($success ? $response->data: '', $success ? $response->statusCode : 0);
         if($success)
         {
+            // streamId
+            $result = $result->withStreamId($response->streamId);
+
             // headers
             foreach($response->headers as $name => $value)
             {
