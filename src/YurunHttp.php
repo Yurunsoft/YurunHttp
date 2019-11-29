@@ -20,6 +20,11 @@ abstract class YurunHttp
     private static $attributes = [];
 
     /**
+     * 版本号
+     */
+    const VERSION = '3.4.0';
+
+    /**
      * 设置默认处理器类
      * @param string $class
      * @return void
@@ -68,6 +73,10 @@ abstract class YurunHttp
         }
         $handler->send($request);
         $response = $handler->recv();
+        if(!$response)
+        {
+            return $response;
+        }
         $response = $response->withTotalTime(microtime(true) - $time);
         return $response;
     }

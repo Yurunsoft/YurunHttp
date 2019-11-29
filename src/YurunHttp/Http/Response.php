@@ -43,6 +43,13 @@ class Response extends Psr7Response
     protected $errno;
 
     /**
+     * Http2 streamId
+     *
+     * @var int
+     */
+    protected $streamId;
+
+    /**
      * Retrieve cookies.
      *
      * Retrieves cookies sent by the client to the server.
@@ -280,4 +287,28 @@ class Response extends Psr7Response
         $self->errno = $errno;
         return $self;
     }
+
+    /**
+     * 设置 Http2 streamId
+     *
+     * @param int $streamId
+     * @return static
+     */
+    public function withStreamId($streamId)
+    {
+        $self = clone $this;
+        $self->streamId = $streamId;
+        return $self;
+    }
+
+    /**
+     * Get http2 streamId
+     *
+     * @return int
+     */ 
+    public function getStreamId()
+    {
+        return $this->streamId;
+    }
+
 }

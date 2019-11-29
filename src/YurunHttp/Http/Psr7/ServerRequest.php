@@ -3,6 +3,7 @@ namespace Yurun\Util\YurunHttp\Http\Psr7;
 
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Psr\Http\Message\ServerRequestInterface;
+use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\RequestHeader;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\RequestMethod;
@@ -310,7 +311,7 @@ class ServerRequest extends Request implements ServerRequestInterface
         }
         else
         {
-            return $default;
+            return YurunHttp::getAttribute($name, $default);
         }
     }
 
