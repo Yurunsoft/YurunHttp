@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
+use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Swoole\Http2\Request as Http2Request;
@@ -36,8 +37,19 @@ class Swoole implements IHandler
      */
     private $result;
 
+    /**
+     * 本 Handler 默认的 User-Agent
+     *
+     * @var string
+     */
+    private static $defaultUA;
+
     public function __construct()
     {
+        if(null === static::$defaultUA)
+        {
+            static::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Swoole/%s', YurunHttp::VERSION, defined('SWOOLE_VERSION') ? SWOOLE_VERSION : 'unknown');
+        }
         $this->initCookieManager();
         $this->httpConnectionManager = new HttpConnectionManager;
         $this->http2ConnectionManager = new Http2ConnectionManager;
@@ -123,6 +135,10 @@ class Swoole implements IHandler
         if(!$hasFile && !$request->hasHeader('Content-Type'))
         {
             $request = $request->withHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
+        }
+        if(!$request->hasHeader('User-Agent'))
+        {
+            $request = $request->withHeader('User-Agent', $request->getAttribute('userAgent', static::$defaultUA));
         }
         $headers = [];
         foreach($request->getHeaders() as $name => $value)

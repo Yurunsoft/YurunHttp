@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler;
 
+use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\FormDataBuilder;
@@ -68,8 +69,19 @@ class Curl implements IHandler
         'socks5'    =>  CURLPROXY_SOCKS5,
     );
 
+    /**
+     * 本 Handler 默认的 User-Agent
+     *
+     * @var string
+     */
+    private static $defaultUA;
+
     public function __construct()
     {
+        if(null === static::$defaultUA)
+        {
+            static::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Curl/%s', YurunHttp::VERSION, curl_version()['version'] ?? 'unknown');
+        }
         $this->initCookieManager();
     }
 
@@ -424,6 +436,10 @@ class Curl implements IHandler
      */
     private function parseHeaders()
     {
+        if(!$this->request->hasHeader('User-Agent'))
+        {
+            $this->request = $this->request->withHeader('User-Agent', $this->request->getAttribute('userAgent', static::$defaultUA));
+        }
         curl_setopt($this->handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat());
     }
     
