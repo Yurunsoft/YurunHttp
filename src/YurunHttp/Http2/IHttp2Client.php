@@ -37,10 +37,29 @@ interface IHttp2Client
      * 成功返回streamId，失败返回false
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
-     * @param bool $dropRecvResponse
+     * @param bool $pipeline 默认send方法在发送请求之后，会结束当前的Http2 Stream，启用PIPELINE后，底层会保持stream流，可以多次调用write方法，向服务器发送数据帧，请参考write方法。
+     * @param bool $dropRecvResponse 丢弃接收到的响应数据
      * @return int|bool
      */
-    public function send($request, $dropRecvResponse = false);
+    public function send($request, $pipeline = false, $dropRecvResponse = false);
+
+    /**
+     * 向一个流写入数据帧
+     *
+     * @param int $streamId
+     * @param string $data
+     * @param boolean $end 是否关闭流
+     * @return bool
+     */
+    public function write($streamId, $data, $end = false);
+
+    /**
+     * 关闭一个流
+     *
+     * @param int $streamId
+     * @return bool
+     */
+    public function end($streamId);
 
     /**
      * 接收数据

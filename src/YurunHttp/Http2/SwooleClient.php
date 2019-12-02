@@ -3,6 +3,7 @@ namespace Yurun\Util\YurunHttp\Http2;
 
 use Swoole\Coroutine;
 use Swoole\Coroutine\Channel;
+use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
 class SwooleClient implements IHttp2Client
@@ -128,10 +129,11 @@ class SwooleClient implements IHttp2Client
      * 成功返回streamId，失败返回false
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param bool $pipeline 默认send方法在发送请求之后，会结束当前的Http2 Stream，启用PIPELINE后，底层会保持stream流，可以多次调用write方法，向服务器发送数据帧，请参考write方法。
      * @param bool $dropRecvResponse 丢弃接收到的响应数据
      * @return int|bool
      */
-    public function send($request, $dropRecvResponse = false)
+    public function send($request, $pipeline = false, $dropRecvResponse = false)
     {
         if('2.0' !== $request->getProtocolVersion())
         {
@@ -142,6 +144,7 @@ class SwooleClient implements IHttp2Client
         {
             throw new \RuntimeException(sprintf('Current http2 connection instance just support %s://%s:%s, does not support %s', $this->ssl ? 'https' : 'http', $this->host, $this->port, $uri->__toString()));
         }
+        $request = $request->withAttribute(Attributes::HTTP2_PIPELINE, $pipeline);
         $this->handler->buildRequest($request, $this->http2Client, $http2Request);
         $streamId = $this->http2Client->send($http2Request);
         if(!$streamId)
@@ -153,6 +156,30 @@ class SwooleClient implements IHttp2Client
             $this->recvChannels[$streamId] = new Channel(1);
         }
         return $streamId;
+    }
+
+    /**
+     * 向一个流写入数据帧
+     *
+     * @param int $streamId
+     * @param string $data
+     * @param boolean $end 是否关闭流
+     * @return bool
+     */
+    public function write($streamId, $data, $end = false)
+    {
+        return $this->http2Client->write($streamId, $data, $end);
+    }
+
+    /**
+     * 关闭一个流
+     *
+     * @param int $streamId
+     * @return bool
+     */
+    public function end($streamId)
+    {
+        return $this->http2Client->write($streamId, '', true);
     }
 
     /**
