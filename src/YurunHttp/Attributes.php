@@ -164,6 +164,11 @@ abstract class Attributes
     const HTTP2_NOT_RECV = 'http2_not_recv';
 
     /**
+     * 启用 Http2 pipeline
+     */
+    const HTTP2_PIPELINE = 'http2_pipeline';
+
+    /**
      * 重定向计数
      */
     const PRIVATE_REDIRECT_COUNT = '__redirectCount';

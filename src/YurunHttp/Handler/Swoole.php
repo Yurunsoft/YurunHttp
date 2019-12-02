@@ -149,6 +149,7 @@ class Swoole implements IHandler
         if($isHttp2)
         {
             $http2Request->headers = $headers;
+            $http2Request->pipeline = $request->getAttribute(Attributes::HTTP2_PIPELINE, false);
         }
         else
         {
@@ -311,12 +312,7 @@ class Swoole implements IHandler
         $cookies = $this->cookieManager->getRequestCookies($request->getUri());
         if($http2Request)
         {
-            $cookie = [];
-            foreach($cookies as $name => $value)
-            {
-                $cookie[] = $name . '=' . urlencode($value);
-            }
-            $request = $request->withHeader('cookie', implode(',', $cookie));
+            $http2Request->cookies = $cookies;
         }
         else
         {
