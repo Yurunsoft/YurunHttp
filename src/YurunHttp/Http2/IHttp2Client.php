@@ -7,8 +7,9 @@ interface IHttp2Client
      * @param string $host
      * @param int $port
      * @param bool $ssl
+     * @param mixed $handler
      */
-    public function __construct($host, $port, $ssl);
+    public function __construct($host, $port, $ssl, $handler = null);
 
     /**
      * 连接
@@ -36,9 +37,10 @@ interface IHttp2Client
      * 成功返回streamId，失败返回false
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param bool $dropRecvResponse
      * @return int|bool
      */
-    public function send($request);
+    public function send($request, $dropRecvResponse = false);
 
     /**
      * 接收数据

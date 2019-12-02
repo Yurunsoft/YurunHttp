@@ -50,6 +50,13 @@ class SwooleClient implements IHttp2Client
     private $recvChannels = [];
 
     /**
+     * 服务端推送数据队列长度
+     *
+     * @var integer
+     */
+    private $serverPushQueueLength = 16;
+
+    /**
      * @param string $host
      * @param int $port
      * @param bool $ssl
@@ -121,9 +128,10 @@ class SwooleClient implements IHttp2Client
      * 成功返回streamId，失败返回false
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param bool $dropRecvResponse 丢弃接收到的响应数据
      * @return int|bool
      */
-    public function send($request)
+    public function send($request, $dropRecvResponse = false)
     {
         if('2.0' !== $request->getProtocolVersion())
         {
@@ -135,12 +143,16 @@ class SwooleClient implements IHttp2Client
             throw new \RuntimeException(sprintf('Current http2 connection instance just support %s://%s:%s, does not support %s', $this->ssl ? 'https' : 'http', $this->host, $this->port, $uri->__toString()));
         }
         $this->handler->buildRequest($request, $this->http2Client, $http2Request);
-        $result = $this->http2Client->send($http2Request);
-        if(!$result)
+        $streamId = $this->http2Client->send($http2Request);
+        if(!$streamId)
         {
             $this->close();
         }
-        return $result;
+        if(!$dropRecvResponse)
+        {
+            $this->recvChannels[$streamId] = new Channel(1);
+        }
+        return $streamId;
     }
 
     /**
@@ -154,12 +166,18 @@ class SwooleClient implements IHttp2Client
     {
         if(isset($this->recvChannels[$streamId]))
         {
-            throw new \RuntimeException(sprintf('Cannot listen to stream #%s repeatedly', $streamId));
+            $channel = $this->recvChannels[$streamId];
         }
-        $this->recvChannels[$streamId] = $channel = new Channel(1);
+        else
+        {
+            $this->recvChannels[$streamId] = $channel = new Channel(-1 === $streamId ? $this->serverPushQueueLength : 1);
+        }
         $swooleResponse = $channel->pop($timeout);
-        unset($this->recvChannels[$streamId]);
-        $channel->close();
+        if(-1 !== $streamId)
+        {
+            unset($this->recvChannels[$streamId]);
+            $channel->close();
+        }
         $response = $this->handler->buildHttp2Response($swooleResponse);
         return $response;
     }
@@ -196,7 +214,7 @@ class SwooleClient implements IHttp2Client
                     return;
                 }
                 $streamId = $swooleResponse->streamId;
-                if(isset($this->recvChannels[$streamId]) || isset($this->recvChannels[$streamId = -1]))
+                if(isset($this->recvChannels[$streamId]) || (0 === $streamId % 2 && isset($this->recvChannels[$streamId = -1])))
                 {
                     $this->recvChannels[$streamId]->push($swooleResponse);
                 }
@@ -242,6 +260,30 @@ class SwooleClient implements IHttp2Client
     public function getRecvingCount()
     {
         return count($this->recvChannels);
+    }
+
+    /**
+     * Get 服务端推送数据队列长度
+     *
+     * @return integer
+     */ 
+    public function getServerPushQueueLength()
+    {
+        return $this->serverPushQueueLength;
+    }
+
+    /**
+     * Set 服务端推送数据队列长度
+     *
+     * @param integer $serverPushQueueLength  服务端推送数据队列长度
+     *
+     * @return self
+     */ 
+    public function setServerPushQueueLength($serverPushQueueLength)
+    {
+        $this->serverPushQueueLength = $serverPushQueueLength;
+
+        return $this;
     }
 
 }

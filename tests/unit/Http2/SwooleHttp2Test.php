@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp\Test\Http2;
 
+use Swoole\Coroutine;
 use Yurun\Util\HttpRequest;
 use Swoole\Coroutine\Channel;
 use Yurun\Util\YurunHttp\Http2\SwooleClient;
@@ -46,6 +47,10 @@ class SwooleHttp2Test extends BaseTest
         $this->call(function(){
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+            go(function() use($client){
+                $result = $client->recv();
+                $this->assertFalse($result->success);
+            });
 
             $this->assertTrue($client->connect());
 
@@ -57,6 +62,8 @@ class SwooleHttp2Test extends BaseTest
 
             $streamId = $client->send($request);
             $this->assertGreaterThan(0, $streamId);
+
+            Coroutine::sleep(1);
             
             $response = $client->recv($streamId, 3);
             $data = $response->json(true);

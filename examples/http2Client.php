@@ -10,11 +10,21 @@ use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 go(function(){
-    $uri = new Uri('https://www.taobao.com/');
+    $uri = new Uri('http://www.taobao.com/');
 
     $client = new \Yurun\Util\YurunHttp\Http2\SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
     $client->connect();
 
+    // 接收服务端主动推送
+    $client->setServerPushQueueLength(16); // 接收服务端推送的队列长度
+    go(function() use($client){
+        do {
+            $response = $client->recv();
+            var_dump($response->body());
+        } while($response->success);
+    });
+
+    // 客户端请求和响应获取
     $httpRequest = new HttpRequest;
     
     $count = 10;
