@@ -150,12 +150,12 @@ class Swoole implements IHandler
         {
             $http2Request->headers = $headers;
             $http2Request->pipeline = $request->getAttribute(Attributes::HTTP2_PIPELINE, false);
+            $http2Request->path = $uri->getPath();
         }
         else
         {
             $connection->setHeaders($headers);
         }
-        $http2Request->path = $uri->getPath();
     }
 
     /**
