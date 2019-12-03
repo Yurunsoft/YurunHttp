@@ -205,7 +205,7 @@ class SwooleClient implements IHttp2Client
             unset($this->recvChannels[$streamId]);
             $channel->close();
         }
-        $response = $this->handler->buildHttp2Response($swooleResponse);
+        $response = $this->handler->buildHttp2Response($this->http2Client, $swooleResponse);
         return $response;
     }
 

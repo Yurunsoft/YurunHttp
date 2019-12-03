@@ -150,6 +150,7 @@ class Swoole implements IHandler
         {
             $http2Request->headers = $headers;
             $http2Request->pipeline = $request->getAttribute(Attributes::HTTP2_PIPELINE, false);
+            $http2Request->path = $uri->getPath();
         }
         else
         {
@@ -213,7 +214,6 @@ class Swoole implements IHandler
             {
                 if($isHttp2)
                 {
-                    $http2Request->path = $path;
                     $result = $connection->send($http2Request);
                 }
                 else
@@ -323,13 +323,14 @@ class Swoole implements IHandler
     /**
      * 构建 Http2 Response
      *
+     * @param \Swoole\Coroutine\Http2\Client $connection
      * @param \Swoole\Http2\Response|bool $response
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function buildHttp2Response($response)
+    public function buildHttp2Response($connection, $response)
     {
         $success = false !== $response;
-        $result = new Response($success ? $response->data: '', $success ? $response->statusCode : 0);
+        $result = new Response($response->data ?? '', $success ? $response->statusCode : 0);
         if($success)
         {
             // streamId
@@ -353,6 +354,11 @@ class Swoole implements IHandler
             }
             $result = $result->withCookieOriginParams($cookies);
         }
+        if($connection)
+        {
+            $result = $result->withError(socket_strerror($connection->errCode))
+                             ->withErrno($connection->errCode);
+        }
         return $result;
     }
 
@@ -366,7 +372,7 @@ class Swoole implements IHandler
         if($isHttp2)
         {
             $response = $connection->recv();
-            $this->result = $this->buildHttp2Response($response);
+            $this->result = $this->buildHttp2Response($connection, $response);
         }
         else
         {
@@ -392,9 +398,9 @@ class Swoole implements IHandler
                 }
                 $this->result = $this->result->withCookieOriginParams($cookies);
             }
+            $this->result = $this->result->withError(socket_strerror($connection->errCode))
+                                         ->withErrno($connection->errCode);
         }
-        $this->result = $this->result->withError(socket_strerror($connection->errCode))
-                                     ->withErrno($connection->errCode);
         return $this->result;
     }
 
