@@ -330,7 +330,7 @@ class Swoole implements IHandler
     public function buildHttp2Response($connection, $response)
     {
         $success = false !== $response;
-        $result = new Response($success ? $response->data: '', $success ? $response->statusCode : 0);
+        $result = new Response($response->data ?? '', $success ? $response->statusCode : 0);
         if($success)
         {
             // streamId
