@@ -155,6 +155,7 @@ class Swoole implements IHandler
         {
             $connection->setHeaders($headers);
         }
+        $http2Request->path = $uri->getPath();
     }
 
     /**
@@ -213,7 +214,6 @@ class Swoole implements IHandler
             {
                 if($isHttp2)
                 {
-                    $http2Request->path = $path;
                     $result = $connection->send($http2Request);
                 }
                 else
