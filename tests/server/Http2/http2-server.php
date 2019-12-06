@@ -19,6 +19,14 @@ $http->on('request', function (\Swoole\Http\Request $request, \Swoole\Http\Respo
                 'fd'    =>  $request->fd,
             ]));
             break;
+        case '/get':
+            $response->header('trailer', 'yurun');
+            $response->trailer('yurun', 'niubi');
+            $response->end(json_encode([
+                'date'  =>  $request->get['date'] ?? time(),
+                'fd'    =>  $request->fd,
+            ]));
+            break;
         case '/sleep':
             $data = json_decode($request->rawcontent(), true);
             Coroutine::sleep(1);
