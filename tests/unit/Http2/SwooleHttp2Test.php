@@ -153,7 +153,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
-            if(version_compare(SWOOLE_VERSION, '<', '4.4.13'))
+            if(version_compare(SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
                 $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', SWOOLE_VERSION));
@@ -195,7 +195,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
-            if(version_compare(SWOOLE_VERSION, '<', '4.4.13'))
+            if(version_compare(SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
                 $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', SWOOLE_VERSION));
