@@ -146,7 +146,6 @@ class SwooleHttp2Test extends BaseTest
             $streamId = $client->send($request, true);
             $this->assertGreaterThan(0, $streamId);
             $this->assertTrue($client->write($streamId, substr($data, 2), true));
-            // $this->assertTrue($client->end($streamId));
 
             $response = $client->recv($streamId);
             $data = $response->json(true);
@@ -154,8 +153,15 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
-            // Swoole 4.4.12 BUG，暂时无法获取
-            // $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
+            if(version_compare(SWOOLE_VERSION, '<', '4.4.13'))
+            {
+                // Swoole <= 4.4.12 BUG
+                $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', SWOOLE_VERSION));
+            }
+            else
+            {
+                $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
+            }
             $client->close();
         });
     }
@@ -189,10 +195,70 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
-            // Swoole 4.4.12 BUG，暂时无法获取
-            // $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
-            
+            if(version_compare(SWOOLE_VERSION, '<', '4.4.13'))
+            {
+                // Swoole <= 4.4.12 BUG
+                $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', SWOOLE_VERSION));
+            }
+            else
+            {
+                $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
+            }
             $client->close();
+        });
+    }
+
+    /**
+     * $response->getRequest()
+     *
+     * @return void
+     */
+    public function testHttp2ResponseGetRequest()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $http->protocolVersion = '2.0';
+            $http->timeout = 3000;
+
+            $date = strtotime('2017-03-24 17:12:14');
+            $response = $http->post($this->http2Host, [
+                'date'  =>  $date,
+            ], 'json');
+            $data = $response->json(true);
+            $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
+            $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
+            $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
+            $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
+            $this->assertNotNull($response->getRequest());
+            $this->assertEquals($this->http2Host, $response->getRequest()->getUri());
+        });
+    }
+
+    /**
+     * $response->getRequest()
+     *
+     * @return void
+     */
+    public function testHttp2ResponseGetRequest2()
+    {
+        $this->call(function(){
+            $uri = new Uri($this->http2Host);
+            $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+            $this->assertTrue($client->connect());
+
+            $httpRequest = new HttpRequest;
+            $date = strtotime('2017-03-24 17:12:14');
+            $request = $httpRequest->buildRequest($this->http2Host, [
+                'date'  =>  $date,
+            ], 'POST', 'json');
+
+            $streamId = $client->send($request);
+            
+            $response = $client->recv($streamId, 3);
+            $data = $response->json(true);
+            $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
+            $this->assertNotNull($response->getRequest());
+            $this->assertEquals($this->http2Host, $response->getRequest()->getUri());
         });
     }
 

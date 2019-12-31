@@ -417,4 +417,21 @@ class HttpRequestTest extends BaseTest
         });
     }
 
+    /**
+     * $response->getRequest()
+     *
+     * @return void
+     */
+    public function testResponseGetRequest()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $response = $http->get($this->host);
+            $this->assertResponse($response);
+            $this->assertEquals($response->body(), 'YurunHttp');
+            $this->assertNotNull($response->getRequest());
+            $this->assertEquals($this->host, $response->getRequest()->getUri());
+        });
+    }
+
 }

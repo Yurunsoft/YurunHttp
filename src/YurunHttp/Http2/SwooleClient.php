@@ -58,6 +58,13 @@ class SwooleClient implements IHttp2Client
     private $serverPushQueueLength = 16;
 
     /**
+     * 请求集合
+     *
+     * @var \Yurun\Util\YurunHttp\Http\Request[]
+     */
+    private $requestMap = [];
+
+    /**
      * @param string $host
      * @param int $port
      * @param bool $ssl
@@ -154,6 +161,7 @@ class SwooleClient implements IHttp2Client
         if(!$dropRecvResponse)
         {
             $this->recvChannels[$streamId] = new Channel(1);
+            $this->requestMap[$streamId] = $request;
         }
         return $streamId;
     }
@@ -205,7 +213,16 @@ class SwooleClient implements IHttp2Client
             unset($this->recvChannels[$streamId]);
             $channel->close();
         }
-        $response = $this->handler->buildHttp2Response($this->http2Client, $swooleResponse);
+        if(isset($this->requestMap[$streamId]))
+        {
+            $request = $this->requestMap[$streamId];
+            unset($this->requestMap[$streamId]);
+        }
+        else
+        {
+            $request = null;
+        }
+        $response = $this->handler->buildHttp2Response($request, $this->http2Client, $swooleResponse);
         return $response;
     }
 
