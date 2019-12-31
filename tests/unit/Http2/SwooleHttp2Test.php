@@ -259,6 +259,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertNotNull($response->getRequest());
             $this->assertEquals($this->http2Host, $response->getRequest()->getUri());
+            $client->close();
         });
     }
 
