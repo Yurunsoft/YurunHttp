@@ -153,6 +153,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
+            $client->close();
             if(version_compare(SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
@@ -162,7 +163,6 @@ class SwooleHttp2Test extends BaseTest
             {
                 $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
             }
-            $client->close();
         });
     }
 
@@ -195,6 +195,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
+            $client->close();
             if(version_compare(SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
@@ -204,7 +205,6 @@ class SwooleHttp2Test extends BaseTest
             {
                 $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
             }
-            $client->close();
         });
     }
 
@@ -259,6 +259,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertNotNull($response->getRequest());
             $this->assertEquals($this->http2Host, $response->getRequest()->getUri());
+            $client->close();
         });
     }
 
