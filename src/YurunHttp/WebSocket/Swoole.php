@@ -130,14 +130,15 @@ class Swoole implements IWebSocketClient
     /**
      * 接收数据
      *
+     * @param double|null $timeout 超时时间，单位：秒。默认为 null 不限制
      * @return mixed
      */
-    public function recv()
+    public function recv($timeout = null)
     {
-        $result = $this->handler->recv();
+        $result = $this->handler->recv($timeout);
         if(!$result)
         {
-            throw new WebSocketException(sprintf('Recv Failed, error: %s, errorCode: %s', socket_strerror($this->handler->errCode), $this->handler->errCode), $this->handler->errCode);
+            return false;
         }
         return $result->data;
     }

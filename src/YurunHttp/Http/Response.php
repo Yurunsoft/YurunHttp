@@ -50,6 +50,13 @@ class Response extends Psr7Response
     protected $streamId;
 
     /**
+     * Request
+     * 
+     * @var \Yurun\Util\YurunHttp\Http\Request
+     */
+    protected $request;
+
+    /**
      * Retrieve cookies.
      *
      * Retrieves cookies sent by the client to the server.
@@ -309,6 +316,30 @@ class Response extends Psr7Response
     public function getStreamId()
     {
         return $this->streamId;
+    }
+
+    /**
+     * 设置请求体
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request
+     *  $request
+     * @return static
+     */
+    public function withRequest($request)
+    {
+        $self = clone $this;
+        $self->request = $request;
+        return $self;
+    }
+
+    /**
+     * Get request
+     *
+     * @return \Yurun\Util\YurunHttp\Http\Request
+     */ 
+    public function getRequest()
+    {
+        return $this->request;
     }
 
 }

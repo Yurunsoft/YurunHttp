@@ -296,9 +296,10 @@ class Curl implements IHandler
             $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
             $cookies[$cookieItem->name] = (array)$cookieItem;
         }
-        $this->result = $this->result->withCookieOriginParams($cookies)
-                                    ->withError(curl_error($this->handler))
-                                    ->withErrno(curl_errno($this->handler));
+        $this->result = $this->result->withRequest($this->request)
+                                     ->withCookieOriginParams($cookies)
+                                     ->withError(curl_error($this->handler))
+                                     ->withErrno(curl_errno($this->handler));
     }
     
     /**

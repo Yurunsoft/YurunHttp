@@ -243,7 +243,7 @@ class Swoole implements IHandler
             {
                 return $result;
             }
-            $this->getResponse($connection, $isWebSocket, $isHttp2);
+            $this->getResponse($request, $connection, $isWebSocket, $isHttp2);
             $statusCode = $this->result->getStatusCode();
             // 状态码为5XX或者0才需要重试
             if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
@@ -333,11 +333,12 @@ class Swoole implements IHandler
     /**
      * 构建 Http2 Response
      *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param \Swoole\Coroutine\Http2\Client $connection
      * @param \Swoole\Http2\Response|bool $response
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function buildHttp2Response($connection, $response)
+    public function buildHttp2Response($request, $connection, $response)
     {
         $success = false !== $response;
         $result = new Response($response->data ?? '', $success ? $response->statusCode : 0);
@@ -369,20 +370,24 @@ class Swoole implements IHandler
             $result = $result->withError(socket_strerror($connection->errCode))
                              ->withErrno($connection->errCode);
         }
-        return $result;
+        return $result->withRequest($request);
     }
 
     /**
      * 获取响应对象
      *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client $connection
+     * @param bool $isWebSocket
+     * @param bool $isHttp2
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse($connection, $isWebSocket, $isHttp2)
+    private function getResponse($request, $connection, $isWebSocket, $isHttp2)
     {
         if($isHttp2)
         {
             $response = $connection->recv();
-            $this->result = $this->buildHttp2Response($connection, $response);
+            $this->result = $this->buildHttp2Response($request, $connection, $response);
         }
         else
         {
@@ -408,7 +413,8 @@ class Swoole implements IHandler
                 }
                 $this->result = $this->result->withCookieOriginParams($cookies);
             }
-            $this->result = $this->result->withError(socket_strerror($connection->errCode))
+            $this->result = $this->result->withRequest($request)
+                                         ->withError(socket_strerror($connection->errCode))
                                          ->withErrno($connection->errCode);
         }
         return $this->result;
