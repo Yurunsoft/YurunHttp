@@ -684,6 +684,10 @@ class HttpRequest
      */
     public function buildRequest($url = null, $requestBody = null, $method = 'GET', $contentType = null)
     {
+        if(null === $url)
+        {
+            $url = $this->url;
+        }
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
         $request = new Request($url, $this->headers, $body, $method);
         $request = $request->withUploadedFiles($files)
