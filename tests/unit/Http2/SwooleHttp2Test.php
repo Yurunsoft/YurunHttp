@@ -74,6 +74,7 @@ class SwooleHttp2Test extends BaseTest
         $this->call(function(){
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+            $client->setTimeout(3);
             go(function() use($client){
                 $result = $client->recv();
                 $this->assertFalse($result->success);
@@ -132,6 +133,8 @@ class SwooleHttp2Test extends BaseTest
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
 
             $this->assertTrue($client->connect());
+
+            $client->setTimeout(3);
 
             $http = new HttpRequest;
             $http->protocolVersion = '2.0';

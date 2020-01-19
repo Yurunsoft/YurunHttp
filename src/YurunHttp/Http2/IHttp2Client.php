@@ -105,4 +105,19 @@ interface IHttp2Client
      */
     public function getRecvingCount();
 
+    /**
+     * 设置超时时间，单位：秒
+     *
+     * @param float|null $timeout
+     * @return void
+     */
+    public function setTimeout($timeout);
+
+    /**
+     * 获取超时时间，单位：秒
+     *
+     * @return float|null
+     */
+    public function getTimeout();
+
 }

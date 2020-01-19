@@ -65,6 +65,13 @@ class SwooleClient implements IHttp2Client
     private $requestMap = [];
 
     /**
+     * 超时时间，单位：秒
+     *
+     * @var float
+     */
+    private $timeout;
+
+    /**
      * @param string $host
      * @param int $port
      * @param bool $ssl
@@ -96,6 +103,12 @@ class SwooleClient implements IHttp2Client
         if($client)
         {
             $this->http2Client = $client;
+            if($this->timeout)
+            {
+                $this->http2Client->set([
+                    'timeout'   =>  $this->timeout,
+                ]);
+            }
             $this->startRecvCo();
             return true;
         }
@@ -328,6 +341,33 @@ class SwooleClient implements IHttp2Client
         $this->serverPushQueueLength = $serverPushQueueLength;
 
         return $this;
+    }
+
+    /**
+     * 设置超时时间，单位：秒
+     *
+     * @param float|null $timeout
+     * @return void
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
+        if($this->http2Client)
+        {
+            $this->http2Client->set([
+                'timeout'   =>  $timeout,
+            ]);
+        }
+    }
+
+    /**
+     * 获取超时时间，单位：秒
+     *
+     * @return float|null
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
     }
 
 }
