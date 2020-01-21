@@ -517,7 +517,6 @@ class Swoole implements IHandler
         return null;
     }
 
-
     /**
      * Get http 连接管理器
      *
@@ -537,4 +536,17 @@ class Swoole implements IHandler
     {
         return $this->http2ConnectionManager;
     }
+    
+    /**
+     * 批量运行并发请求
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request[] $requests
+     * @param float|null $timeout 超时时间，单位：秒。默认为 null 不限制
+     * @return \Yurun\Util\YurunHttp\Http\Response[]
+     */
+    public function coBatch($requests, $timeout = null)
+    {
+
+    }
+
 }

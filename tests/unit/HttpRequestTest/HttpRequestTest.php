@@ -2,6 +2,7 @@
 namespace Yurun\Util\YurunHttp\Test\HttpRequestTest;
 
 use Yurun\Util\HttpRequest;
+use Yurun\Util\YurunHttp\Co\Batch;
 use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
@@ -431,6 +432,51 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals($response->body(), 'YurunHttp');
             $this->assertNotNull($response->getRequest());
             $this->assertEquals($this->host, $response->getRequest()->getUri());
+        });
+    }
+
+    /**
+     * co
+     *
+     * @return void
+     */
+    public function testCoBatch()
+    {
+        $this->call(function(){
+            $time = time();
+            $fileName = __DIR__ . '/download.txt';
+            if(is_file($fileName))
+            {
+                unlink($fileName);
+            }
+            $this->assertFalse(is_file($fileName));
+            $result = Batch::run([
+                (new HttpRequest)->url($this->host),
+                (new HttpRequest)->url($this->host . '?a=info&time=' . $time),
+                (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName)->method('POST'),
+            ]);
+
+            foreach($result as $i => $response)
+            {
+                switch($i)
+                {
+                    case 0:
+                        $this->assertResponse($response);
+                        $this->assertEquals($response->body(), 'YurunHttp');
+                        break;
+                    case 1:
+                        $data = $response->json(true);
+                        $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+                        $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
+                        break;
+                    case 2:
+                        $this->assertTrue(is_file($fileName));
+                        $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+                        break;
+                    default:
+                        throw new \RuntimeException(sprintf('Unknown %s', $i));
+                }
+            }
         });
     }
 
