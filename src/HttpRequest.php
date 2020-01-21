@@ -166,6 +166,13 @@ class HttpRequest
     public $keyPassword = null;
 
     /**
+     * 请求方法
+     *
+     * @var string
+     */
+    public $method = 'GET';
+
+    /**
      * Http 协议版本
      *
      * @var string
@@ -631,6 +638,17 @@ class HttpRequest
     }
 
     /**
+     * 设置请求方法
+     * @param string $method 
+     * @return static
+     */
+    public function method($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+
+    /**
      * 处理请求主体
      * @param string|array $requestBody
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
@@ -678,15 +696,19 @@ class HttpRequest
      *
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param array $method 请求方法，GET、POST等
+     * @param string|null $method 请求方法，GET、POST等
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Request
      */
-    public function buildRequest($url = null, $requestBody = null, $method = 'GET', $contentType = null)
+    public function buildRequest($url = null, $requestBody = null, $method = null, $contentType = null)
     {
         if(null === $url)
         {
             $url = $this->url;
+        }
+        if(null === $method)
+        {
+            $method = $this->method;
         }
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
         $request = new Request($url, $this->headers, $body, $method);
@@ -724,11 +746,11 @@ class HttpRequest
      * 发送请求，所有请求的老祖宗
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param array $method 请求方法，GET、POST等
+     * @param string|null $method 请求方法，GET、POST等
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function send($url = null, $requestBody = null, $method = 'GET', $contentType = null)
+    public function send($url = null, $requestBody = null, $method = null, $contentType = null)
     {
         $request = $this->buildRequest($url, $requestBody, $method, $contentType);
         return YurunHttp::send($request, $this->handler);
