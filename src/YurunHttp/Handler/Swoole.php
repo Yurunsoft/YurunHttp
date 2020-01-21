@@ -12,6 +12,7 @@ use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
 use Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager;
 use Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager;
+use function Yurun\Swoole\Coroutine\batch;
 
 class Swoole implements IHandler
 {
@@ -546,7 +547,17 @@ class Swoole implements IHandler
      */
     public function coBatch($requests, $timeout = null)
     {
-
+        $callbacks = [];
+        foreach($requests as $k => $request)
+        {
+            $callbacks[$k] = function() use($request){
+                $swooleHandler = new Swoole;
+                $swooleHandler->send($request);
+                $response = $swooleHandler->recv();
+                return $response;
+            };
+        }
+        return batch($callbacks, $timeout ?? -1);
     }
 
 }

@@ -7,14 +7,4 @@ class SwooleHttpRequestTest extends HttpRequestTest
 {
     use TSwooleHandlerTest;
 
-    /**
-     * co
-     *
-     * @return void
-     */
-    public function testCoBatch()
-    {
-        $this->markTestSkipped('TODO');
-    }
-
 }
