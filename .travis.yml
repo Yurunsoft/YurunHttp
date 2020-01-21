@@ -4,8 +4,6 @@ dist: trusty
 
 matrix:
   include:
-  - php: '5.4'
-    env: PHPUNIT_VERSION="4"
   - php: '5.5'
     env: PHPUNIT_VERSION="4"
   - php: '5.6'
