@@ -53,6 +53,13 @@ class Curl implements IHandler
     private $headerFileFp;
 
     /**
+     * 接收的响应头
+     *
+     * @var array
+     */
+    private $receiveHeaders;
+
+    /**
      * 代理认证方式
      */
     public static $proxyAuths = array(
@@ -107,45 +114,16 @@ class Curl implements IHandler
         if(!$this->handler)
         {
             $this->handler = curl_init();
-            $options = [
-                // 返回内容
-                CURLOPT_RETURNTRANSFER  => true,
-                // 返回header
-                CURLOPT_HEADER          => true,
-                // 保存cookie
-                CURLOPT_COOKIEJAR       => 'php://memory',
-            ];
         }
-        // 自动重定向
-        $options[CURLOPT_MAXREDIRS] = $this->request->getAttribute(Attributes::MAX_REDIRECTS, 10);
-
-        // 发送内容
         $files = $this->request->getUploadedFiles();
         $body = (string)$this->request->getBody();
         
         if(!empty($files))
         {
             $body = FormDataBuilder::build($body, $files, $boundary);
-            $this->request = $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
+            $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
         }
-        // 自动解压缩支持
-        $acceptEncoding = $this->request->getHeaderLine('Accept-Encoding');
-        if('' !== $acceptEncoding)
-        {
-            $options[CURLOPT_ENCODING] = $acceptEncoding;
-        }
-        else
-        {
-            $options[CURLOPT_ENCODING] = '';
-        }
-        curl_setopt_array($this->handler, $options);
-        $this->parseSSL();
-        $this->parseOptions();
-        $this->parseProxy();
-        $this->parseHeaders();
-        $this->parseCookies();
-        $this->parseNetwork();
-        $count = 0;
+        $this->buildCurlHandlerBase($this->request, $this->handler, $this->receiveHeaders, $this->saveFileFp, $this->headerFileFp);
         if([] !== ($queryParams = $this->request->getQueryParams()))
         {
             $this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
@@ -155,30 +133,8 @@ class Curl implements IHandler
         $statusCode = 0;
         $lastMethod = null;
         $copyHandler = curl_copy_handle($this->handler);
+        $redirectCount = 0;
         do{
-            switch($request->getProtocolVersion())
-            {
-                case '1.0':
-                    $httpVersion = CURL_HTTP_VERSION_1;
-                    break;
-                case '2.0':
-                    $ssl = 'https' === $uri->getScheme();
-                    if($ssl)
-                    {
-                        $httpVersion = CURL_HTTP_VERSION_2TLS;
-                    }
-                    else
-                    {
-                        $httpVersion = CURL_HTTP_VERSION_2;
-                    }
-                    break;
-                default:
-                    $httpVersion = CURL_HTTP_VERSION_1_1;
-            }
-            $requestOptions = [
-                CURLOPT_URL             =>  (string)$uri,
-                CURLOPT_HTTP_VERSION    =>  $httpVersion,
-            ];
             // 请求方法
             if($isLocation && in_array($statusCode, [301, 302, 303]))
             {
@@ -190,18 +146,22 @@ class Curl implements IHandler
             }
             if('GET' !== $method)
             {
-                $requestOptions[CURLOPT_POSTFIELDS] = $body;
+                $bodyContent = $body;
             }
-            $requestOptions[CURLOPT_CUSTOMREQUEST] = $method;
+            else
+            {
+                $bodyContent = false;
+            }
             if($lastMethod && 'GET' !== $lastMethod && 'GET' === $method)
             {
                 $this->handler = curl_copy_handle($copyHandler);
             }
-            $lastMethod = $requestOptions[CURLOPT_CUSTOMREQUEST];
-            curl_setopt_array($this->handler, $requestOptions);
+            $this->buildCurlHandlerEx($this->request, $this->handler, $uri, $method, $bodyContent);
+            $lastMethod = $method;
             $retry = $this->request->getAttribute(Attributes::RETRY, 0);
             for($i = 0; $i <= $retry; ++$i)
             {
+                $this->receiveHeaders = [];
                 $this->curlResult = curl_exec($this->handler);
                 // 下载文件特别处理 header
                 if($this->headerFileFp)
@@ -210,7 +170,7 @@ class Curl implements IHandler
                     $length = curl_getinfo($this->handler, CURLINFO_HEADER_SIZE);
                     $this->curlResult = fread($this->headerFileFp, $length);
                 }
-                $this->getResponse();
+                $this->result = $this->getResponse($this->handler, $this->curlResult, !!$this->headerFileFp, $this->receiveHeaders);
                 $statusCode = $this->result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
                 if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
@@ -220,7 +180,7 @@ class Curl implements IHandler
             }
             if($this->request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400))
             {
-                if(++$count <= ($maxRedirects = $this->request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
+                if(++$redirectCount <= ($maxRedirects = $this->request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
                 {
                     $isLocation = true;
                     $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $uri);
@@ -248,6 +208,101 @@ class Curl implements IHandler
     }
 
     /**
+     * 构建基础 Curl Handler
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * @return void
+     */
+    public function buildCurlHandlerBase(&$request, $handler, &$headers = null, &$saveFileFp = null, &$headerFileFp = null)
+    {
+        $options = [
+            // 返回内容
+            CURLOPT_RETURNTRANSFER  => true,
+            // 返回header
+            CURLOPT_HEADER          => true,
+            // 保存cookie
+            CURLOPT_COOKIEJAR       => 'php://memory',
+        ];
+        // 自动重定向
+        $options[CURLOPT_MAXREDIRS] = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
+
+        // 自动解压缩支持
+        $acceptEncoding = $request->getHeaderLine('Accept-Encoding');
+        if('' !== $acceptEncoding)
+        {
+            $options[CURLOPT_ENCODING] = $acceptEncoding;
+        }
+        else
+        {
+            $options[CURLOPT_ENCODING] = '';
+        }
+        curl_setopt_array($handler, $options);
+        $this->parseSSL($request, $handler);
+        $this->parseOptions($request, $handler, $headers, $saveFileFp, $headerFileFp);
+        $this->parseProxy($request, $handler);
+        $this->parseHeaders($request, $handler);
+        $this->parseCookies($request, $handler);
+        $this->parseNetwork($request, $handler);
+    }
+
+    /**
+     * 构建扩展 Curl Handler
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * @param \Yurun\Util\YurunHttp\Http\Psr7\Uri|null $uri
+     * @param string|null $method
+     * @param string|null $body
+     * @return void
+     */
+    public function buildCurlHandlerEx(&$request, $handler, $uri = null, $method = null, $body = null)
+    {
+        if(null === $uri)
+        {
+            $uri = $request->getUri();
+        }
+        if(null === $method)
+        {
+            $method = $request->getMethod();
+        }
+        if(null === $body)
+        {
+            $body = (string)$request->getBody();
+        }
+        switch($request->getProtocolVersion())
+        {
+            case '1.0':
+                $httpVersion = CURL_HTTP_VERSION_1;
+                break;
+            case '2.0':
+                $ssl = 'https' === $uri->getScheme();
+                if($ssl)
+                {
+                    $httpVersion = CURL_HTTP_VERSION_2TLS;
+                }
+                else
+                {
+                    $httpVersion = CURL_HTTP_VERSION_2;
+                }
+                break;
+            default:
+                $httpVersion = CURL_HTTP_VERSION_1_1;
+        }
+        $requestOptions = [
+            CURLOPT_URL             =>  (string)$uri,
+            CURLOPT_HTTP_VERSION    =>  $httpVersion,
+        ];
+        // 请求方法
+        if($body && 'GET' !== $method)
+        {
+            $requestOptions[CURLOPT_POSTFIELDS] = $body;
+        }
+        $requestOptions[CURLOPT_CUSTOMREQUEST] = $method;
+        curl_setopt_array($handler, $requestOptions);
+    }
+
+    /**
      * 接收请求
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
@@ -261,12 +316,12 @@ class Curl implements IHandler
      *
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse()
+    private function getResponse($handler, $curlResult, $isDownload, $receiveHeaders)
     {
         // 分离header和body
-        $headerSize = curl_getinfo($this->handler, CURLINFO_HEADER_SIZE);
-        $headerContent = substr($this->curlResult, 0, $headerSize);
-        $body = substr($this->curlResult, $headerSize);
+        $headerSize = curl_getinfo($handler, CURLINFO_HEADER_SIZE);
+        $headerContent = substr($curlResult, 0, $headerSize);
+        $body = substr($curlResult, $headerSize);
         // PHP 7.0.0开始substr()的 string 字符串长度与 start 相同时将返回一个空字符串。在之前的版本中，这种情况将返回 FALSE 。
         if(false === $body)
         {
@@ -274,17 +329,29 @@ class Curl implements IHandler
         }
 
         // body
-        $this->result = new Response($body, curl_getinfo($this->handler, CURLINFO_HTTP_CODE));
+        $result = new Response($body, curl_getinfo($handler, CURLINFO_HTTP_CODE));
 
         // headers
-        $rawHeaders = explode("\r\n\r\n", trim($headerContent));
-        $requestCount = count($rawHeaders);
-        if($requestCount > 0)
+        if($isDownload)
         {
-            $headers = $this->parseHeaderOneRequest($rawHeaders[$requestCount - 1]);
+            $rawHeaders = explode("\r\n\r\n", trim($headerContent));
+            $requestCount = count($rawHeaders);
+            if($requestCount > 0)
+            {
+                $headers = $this->parseHeaderOneRequest($rawHeaders[$requestCount - 1]);
+                foreach($headers as $name => $value)
+                {
+                    $result = $result->withAddedHeader($name, $value);
+                }
+            }
+        }
+        else
+        {
+            $rawHeaders = implode('', $receiveHeaders);
+            $headers = $this->parseHeaderOneRequest($rawHeaders);
             foreach($headers as $name => $value)
             {
-                $this->result = $this->result->withAddedHeader($name, $value);
+                $result = $result->withAddedHeader($name, $value);
             }
         }
         
@@ -296,10 +363,10 @@ class Curl implements IHandler
             $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
             $cookies[$cookieItem->name] = (array)$cookieItem;
         }
-        $this->result = $this->result->withRequest($this->request)
-                                     ->withCookieOriginParams($cookies)
-                                     ->withError(curl_error($this->handler))
-                                     ->withErrno(curl_errno($this->handler));
+        return $result->withRequest($this->request)
+                      ->withCookieOriginParams($cookies)
+                      ->withError(curl_error($handler))
+                      ->withErrno(curl_errno($handler));
     }
     
     /**
@@ -350,39 +417,39 @@ class Curl implements IHandler
      * 处理加密访问
      * @return void
      */
-    private function parseSSL()
+    private function parseSSL(&$request, $handler)
     {
-        if($this->request->getAttribute(Attributes::IS_VERIFY_CA, false))
+        if($request->getAttribute(Attributes::IS_VERIFY_CA, false))
         {
-            curl_setopt_array($this->handler, array(
+            curl_setopt_array($handler, array(
                 CURLOPT_SSL_VERIFYPEER    => true,
-                CURLOPT_CAINFO            => $this->request->getAttribute(Attributes::CA_CERT),
+                CURLOPT_CAINFO            => $request->getAttribute(Attributes::CA_CERT),
                 CURLOPT_SSL_VERIFYHOST    => 2,
             ));
         }
         else
         {
-            curl_setopt_array($this->handler, array(
+            curl_setopt_array($handler, array(
                 CURLOPT_SSL_VERIFYPEER    => false,
                 CURLOPT_SSL_VERIFYHOST    => 0,
             ));
         }
-        $certPath = $this->request->getAttribute(Attributes::CERT_PATH, '');
+        $certPath = $request->getAttribute(Attributes::CERT_PATH, '');
         if('' !== $certPath)
         {
-            curl_setopt_array($this->handler, array(
+            curl_setopt_array($handler, array(
                 CURLOPT_SSLCERT         => $certPath,
-                CURLOPT_SSLCERTPASSWD   => $this->request->getAttribute(Attributes::CERT_PASSWORD),
-                CURLOPT_SSLCERTTYPE     => $this->request->getAttribute(Attributes::CERT_TYPE, 'pem'),
+                CURLOPT_SSLCERTPASSWD   => $request->getAttribute(Attributes::CERT_PASSWORD),
+                CURLOPT_SSLCERTTYPE     => $request->getAttribute(Attributes::CERT_TYPE, 'pem'),
             ));
         }
-        $keyPath = $this->request->getAttribute(Attributes::KEY_PATH, '');
+        $keyPath = $request->getAttribute(Attributes::KEY_PATH, '');
         if('' !== $keyPath)
         {
-            curl_setopt_array($this->handler, array(
+            curl_setopt_array($handler, array(
                 CURLOPT_SSLKEY          => $keyPath,
-                CURLOPT_SSLKEYPASSWD    => $this->request->getAttribute(Attributes::KEY_PASSWORD),
-                CURLOPT_SSLKEYTYPE      => $this->request->getAttribute(Attributes::KEY_TYPE, 'pem'),
+                CURLOPT_SSLKEYPASSWD    => $request->getAttribute(Attributes::KEY_PASSWORD),
+                CURLOPT_SSLKEYTYPE      => $request->getAttribute(Attributes::KEY_TYPE, 'pem'),
             ));
         }
     }
@@ -391,11 +458,29 @@ class Curl implements IHandler
      * 处理设置项
      * @return void
      */
-    private function parseOptions()
+    private function parseOptions(&$request, $handler, &$headers = null, &$saveFileFp = null, &$headerFileFp = null)
     {
-        curl_setopt_array($this->handler, $this->request->getAttribute(Attributes::OPTIONS, []));
+        $options = $request->getAttribute(Attributes::OPTIONS, []);
+        if(isset($options[CURLOPT_HEADERFUNCTION]))
+        {
+            $headerCallable = $options[CURLOPT_HEADERFUNCTION];
+        }
+        else
+        {
+            $headerCallable = null;
+        }
+        $headers = [];
+        $options[CURLOPT_HEADERFUNCTION] = function($handler, $header) use($headerCallable, &$headers){
+            $headers[] = $header;
+            if($headerCallable)
+            {
+                $headerCallable($handler, $header);
+            }
+            return strlen($header);
+        };
+        curl_setopt_array($handler, $options);
         // 请求结果保存为文件
-        if(null !== ($saveFilePath = $this->request->getAttribute(Attributes::SAVE_FILE_PATH)))
+        if(null !== ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
         {
             $last = substr($saveFilePath, -1, 1);
             if('/' === $last || '\\' === $last)
@@ -403,31 +488,31 @@ class Curl implements IHandler
                 // 自动获取文件名
                 $saveFilePath .= basename($this->url);
             }
-            $this->saveFileFp = fopen($saveFilePath, $this->request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
-            $this->headerFileFp = fopen('php://memory', 'w+');
-            curl_setopt_array($this->handler, array(
+            $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
+            $headerFileFp = fopen('php://memory', 'w+');
+            curl_setopt_array($handler, array(
                 CURLOPT_HEADER          => false,
                 CURLOPT_RETURNTRANSFER  => false,
-                CURLOPT_FILE            => $this->saveFileFp,
-                CURLOPT_WRITEHEADER     => $this->headerFileFp,
+                CURLOPT_FILE            => $saveFileFp,
+                CURLOPT_WRITEHEADER     => $headerFileFp,
             ));
         }
     }
-    
+
     /**
      * 处理代理
      * @return void
      */
-    private function parseProxy()
+    private function parseProxy(&$request, $handler)
     {
-        if($this->request->getAttribute(Attributes::USE_PROXY, false))
+        if($request->getAttribute(Attributes::USE_PROXY, false))
         {
-            $type = $this->request->getAttribute(Attributes::PROXY_TYPE, 'http');
-            curl_setopt_array($this->handler, array(
-                CURLOPT_PROXYAUTH    => self::$proxyAuths[$this->request->getAttribute(Attributes::PROXY_AUTH, 'basic')],
-                CURLOPT_PROXY        => $this->request->getAttribute(Attributes::PROXY_SERVER),
-                CURLOPT_PROXYPORT    => $this->request->getAttribute(Attributes::PROXY_PORT),
-                CURLOPT_PROXYUSERPWD => $this->request->getAttribute(Attributes::PROXY_USERNAME, '') . ':' . $this->request->getAttribute(Attributes::PROXY_PASSWORD, ''),
+            $type = $request->getAttribute(Attributes::PROXY_TYPE, 'http');
+            curl_setopt_array($handler, array(
+                CURLOPT_PROXYAUTH    => self::$proxyAuths[$request->getAttribute(Attributes::PROXY_AUTH, 'basic')],
+                CURLOPT_PROXY        => $request->getAttribute(Attributes::PROXY_SERVER),
+                CURLOPT_PROXYPORT    => $request->getAttribute(Attributes::PROXY_PORT),
+                CURLOPT_PROXYUSERPWD => $request->getAttribute(Attributes::PROXY_USERNAME, '') . ':' . $request->getAttribute(Attributes::PROXY_PASSWORD, ''),
                 CURLOPT_PROXYTYPE    => 'socks5' === $type ? (defined('CURLPROXY_SOCKS5_HOSTNAME') ? CURLPROXY_SOCKS5_HOSTNAME : self::$proxyType[$type]) : self::$proxyType[$type],
             ));
         }
@@ -437,23 +522,23 @@ class Curl implements IHandler
      * 处理headers
      * @return void
      */
-    private function parseHeaders()
+    private function parseHeaders(&$request, $handler)
     {
-        if(!$this->request->hasHeader('User-Agent'))
+        if(!$request->hasHeader('User-Agent'))
         {
-            $this->request = $this->request->withHeader('User-Agent', $this->request->getAttribute(Attributes::USER_AGENT, static::$defaultUA));
+            $request = $request->withHeader('User-Agent', $request->getAttribute(Attributes::USER_AGENT, static::$defaultUA));
         }
-        curl_setopt($this->handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat());
+        curl_setopt($handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat($request));
     }
     
     /**
      * 处理成CURL可以识别的headers格式
      * @return array 
      */
-    private function parseHeadersFormat()
+    private function parseHeadersFormat($request)
     {
         $headers = array();
-        foreach($this->request->getHeaders() as $name => $value)
+        foreach($request->getHeaders() as $name => $value)
         {
             $headers[] = $name . ':' . implode(',', $value);
         }
@@ -464,41 +549,41 @@ class Curl implements IHandler
      * 处理cookie
      * @return void
      */
-    private function parseCookies()
+    private function parseCookies(&$request, $handler)
     {
-        foreach($this->request->getCookieParams() as $name => $value)
+        foreach($request->getCookieParams() as $name => $value)
         {
             $this->cookieManager->setCookie($name, $value);
         }
-        $cookie = $this->cookieManager->getRequestCookieString($this->request->getUri());
-        curl_setopt($this->handler, CURLOPT_COOKIE, $cookie);
+        $cookie = $this->cookieManager->getRequestCookieString($request->getUri());
+        curl_setopt($handler, CURLOPT_COOKIE, $cookie);
     }
     
     /**
      * 处理网络相关
      * @return void
      */
-    private function parseNetwork()
+    private function parseNetwork(&$request, $handler)
     {
         // 用户名密码处理
-        $username = $this->request->getAttribute(Attributes::USERNAME);
+        $username = $request->getAttribute(Attributes::USERNAME);
         if(null != $username)
         {
-            $userPwd = $username . ':' . $this->request->getAttribute(Attributes::PASSWORD, '');
+            $userPwd = $username . ':' . $request->getAttribute(Attributes::PASSWORD, '');
         }
         else
         {
             $userPwd = '';
         }
-        curl_setopt_array($this->handler, array(
+        curl_setopt_array($handler, array(
             // 连接超时
-            CURLOPT_CONNECTTIMEOUT_MS       => $this->request->getAttribute(Attributes::CONNECT_TIMEOUT, 30000),
+            CURLOPT_CONNECTTIMEOUT_MS       => $request->getAttribute(Attributes::CONNECT_TIMEOUT, 30000),
             // 总超时
-            CURLOPT_TIMEOUT_MS              => $this->request->getAttribute(Attributes::TIMEOUT, 0),
+            CURLOPT_TIMEOUT_MS              => $request->getAttribute(Attributes::TIMEOUT, 0),
             // 下载限速
-            CURLOPT_MAX_RECV_SPEED_LARGE    => $this->request->getAttribute(Attributes::DOWNLOAD_SPEED),
+            CURLOPT_MAX_RECV_SPEED_LARGE    => $request->getAttribute(Attributes::DOWNLOAD_SPEED),
             // 上传限速
-            CURLOPT_MAX_SEND_SPEED_LARGE    => $this->request->getAttribute(Attributes::UPLOAD_SPEED),
+            CURLOPT_MAX_SEND_SPEED_LARGE    => $request->getAttribute(Attributes::UPLOAD_SPEED),
             // 连接中用到的用户名和密码
             CURLOPT_USERPWD                 => $userPwd,
         ));
@@ -524,6 +609,82 @@ class Curl implements IHandler
     public function getHandler()
     {
         return $this->handler;
+    }
+
+    /**
+     * 批量运行并发请求
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request[] $requests
+     * @param float|null $timeout 超时时间，单位：秒。默认为 null 不限制
+     * @return \Yurun\Util\YurunHttp\Http\Response[]
+     */
+    public function coBatch($requests, $timeout = null)
+    {
+        $this->checkRequests($requests);
+        $mh = curl_multi_init();
+        $curlHandlers = $recvHeaders = $saveFileFps = $headerFileFps = [];
+        try {
+            foreach($requests as $k => $request)
+            {
+                $curlHandler = curl_init();
+                $recvHeaders[$k] = $saveFileFps[$k] = $headerFileFps[$k] = [];
+                $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k], $headerFileFps[$k]);
+                $files = $request->getUploadedFiles();
+                $body = (string)$request->getBody();
+                if(!empty($files))
+                {
+                    $body = FormDataBuilder::build($body, $files, $boundary);
+                    $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
+                }
+                $this->buildCurlHandlerEx($request, $curlHandler, null, null, $body);
+                curl_multi_add_handle($mh, $curlHandler);
+                $curlHandlers[$k] = $curlHandler;
+            }
+            $running = null;
+            $beginTime = microtime(true);
+            // 执行批处理句柄
+            do {
+                curl_multi_exec($mh, $running);
+                if($running > 0)
+                {
+                    if($timeout && microtime(true) - $beginTime >= $timeout)
+                    {
+                        break;
+                    }
+                    usleep(5000); // 每次延时 5 毫秒
+                }
+                else
+                {
+                    break;
+                }
+            } while (true);
+            $result = [];
+            foreach($requests as $k => $request)
+            {
+                $handler = $curlHandlers[$k];
+                $isDownload = null !== $request->getAttribute(Attributes::SAVE_FILE_PATH);
+                $receiveHeaders = $recvHeaders[$k];
+                $curlResult = curl_multi_getcontent($handler);
+                if($isDownload)
+                {
+                    if($headerFileFps[$k])
+                    {
+                        fseek($headerFileFps[$k], 0);
+                        $length = curl_getinfo($curlHandlers[$k], CURLINFO_HEADER_SIZE);
+                        $curlResult = fread($headerFileFps[$k], $length);
+                    }
+                }
+                $result[$k] = $this->getResponse($handler, $curlResult, $isDownload, $receiveHeaders);
+            }
+            return $result;
+        } finally {
+            foreach($curlHandlers as $curlHandler)
+            {
+                curl_multi_remove_handle($mh, $curlHandler);
+                curl_close($curlHandler);
+            }
+            curl_multi_close($mh);
+        }
     }
 
 }

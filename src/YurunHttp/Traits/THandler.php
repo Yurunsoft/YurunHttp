@@ -41,4 +41,22 @@ trait THandler
         }
         return $uri;
     }
+
+    /**
+     * 检查请求对象
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request[] $requests
+     * @return void
+     */
+    protected function checkRequests($requests)
+    {
+        foreach($requests as $request)
+        {
+            if(!$request instanceof \Yurun\Util\YurunHttp\Http\Request)
+            {
+                throw new \InvalidArgumentException('Request must be instance of \Yurun\Util\YurunHttp\Http\Request');
+            }
+        }
+    }
+
 }

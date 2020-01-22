@@ -10,8 +10,7 @@ use Yurun\Util\YurunHttp;
 use Yurun\Util\HttpRequest;
 
 // 设置默认请求处理器为 Swoole
-// YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Swoole'); // php 5.4
-// YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class); // php 5.5+
+// YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
 // Swoole 处理器必须在协程中调用
 go('test');
 

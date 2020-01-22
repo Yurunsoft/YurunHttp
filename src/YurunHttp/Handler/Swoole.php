@@ -12,6 +12,7 @@ use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
 use Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager;
 use Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager;
+use function Yurun\Swoole\Coroutine\batch;
 
 class Swoole implements IHandler
 {
@@ -517,7 +518,6 @@ class Swoole implements IHandler
         return null;
     }
 
-
     /**
      * Get http 连接管理器
      *
@@ -537,4 +537,27 @@ class Swoole implements IHandler
     {
         return $this->http2ConnectionManager;
     }
+    
+    /**
+     * 批量运行并发请求
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request[] $requests
+     * @param float|null $timeout 超时时间，单位：秒。默认为 null 不限制
+     * @return \Yurun\Util\YurunHttp\Http\Response[]
+     */
+    public function coBatch($requests, $timeout = null)
+    {
+        $callbacks = [];
+        foreach($requests as $k => $request)
+        {
+            $callbacks[$k] = function() use($request){
+                $swooleHandler = new Swoole;
+                $swooleHandler->send($request);
+                $response = $swooleHandler->recv();
+                return $response;
+            };
+        }
+        return batch($callbacks, $timeout ?? -1);
+    }
+
 }
