@@ -20,6 +20,10 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 > 每个小版本的更新日志请移步到 Release 查看
 
+v4.0.0 新增支持 `Swoole` 并发批量请求 (PHP >= 7.1)
+
+v3.5.0 新增支持 `Curl` 并发批量请求 (PHP >= 5.5)
+
 v3.4.0 新增支持 `Http2` 全双工用法
 
 v3.3.0 新增支持 `Http2` 兼容用法
@@ -43,7 +47,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^3.4.0"
+        "yurunsoft/yurun-http": "^4.0.0"
     }
 }
 ```
@@ -67,6 +71,19 @@ $response = $http->ua('YurunHttp')
                  ->get('http://www.baidu.com');
 
 echo 'html:', PHP_EOL, $response->body();
+```
+
+### 并发批量请求
+
+```php
+$result = Batch::run([
+    (new HttpRequest)->url('https://www.imiphp.com'),
+    (new HttpRequest)->url('https://www.yurunsoft.com'),
+]);
+
+var_dump($result[0]->getHeaders(), strlen($result[0]->body()), $result[0]->getStatusCode());
+
+var_dump($result[1]->getHeaders(), strlen($result[1]->body()), $result[1]->getStatusCode());
 ```
 
 ### PSR-7 请求构建
