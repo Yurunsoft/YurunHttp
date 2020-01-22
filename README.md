@@ -76,6 +76,8 @@ echo 'html:', PHP_EOL, $response->body();
 ### 并发批量请求
 
 ```php
+use \Yurun\Util\YurunHttp\Co\Batch;
+
 $result = Batch::run([
     (new HttpRequest)->url('https://www.imiphp.com'),
     (new HttpRequest)->url('https://www.yurunsoft.com'),
