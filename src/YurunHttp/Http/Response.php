@@ -85,7 +85,7 @@ class Response extends Psr7Response
     /**
      * 设置cookie原始参数，包含expires、path、domain等
      * @param array $cookiesOrigin
-     * @return void
+     * @return static
      */
     public function withCookieOriginParams(array $cookiesOrigin)
     {
@@ -129,7 +129,7 @@ class Response extends Psr7Response
      * 获取返回的主体内容
      * @param string $fromEncoding 请求返回数据的编码，如果不为空则进行编码转换
      * @param string $toEncoding 要转换到的编码，默认为UTF-8
-     * @return void
+     * @return string
      */
     public function body($fromEncoding = null, $toEncoding = 'UTF-8')
     {

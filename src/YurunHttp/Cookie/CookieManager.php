@@ -287,7 +287,7 @@ class CookieManager
      * 查找 Cookie ID
      *
      * @param \Yurun\Util\YurunHttp\Cookie\CookieItem $item
-     * @return void
+     * @return int|null
      */
     private function findCookie($item)
     {
