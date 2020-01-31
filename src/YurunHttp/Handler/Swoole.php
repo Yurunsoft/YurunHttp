@@ -57,7 +57,12 @@ class Swoole implements IHandler
         $this->http2ConnectionManager = new Http2ConnectionManager;
     }
 
-    public function __destruct()
+    /**
+     * 关闭并释放所有资源
+     *
+     * @return void
+     */
+    public function close()
     {
         $this->httpConnectionManager->close();
         $this->http2ConnectionManager->close();

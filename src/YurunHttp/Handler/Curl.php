@@ -94,7 +94,12 @@ class Curl implements IHandler
         $this->initCookieManager();
     }
 
-    public function __destruct()
+    /**
+     * 关闭并释放所有资源
+     *
+     * @return void
+     */
+    public function close()
     {
         if($this->handler)
         {
@@ -131,8 +136,6 @@ class Curl implements IHandler
         $uri = $this->request->getUri();
         $isLocation = false;
         $statusCode = 0;
-        $lastMethod = null;
-        $copyHandler = curl_copy_handle($this->handler);
         $redirectCount = 0;
         do{
             // 请求方法
@@ -152,12 +155,7 @@ class Curl implements IHandler
             {
                 $bodyContent = false;
             }
-            if($lastMethod && 'GET' !== $lastMethod && 'GET' === $method)
-            {
-                $this->handler = curl_copy_handle($copyHandler);
-            }
             $this->buildCurlHandlerEx($this->request, $this->handler, $uri, $method, $bodyContent);
-            $lastMethod = $method;
             $retry = $this->request->getAttribute(Attributes::RETRY, 0);
             for($i = 0; $i <= $retry; ++$i)
             {
