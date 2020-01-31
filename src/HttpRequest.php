@@ -239,6 +239,7 @@ class HttpRequest
      */
     public function close()
     {
+        $this->handler->close();
         $this->handler = null;
     }
 

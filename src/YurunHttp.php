@@ -1,7 +1,6 @@
 <?php
 namespace Yurun\Util;
 
-use Yurun\Util\YurunHttp\Handler\Curl;
 use Yurun\Util\YurunHttp\Handler\IHandler;
 
 abstract class YurunHttp
@@ -22,7 +21,7 @@ abstract class YurunHttp
     /**
      * 版本号
      */
-    const VERSION = '3.4.0';
+    const VERSION = '4.0';
 
     /**
      * 设置默认处理器类
