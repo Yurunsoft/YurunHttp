@@ -48,4 +48,11 @@ interface IHandler
      */
     public function coBatch($requests, $timeout = null);
 
+    /**
+     * 关闭并释放所有资源
+     *
+     * @return void
+     */
+    public function close();
+
 }
