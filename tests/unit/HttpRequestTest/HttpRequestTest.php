@@ -490,7 +490,8 @@ class HttpRequestTest extends BaseTest
                 $http->get($this->host);
                 $memorys[$i] = memory_get_usage();
             }
-            $this->assertEquals(2, count(array_unique($memorys)));
+            unset($memorys[0]);
+            $this->assertEquals(1, count(array_unique($memorys)));
         });
     }
 
