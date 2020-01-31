@@ -483,12 +483,11 @@ class HttpRequestTest extends BaseTest
     public function testMemoryLeak()
     {
         $this->call(function(){
-            $memorys = [];
+            $memorys = [1, 2, 3, 4, 5];
             for($i = 0; $i < 5; ++$i)
             {
                 $http = new HttpRequest;
                 $http->get($this->host);
-                $http = null;
                 $memorys[] = memory_get_usage();
             }
             $this->assertEquals(2, count(array_unique($memorys)));
