@@ -222,7 +222,7 @@ class Swoole implements IHandler
                 }
                 if(!$connection->upgrade($path))
                 {
-                    throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', socket_strerror($connection->errCode), $connection->errCode), $connection->errCode);
+                    throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
                 }
             }
             else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
@@ -372,7 +372,7 @@ class Swoole implements IHandler
         }
         if($connection)
         {
-            $result = $result->withError(socket_strerror($connection->errCode))
+            $result = $result->withError(swoole_strerror($connection->errCode))
                              ->withErrno($connection->errCode);
         }
         return $result->withRequest($request);
@@ -419,7 +419,7 @@ class Swoole implements IHandler
                 $this->result = $this->result->withCookieOriginParams($cookies);
             }
             $this->result = $this->result->withRequest($request)
-                                         ->withError(socket_strerror($connection->errCode))
+                                         ->withError(swoole_strerror($connection->errCode))
                                          ->withErrno($connection->errCode);
         }
         return $this->result;
