@@ -77,6 +77,7 @@ echo 'html:', PHP_EOL, $response->body();
 
 ```php
 use \Yurun\Util\YurunHttp\Co\Batch;
+use \Yurun\Util\HttpRequest;
 
 $result = Batch::run([
     (new HttpRequest)->url('https://www.imiphp.com'),

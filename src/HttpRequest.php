@@ -118,7 +118,7 @@ class HttpRequest
     public $saveFileOption = array();
 
     /**
-     * 根据location自动重定向
+     * 是否启用重定向
      * @var bool
      */
     public $followLocation = true;
@@ -486,7 +486,7 @@ class HttpRequest
     }
 
     /**
-     * 设置失败重试次数，状态码非200时重试
+     * 设置失败重试次数，状态码为5XX或者0才需要重试
      * @param string $retry 
      * @return static
      */

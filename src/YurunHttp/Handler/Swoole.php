@@ -508,6 +508,10 @@ class Swoole implements IHandler
         }
         // 超时
         $settings['timeout'] = $request->getAttribute(Attributes::TIMEOUT, 30000) / 1000;
+        if($settings['timeout'] < 0)
+        {
+            $settings['timeout'] = -1;
+        }
         // 长连接
         $settings['keep_alive'] = $request->getAttribute(Attributes::KEEP_ALIVE, true);
         $request = $request->withAttribute(Attributes::OPTIONS, $settings);
