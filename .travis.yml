@@ -5,27 +5,27 @@ dist: trusty
 matrix:
   include:
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.14" PHPUNIT_VERSION="7"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.14" PHPUNIT_VERSION="7"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.14" PHPUNIT_VERSION="7"
   - php: '7.4'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.14" PHPUNIT_VERSION="7"
   - php: '7.1'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: '7.2'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: '7.3'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: '7.4'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: 'nightly'
     env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7" INSTALL_REDIS_EXT=true
   allow_failures:
