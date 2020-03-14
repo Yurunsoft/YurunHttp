@@ -74,7 +74,7 @@ class SwooleClient implements IHttp2Client
     /**
      * 接收协程ID
      *
-     * @var int
+     * @var int|bool
      */
     private $recvCo;
 
@@ -271,6 +271,7 @@ class SwooleClient implements IHttp2Client
         {
             return false;
         }
+        $this->recvCo = true;
         return $this->recvCo = Coroutine::create(function(){
             while($this->isConnected())
             {
