@@ -218,7 +218,7 @@ class SwooleClient implements IHttp2Client
      */
     public function recv($streamId = -1, $timeout = null)
     {
-        if(!$this->recvCo || !Coroutine::exists($this->recvCo))
+        if(!$this->recvCo || (true !== $this->recvCo && !Coroutine::exists($this->recvCo)))
         {
             $this->startRecvCo();
         }
