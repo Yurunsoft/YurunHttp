@@ -275,7 +275,14 @@ class SwooleClient implements IHttp2Client
         return $this->recvCo = Coroutine::create(function(){
             while($this->isConnected())
             {
-                $swooleResponse = $this->http2Client->recv($this->timeout);
+                if($this->timeout > 0)
+                {
+                    $swooleResponse = $this->http2Client->recv($this->timeout);
+                }
+                else
+                {
+                    $swooleResponse = $this->http2Client->recv();
+                }
                 if(!$swooleResponse)
                 {
                     $this->close();
