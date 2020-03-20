@@ -72,6 +72,13 @@ class SwooleClient implements IHttp2Client
     private $timeout;
 
     /**
+     * 接收协程ID
+     *
+     * @var int|bool
+     */
+    private $recvCo;
+
+    /**
      * @param string $host
      * @param int $port
      * @param bool $ssl
@@ -109,7 +116,6 @@ class SwooleClient implements IHttp2Client
                     'timeout'   =>  $this->timeout,
                 ]);
             }
-            $this->startRecvCo();
             return true;
         }
         else
@@ -212,6 +218,10 @@ class SwooleClient implements IHttp2Client
      */
     public function recv($streamId = -1, $timeout = null)
     {
+        if(!$this->recvCo || (true !== $this->recvCo && !Coroutine::exists($this->recvCo)))
+        {
+            $this->startRecvCo();
+        }
         if(isset($this->recvChannels[$streamId]))
         {
             $channel = $this->recvChannels[$streamId];
@@ -261,10 +271,18 @@ class SwooleClient implements IHttp2Client
         {
             return false;
         }
-        return Coroutine::create(function(){
+        $this->recvCo = true;
+        return $this->recvCo = Coroutine::create(function(){
             while($this->isConnected())
             {
-                $swooleResponse = $this->http2Client->recv();
+                if($this->timeout > 0)
+                {
+                    $swooleResponse = $this->http2Client->recv($this->timeout);
+                }
+                else
+                {
+                    $swooleResponse = $this->http2Client->recv();
+                }
                 if(!$swooleResponse)
                 {
                     $this->close();
