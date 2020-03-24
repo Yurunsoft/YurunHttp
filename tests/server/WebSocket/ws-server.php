@@ -21,8 +21,11 @@ $server->on('message', function (Swoole\WebSocket\Server $server, $frame) use(&$
     }
 });
 
-$server->on('close', function ($ser, $fd) {
-    
+$server->on('close', function ($ser, $fd) use(&$userNameStore){
+    if(isset($userNameStore[$fd]))
+    {
+        unset($userNameStore[$fd]);
+    }
 });
 
 $server->start();
