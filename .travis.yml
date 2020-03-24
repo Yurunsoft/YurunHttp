@@ -36,6 +36,7 @@ env:
   global:
     - HTTP_SERVER_HOST=http://127.0.0.1:8898/
     - WS_SERVER_HOST=ws://127.0.0.1:8900/
+    - WSS_SERVER_HOST=wss://127.0.0.1:8902/
 
 services:
   - redis-server

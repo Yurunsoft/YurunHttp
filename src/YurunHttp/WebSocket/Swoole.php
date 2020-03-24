@@ -55,7 +55,7 @@ class Swoole implements IWebSocketClient
         $this->request = $request;
         $this->response = $response;
         $uri = $request->getUri();
-        $this->handler = $this->httpHandler->getHttpConnectionManager()->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+        $this->handler = $this->httpHandler->getHttpConnectionManager()->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
         $this->connected = true;
     }
 

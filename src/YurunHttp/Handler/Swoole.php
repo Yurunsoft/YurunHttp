@@ -189,11 +189,11 @@ class Swoole implements IHandler
         $isHttp2 = '2.0' === $request->getProtocolVersion();
         if($isHttp2)
         {
-            $connection = $this->http2ConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+            $connection = $this->http2ConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
         }
         else
         {
-            $connection = $this->httpConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+            $connection = $this->httpConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
             $connection->setDefer(true);
         }
         $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);

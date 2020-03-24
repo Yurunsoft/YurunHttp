@@ -166,7 +166,7 @@ class SwooleClient implements IHttp2Client
             $request = $request->withProtocolVersion('2.0');
         }
         $uri = $request->getUri();
-        if($this->host != $uri->getHost() || $this->port != Uri::getServerPort($uri) || $this->ssl != ('https' === $uri->getScheme()))
+        if($this->host != $uri->getHost() || $this->port != Uri::getServerPort($uri) || $this->ssl != ('https' === $uri->getScheme() || 'wss' === $uri->getScheme()))
         {
             throw new \RuntimeException(sprintf('Current http2 connection instance just support %s://%s:%s, does not support %s', $this->ssl ? 'https' : 'http', $this->host, $this->port, $uri->__toString()));
         }
