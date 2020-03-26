@@ -212,8 +212,7 @@ class HttpRequest
      */
     public function open()
     {
-        $handlerClass = YurunHttp::getDefaultHandler();
-        $this->handler = new $handlerClass;
+        $this->handler = YurunHttp::getHandler();
         $this->retry = 0;
         $this->headers = $this->options =[];
         $this->url = $this->content = '';
