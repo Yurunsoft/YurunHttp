@@ -31,19 +31,19 @@ class HttpRequest
      * `curl_setopt_array()`所需要的第二个参数
      * @var array
      */
-    public $options = array();
+    public $options =[];
 
     /**
      * 请求头
      * @var array
      */
-    public $headers = array();
+    public $headers =[];
 
     /**
      * Cookies
      * @var array
      */
-    public $cookies = array();
+    public $cookies =[];
 
     /**
      * 失败重试次数，默认为0
@@ -61,7 +61,7 @@ class HttpRequest
      * 代理设置
      * @var array
      */
-    public $proxy = array();
+    public $proxy =[];
 
     /**
      * 是否验证证书
@@ -115,7 +115,7 @@ class HttpRequest
      * 请求结果保存至文件的配置
      * @var mixed
      */
-    public $saveFileOption = array();
+    public $saveFileOption =[];
 
     /**
      * 是否启用重定向
@@ -182,12 +182,12 @@ class HttpRequest
     /**
      * 代理认证方式
      */
-    public static $proxyAuths = array();
+    public static $proxyAuths =[];
 
     /**
      * 代理类型
      */
-    public static $proxyType = array();
+    public static $proxyType =[];
 
     /**
      * 构造方法
@@ -215,13 +215,13 @@ class HttpRequest
         $handlerClass = YurunHttp::getDefaultHandler();
         $this->handler = new $handlerClass;
         $this->retry = 0;
-        $this->headers = $this->options = array();
+        $this->headers = $this->options =[];
         $this->url = $this->content = '';
         $this->useProxy = false;
-        $this->proxy = array(
+        $this->proxy = [
             'auth'    =>    'basic',
             'type'    =>    'http',
-        );
+        ];
         $this->isVerifyCA = false;
         $this->caCert = null;
         $this->connectTimeout = 30000;
@@ -230,7 +230,7 @@ class HttpRequest
         $this->uploadSpeed = null;
         $this->username = null;
         $this->password = null;
-        $this->saveFileOption = array();
+        $this->saveFileOption =[];
     }
 
     /**
@@ -507,12 +507,12 @@ class HttpRequest
     public function proxy($server, $port, $type = 'http', $auth = 'basic')
     {
         $this->useProxy = true;
-        $this->proxy = array(
-            'server'    =>    $server,
-            'port'        =>    $port,
-            'type'        =>    $type,
-            'auth'        =>    $auth,
-        );
+        $this->proxy = [
+            'server'    =>  $server,
+            'port'      =>  $port,
+            'type'      =>  $type,
+            'auth'      =>  $auth,
+        ];
         return $this;
     }
 
@@ -793,7 +793,7 @@ class HttpRequest
             }
             $url .= http_build_query($requestBody, '', '&');
         }
-        return $this->send($url, array(), 'GET');
+        return $this->send($url,[], 'GET');
     }
 
     /**
@@ -881,7 +881,7 @@ class HttpRequest
             }
             rename($fileName, $basename . '.' . $ext);
         }
-        $this->saveFileOption = array();
+        $this->saveFileOption =[];
         return $result;
     }
 
@@ -902,16 +902,16 @@ class HttpRequest
 if(extension_loaded('curl'))
 {
     // 代理认证方式
-    HttpRequest::$proxyAuths = array(
-        'basic'        =>    CURLAUTH_BASIC,
-        'ntlm'        =>    CURLAUTH_NTLM
-    );
+    HttpRequest::$proxyAuths = [
+        'basic' =>  CURLAUTH_BASIC,
+        'ntlm'  =>  CURLAUTH_NTLM
+    ];
 
     // 代理类型
-    HttpRequest::$proxyType = array(
-        'http'        =>    CURLPROXY_HTTP,
-        'socks4'    =>    CURLPROXY_SOCKS4,
-        'socks4a'    =>    6,    // CURLPROXY_SOCKS4A
-        'socks5'    =>    CURLPROXY_SOCKS5,
-    );
+    HttpRequest::$proxyType = [
+        'http'      =>  CURLPROXY_HTTP,
+        'socks4'    =>  CURLPROXY_SOCKS4,
+        'socks4a'   =>  6,    // CURLPROXY_SOCKS4A
+        'socks5'    =>  CURLPROXY_SOCKS5,
+    ];
 }

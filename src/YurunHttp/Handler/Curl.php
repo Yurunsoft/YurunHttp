@@ -62,20 +62,20 @@ class Curl implements IHandler
     /**
      * 代理认证方式
      */
-    public static $proxyAuths = array(
+    public static $proxyAuths = [
         'basic' =>  CURLAUTH_BASIC,
         'ntlm'  =>  CURLAUTH_NTLM
-    );
+    ];
 
     /**
      * 代理类型
      */
-    public static $proxyType = array(
+    public static $proxyType = [
         'http'      =>  CURLPROXY_HTTP,
         'socks4'    =>  CURLPROXY_SOCKS4,
         'socks4a'   =>  6, // CURLPROXY_SOCKS4A
         'socks5'    =>  CURLPROXY_SOCKS5,
-    );
+    ];
 
     /**
      * 本 Handler 默认的 User-Agent
@@ -320,11 +320,6 @@ class Curl implements IHandler
         $headerSize = curl_getinfo($handler, CURLINFO_HEADER_SIZE);
         $headerContent = substr($curlResult, 0, $headerSize);
         $body = substr($curlResult, $headerSize);
-        // PHP 7.0.0开始substr()的 string 字符串长度与 start 相同时将返回一个空字符串。在之前的版本中，这种情况将返回 FALSE 。
-        if(false === $body)
-        {
-            $body = '';
-        }
 
         // body
         $result = new Response($body, curl_getinfo($handler, CURLINFO_HTTP_CODE));
@@ -374,7 +369,7 @@ class Curl implements IHandler
      */
     private function parseHeaderOneRequest($piece)
     {
-        $tmpHeaders = array();
+        $tmpHeaders =[];
         $lines = explode("\r\n", $piece);
         $linesCount = count($lines);
         //从1开始，第0行包含了协议信息和状态信息，排除该行
@@ -397,10 +392,10 @@ class Curl implements IHandler
                 else
                 {
                     $tmp = $tmpHeaders[$key];
-                    $tmpHeaders[$key] = array(
+                    $tmpHeaders[$key] = [
                         $tmp,
                         $value,
-                    );
+                    ];
                 }
             }
             else
@@ -419,36 +414,36 @@ class Curl implements IHandler
     {
         if($request->getAttribute(Attributes::IS_VERIFY_CA, false))
         {
-            curl_setopt_array($handler, array(
+            curl_setopt_array($handler, [
                 CURLOPT_SSL_VERIFYPEER    => true,
                 CURLOPT_CAINFO            => $request->getAttribute(Attributes::CA_CERT),
                 CURLOPT_SSL_VERIFYHOST    => 2,
-            ));
+            ]);
         }
         else
         {
-            curl_setopt_array($handler, array(
+            curl_setopt_array($handler, [
                 CURLOPT_SSL_VERIFYPEER    => false,
                 CURLOPT_SSL_VERIFYHOST    => 0,
-            ));
+            ]);
         }
         $certPath = $request->getAttribute(Attributes::CERT_PATH, '');
         if('' !== $certPath)
         {
-            curl_setopt_array($handler, array(
+            curl_setopt_array($handler, [
                 CURLOPT_SSLCERT         => $certPath,
                 CURLOPT_SSLCERTPASSWD   => $request->getAttribute(Attributes::CERT_PASSWORD),
                 CURLOPT_SSLCERTTYPE     => $request->getAttribute(Attributes::CERT_TYPE, 'pem'),
-            ));
+            ]);
         }
         $keyPath = $request->getAttribute(Attributes::KEY_PATH, '');
         if('' !== $keyPath)
         {
-            curl_setopt_array($handler, array(
+            curl_setopt_array($handler, [
                 CURLOPT_SSLKEY          => $keyPath,
                 CURLOPT_SSLKEYPASSWD    => $request->getAttribute(Attributes::KEY_PASSWORD),
                 CURLOPT_SSLKEYTYPE      => $request->getAttribute(Attributes::KEY_TYPE, 'pem'),
-            ));
+            ]);
         }
     }
     
@@ -488,12 +483,12 @@ class Curl implements IHandler
             }
             $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
             $headerFileFp = fopen('php://memory', 'w+');
-            curl_setopt_array($handler, array(
+            curl_setopt_array($handler, [
                 CURLOPT_HEADER          => false,
                 CURLOPT_RETURNTRANSFER  => false,
                 CURLOPT_FILE            => $saveFileFp,
                 CURLOPT_WRITEHEADER     => $headerFileFp,
-            ));
+            ]);
         }
     }
 
@@ -506,13 +501,13 @@ class Curl implements IHandler
         if($request->getAttribute(Attributes::USE_PROXY, false))
         {
             $type = $request->getAttribute(Attributes::PROXY_TYPE, 'http');
-            curl_setopt_array($handler, array(
+            curl_setopt_array($handler, [
                 CURLOPT_PROXYAUTH    => self::$proxyAuths[$request->getAttribute(Attributes::PROXY_AUTH, 'basic')],
                 CURLOPT_PROXY        => $request->getAttribute(Attributes::PROXY_SERVER),
                 CURLOPT_PROXYPORT    => $request->getAttribute(Attributes::PROXY_PORT),
                 CURLOPT_PROXYUSERPWD => $request->getAttribute(Attributes::PROXY_USERNAME, '') . ':' . $request->getAttribute(Attributes::PROXY_PASSWORD, ''),
                 CURLOPT_PROXYTYPE    => 'socks5' === $type ? (defined('CURLPROXY_SOCKS5_HOSTNAME') ? CURLPROXY_SOCKS5_HOSTNAME : self::$proxyType[$type]) : self::$proxyType[$type],
-            ));
+            ]);
         }
     }
     
@@ -535,7 +530,7 @@ class Curl implements IHandler
      */
     private function parseHeadersFormat($request)
     {
-        $headers = array();
+        $headers =[];
         foreach($request->getHeaders() as $name => $value)
         {
             $headers[] = $name . ':' . implode(',', $value);
@@ -573,7 +568,7 @@ class Curl implements IHandler
         {
             $userPwd = '';
         }
-        curl_setopt_array($handler, array(
+        curl_setopt_array($handler, [
             // 连接超时
             CURLOPT_CONNECTTIMEOUT_MS       => $request->getAttribute(Attributes::CONNECT_TIMEOUT, 30000),
             // 总超时
@@ -584,7 +579,7 @@ class Curl implements IHandler
             CURLOPT_MAX_SEND_SPEED_LARGE    => $request->getAttribute(Attributes::UPLOAD_SPEED),
             // 连接中用到的用户名和密码
             CURLOPT_USERPWD                 => $userPwd,
-        ));
+        ]);
     }
 
     /**
