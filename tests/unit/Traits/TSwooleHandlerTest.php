@@ -16,7 +16,7 @@ trait TSwooleHandlerTest
         $end = false;
         go(function() use($callable, &$throwable, &$end){
             try {
-                YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Swoole');
+                YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
                 $callable();
             } catch(\Throwable $th) {
                 $throwable = $th;
