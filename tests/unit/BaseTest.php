@@ -21,6 +21,13 @@ abstract class BaseTest extends TestCase
     protected $wsHost;
 
     /**
+     * WebSocket SSL 请求主机
+     *
+     * @var string
+     */
+    protected $wssHost;
+
+    /**
      * Http2 请求主机
      *
      * @var string
@@ -33,6 +40,7 @@ abstract class BaseTest extends TestCase
         $this->host = testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8899/');
         $this->wsHost = testEnv('WS_SERVER_HOST', 'ws://127.0.0.1:8900/');
         $this->http2Host = testEnv('HTTP2_SERVER_HOST', 'http://127.0.0.1:8901/');
+        $this->wssHost = testEnv('WSS_SERVER_HOST', 'wss://127.0.0.1:8902/');
     }
 
     protected function call($callable)

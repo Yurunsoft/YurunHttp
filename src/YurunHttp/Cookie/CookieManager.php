@@ -150,7 +150,7 @@ class CookieManager
                         foreach($idList as $id)
                         {
                             $cookieItem = $this->cookieList[$id];
-                            if((0 === $cookieItem->expires || $cookieItem->expires > time()) && (!$cookieItem->secure || 'https' === $uri->getScheme()) )
+                            if((0 === $cookieItem->expires || $cookieItem->expires > time()) && (!$cookieItem->secure || 'https' === $uri->getScheme() || 'wss' === $uri->getScheme()) )
                             {
                                 $result[$cookieItem->name] = $cookieItem->value;
                             }
