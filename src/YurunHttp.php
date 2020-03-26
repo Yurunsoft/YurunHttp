@@ -1,15 +1,17 @@
 <?php
 namespace Yurun\Util;
 
+use Swoole\Coroutine;
 use Yurun\Util\YurunHttp\Handler\IHandler;
 
 abstract class YurunHttp
 {
     /**
      * 默认处理器类
-     * @var string
+     * 
+     * @var string|null
      */
-    private static $defaultHandler = 'Yurun\Util\YurunHttp\Handler\Curl';
+    private static $defaultHandler = null;
 
     /**
      * 属性
@@ -21,11 +23,11 @@ abstract class YurunHttp
     /**
      * 版本号
      */
-    const VERSION = '4.0';
+    const VERSION = '4.1';
 
     /**
      * 设置默认处理器类
-     * @param string $class
+     * @param string|null $class
      * @return void
      */
     public static function setDefaultHandler($class)
@@ -35,11 +37,33 @@ abstract class YurunHttp
 
     /**
      * 获取默认处理器类
-     * @return string
+     * @return string|null
      */
     public static function getDefaultHandler()
     {
         return static::$defaultHandler;
+    }
+
+    /**
+     * 获取处理器类
+     *
+     * @return \Yurun\Util\YurunHttp\Handler\IHandler
+     */
+    public static function getHandler()
+    {
+        if(static::$defaultHandler)
+        {
+            $class = static::$defaultHandler;
+        }
+        if(defined('SWOOLE_VERSION') && Coroutine::getuid() > -1)
+        {
+            $class = \Yurun\Util\YurunHttp\Handler\Swoole::class;
+        }
+        else
+        {
+            $class = \Yurun\Util\YurunHttp\Handler\Curl::class;
+        }
+        return new $class;
     }
 
     /**
@@ -54,12 +78,12 @@ abstract class YurunHttp
         {
             $handler = $handlerClass;
         }
+        else if(null === $handlerClass)
+        {
+            $handler = static::getHandler();
+        }
         else
         {
-            if(null === $handlerClass)
-            {
-                $handlerClass = static::$defaultHandler;
-            }
             $handler = new $handlerClass();
         }
         $time = microtime(true);
@@ -93,12 +117,12 @@ abstract class YurunHttp
         {
             $handler = $handlerClass;
         }
+        else if(null === $handlerClass)
+        {
+            $handler = static::getHandler();
+        }
         else
         {
-            if(null === $handlerClass)
-            {
-                $handlerClass = static::$defaultHandler;
-            }
             $handler = new $handlerClass();
         }
         $time = microtime(true);

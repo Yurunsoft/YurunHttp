@@ -45,7 +45,7 @@ abstract class BaseTest extends TestCase
 
     protected function call($callable)
     {
-        YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Curl');
+        YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Curl::class);
         $callable();
     }
 

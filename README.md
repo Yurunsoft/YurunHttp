@@ -10,6 +10,8 @@ YurunHttp 是开源的 PHP HTTP 类库，支持链式操作，简单易用。
 
 支持所有常见的 GET、POST、PUT、DELETE、UPDATE 等请求方式，支持 Http2、WebSocket、浏览器级别 Cookies 管理、上传下载、设置和读取 header、Cookie、请求参数、失败重试、限速、代理、证书等。
 
+支持 Curl 和 Swoole 环境智能识别兼容。
+
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
 欢迎各位加入技术支持群17916227[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://jq.qq.com/?_wv=1027&k=5wXf4Zq)，如有问题可以及时解答和修复。
@@ -19,6 +21,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 ## 重大版本更新日志
 
 > 每个小版本的更新日志请移步到 Release 查看
+
+v4.1.0 实现智能识别场景，自动选择适合 Curl/Swoole 环境的处理器
 
 v4.0.0 新增支持 `Swoole` 并发批量请求 (PHP >= 7.1)
 
@@ -47,7 +51,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^4.0.0"
+        "yurunsoft/yurun-http": "^4.1.0"
     }
 }
 ```
@@ -114,9 +118,6 @@ var_dump($response);
 use Yurun\Util\YurunHttp;
 use Yurun\Util\HttpRequest;
 
-// 设置默认请求处理器为 Swoole
-YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
-
 // Swoole 处理器必须在协程中调用
 go('test');
 
@@ -131,7 +132,6 @@ function test()
 ### WebSocket Client
 
 ```php
-YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
 go(function(){
     $url = 'ws://127.0.0.1:1234/';
     $http = new HttpRequest;

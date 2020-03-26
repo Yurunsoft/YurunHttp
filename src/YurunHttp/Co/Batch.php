@@ -28,10 +28,13 @@ abstract class Batch
         }
         if(null === $handlerClass)
         {
-            $handlerClass = YurunHttp::getDefaultHandler();
+            $handler = YurunHttp::getHandler();
+        }
+        else
+        {
+            $handler = new $handlerClass;
         }
         /** @var \Yurun\Util\YurunHttp\Handler\IHandler $handler */
-        $handler = new $handlerClass;
         return $handler->coBatch($requests, $timeout);
     }
 
