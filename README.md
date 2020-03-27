@@ -22,6 +22,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 > 每个小版本的更新日志请移步到 Release 查看
 
+v4.2.0 重构 Swoole 处理器，并发请求性能大幅提升 (PHP 版本依赖降为 >= 5.5)
+
 v4.1.0 实现智能识别场景，自动选择适合 Curl/Swoole 环境的处理器
 
 v4.0.0 新增支持 `Swoole` 并发批量请求 (PHP >= 7.1)
@@ -51,7 +53,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^4.1.0"
+        "yurunsoft/yurun-http": "^4.2.0"
     }
 }
 ```

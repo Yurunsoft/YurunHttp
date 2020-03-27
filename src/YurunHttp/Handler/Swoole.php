@@ -12,7 +12,6 @@ use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
 use Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager;
 use Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager;
-use function Yurun\Swoole\Coroutine\batch;
 
 class Swoole implements IHandler
 {
@@ -181,6 +180,22 @@ class Swoole implements IHandler
      */
     public function send($request)
     {
+        $deferRequest = $this->sendDefer($request);
+        if($request->getAttribute(Attributes::PRIVATE_IS_HTTP2) && $request->getAttribute(Attributes::HTTP2_NOT_RECV))
+        {
+            return true;
+        }
+        return !!$this->recvDefer($deferRequest);
+    }
+
+    /**
+     * 发送请求，但延迟接收
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @return \Yurun\Util\YurunHttp\Http\Request
+     */
+    public function sendDefer($request)
+    {
         if([] !== ($queryParams = $request->getQueryParams()))
         {
             $request = $request->withUri($request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
@@ -196,73 +211,86 @@ class Swoole implements IHandler
             $connection = $this->httpConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
             $connection->setDefer(true);
         }
-        $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
-        $statusCode = 0;
         $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET);
-        $retry = $request->getAttribute(Attributes::RETRY, 0);
-        for($i = 0; $i <= $retry; ++$i)
+        // 构建
+        $this->buildRequest($request, $connection, $http2Request);
+        // 发送
+        $path = $uri->getPath();
+        if('' === $path)
         {
-            // 构建
-            $this->buildRequest($request, $connection, $http2Request);
-            // 发送
-            $path = $uri->getPath();
-            if('' === $path)
+            $path = '/';
+        }
+        $query = $uri->getQuery();
+        if('' !== $query)
+        {
+            $path .= '?' . $query;
+        }
+        if($isWebSocket)
+        {
+            if($isHttp2)
             {
-                $path = '/';
+                throw new \RuntimeException('Http2 swoole handler does not support websocket');
             }
-            $query = $uri->getQuery();
-            if('' !== $query)
+            if(!$connection->upgrade($path))
             {
-                $path .= '?' . $query;
+                throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
             }
-            if($isWebSocket)
+        }
+        else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
+        {
+            if($isHttp2)
             {
-                if($isHttp2)
-                {
-                    throw new \RuntimeException('Http2 swoole handler does not support websocket');
-                }
-                if(!$connection->upgrade($path))
-                {
-                    throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
-                }
-            }
-            else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
-            {
-                if($isHttp2)
-                {
-                    $result = $connection->send($http2Request);
-                }
-                else
-                {
-                    $connection->execute($path);
-                }
+                $result = $connection->send($http2Request);
+                $request = $request->withAttribute(Attributes::PRIVATE_HTTP2_STREAM_ID, $result);
             }
             else
             {
-                if($isHttp2)
-                {
-                    throw new \RuntimeException('Http2 swoole handler does not support download file');
-                }
-                $connection->download($path, $saveFilePath);
+                $connection->execute($path);
             }
-            if($isHttp2 && $request->getAttribute(Attributes::HTTP2_NOT_RECV))
+        }
+        else
+        {
+            if($isHttp2)
             {
-                return $result;
+                throw new \RuntimeException('Http2 swoole handler does not support download file');
             }
-            $this->getResponse($request, $connection, $isWebSocket, $isHttp2);
-            $statusCode = $this->result->getStatusCode();
-            // 状态码为5XX或者0才需要重试
-            if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
-            {
-                break;
-            }
+            $connection->download($path, $saveFilePath);
+        }
+       
+        return $request->withAttribute(Attributes::PRIVATE_IS_HTTP2, $isHttp2)
+                       ->withAttribute(Attributes::PRIVATE_IS_WEBSOCKET, $isHttp2)
+                       ->withAttribute(Attributes::PRIVATE_CONNECTION, $connection);
+    }
+
+    /**
+     * 延迟接收
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @return \Yurun\Util\YurunHttp\Http\Response
+     */
+    public function recvDefer($request)
+    {
+        /** @var \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client $connection */
+        $connection = $request->getAttribute(Attributes::PRIVATE_CONNECTION);
+        $retryCount = $request->getAttribute(Attributes::PRIVATE_RETRY_COUNT, 0);
+        $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
+        $isHttp2 = '2.0' === $request->getProtocolVersion();
+        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET);
+        $this->getResponse($request, $connection, $isWebSocket, $isHttp2);
+        $statusCode = $this->result->getStatusCode();
+        // 状态码为5XX或者0才需要重试
+        if((0 === $statusCode || (5 === (int)($statusCode/100))) && $retryCount < $request->getAttribute(Attributes::RETRY, 0))
+        {
+            $request = $request->withAttribute(Attributes::RETRY, ++$retryCount);
+            $deferRequest = $this->sendDefer($request);
+            return $this->recvDefer($deferRequest);
         }
         if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true))
         {
             if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
             {
                 // 自己实现重定向
-                $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $uri);
+                $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $request->getUri());
                 if(in_array($statusCode, [301, 302, 303]))
                 {
                     $method = 'GET';
@@ -276,11 +304,11 @@ class Swoole implements IHandler
             else
             {
                 $this->result = $this->result->withErrno(-1)
-                                                ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                                             ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                 return false;
             }
         }
-        return true;
+        return $this->result;
     }
 
     /**
@@ -556,17 +584,20 @@ class Swoole implements IHandler
      */
     public function coBatch($requests, $timeout = null)
     {
-        $callbacks = [];
-        foreach($requests as $k => $request)
+        $handlers = [];
+        $results = [];
+        foreach($requests as $i => &$request)
         {
-            $callbacks[$k] = function() use($request){
-                $swooleHandler = new Swoole;
-                $swooleHandler->send($request);
-                $response = $swooleHandler->recv();
-                return $response;
-            };
+            $results[$i] = null;
+            $handlers[$i] = $handler = new Swoole;
+            $request = $handler->sendDefer($request);
         }
-        return batch($callbacks, $timeout ?? -1);
+        unset($request);
+        foreach($requests as $i => $request)
+        {
+            $results[$i] = $handlers[$i]->recvDefer($request);
+        }
+        return $results;
     }
 
 }
