@@ -320,6 +320,11 @@ class Curl implements IHandler
         $headerSize = curl_getinfo($handler, CURLINFO_HEADER_SIZE);
         $headerContent = substr($curlResult, 0, $headerSize);
         $body = substr($curlResult, $headerSize);
+        // PHP 7.0.0开始substr()的 string 字符串长度与 start 相同时将返回一个空字符串。在之前的版本中，这种情况将返回 FALSE 。
+        if(false === $body)
+        {
+            $body = '';
+        }
 
         // body
         $result = new Response($body, curl_getinfo($handler, CURLINFO_HTTP_CODE));
