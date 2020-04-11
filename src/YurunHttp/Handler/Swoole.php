@@ -285,12 +285,12 @@ class Swoole implements IHandler
             $deferRequest = $this->sendDefer($request);
             return $this->recvDefer($deferRequest);
         }
-        if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true))
+        if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $this->result->getHeaderLine('location')))
         {
             if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
             {
                 // 自己实现重定向
-                $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $request->getUri());
+                $uri = $this->parseRedirectLocation($location, $request->getUri());
                 if(in_array($statusCode, [301, 302, 303]))
                 {
                     $method = 'GET';

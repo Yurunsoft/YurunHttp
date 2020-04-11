@@ -495,4 +495,15 @@ class HttpRequestTest extends BaseTest
         });
     }
 
+    public function test304()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $response = $http->get($this->host . '?a=304');
+            $this->assertResponse($response);
+            $this->assertEquals(304, $response->getStatusCode());
+            $this->assertEquals('', $response->body());
+        });
+    }
+
 }

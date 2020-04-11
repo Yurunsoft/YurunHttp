@@ -65,6 +65,9 @@ switch($action)
     case 'body':
         echo file_get_contents('php://input');
         break;
+    case '304':
+        header('HTTP/1.1 304 Not Modified');
+        break;
     default:
         // 默认
         echo 'YurunHttp';
