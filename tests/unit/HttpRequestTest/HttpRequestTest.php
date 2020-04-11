@@ -498,11 +498,11 @@ class HttpRequestTest extends BaseTest
 
     public function test304()
     {
-        if(method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(SWOOLE_VERSION, '4.4.17', '<'))
-        {
-            $this->markTestSkipped('Swoole must >= 4.4.17');
-        }
         $this->call(function(){
+            if(method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(SWOOLE_VERSION, '4.4.17', '<'))
+            {
+                $this->markTestSkipped('Swoole must >= 4.4.17');
+            }
             $http = new HttpRequest;
             $response = $http->get($this->host . '?a=304');
             $this->assertResponse($response);
