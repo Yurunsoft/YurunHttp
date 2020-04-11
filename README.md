@@ -1,16 +1,37 @@
 # YurunHttp
 
 [![Latest Version](https://poser.pugx.org/yurunsoft/yurun-http/v/stable)](https://packagist.org/packages/yurunsoft/yurun-http)
+[![Travis](https://img.shields.io/travis/Yurunsoft/yurunhttp.svg)](https://travis-ci.org/Yurunsoft/yurunhttp)
+[![Php Version](https://img.shields.io/badge/php-%3E=5.5-brightgreen.svg)](https://secure.php.net/)
 [![IMI Doc](https://img.shields.io/badge/docs-passing-green.svg)](http://doc.yurunsoft.com/YurunHttp)
 [![IMI License](https://img.shields.io/github/license/Yurunsoft/YurunHttp.svg)](https://github.com/Yurunsoft/YurunHttp/blob/master/LICENSE)
 
 ## 简介
 
-YurunHttp 是开源的 PHP HTTP 类库，支持链式操作，简单易用。
+YurunHttp，支持智能识别 Curl/Swoole 场景的高性能 Http Client。
 
-支持所有常见的 GET、POST、PUT、DELETE、UPDATE 等请求方式，支持 Http2、WebSocket、浏览器级别 Cookies 管理、上传下载、设置和读取 header、Cookie、请求参数、失败重试、限速、代理、证书等。
+支持链式操作，简单易用。支持并发批量请求、HTTP2、WebSocket 全双工通信协议。
 
-支持 Curl 和 Swoole 环境智能识别兼容。
+非常适合用于开发通用 SDK 包，不必再为 Swoole 协程兼容而头疼！
+
+YurunHttp 的目标是做最好用的 PHP HTTP Client 开发包！
+
+### 特性
+
+* GET/POST/PUT/DELETE/UPDATE 等请求方式
+* 浏览器级别 Cookies 管理
+* 上传及下载
+* 请求头和响应头
+* 失败重试
+* 自动重定向
+* HTTP 代理方式请求
+* SSL 证书（HTTPS）
+* 并发批量请求
+* HTTP2
+* WebSocket
+* Curl & Swoole 环境智能兼容
+
+---
 
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 

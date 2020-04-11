@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp\Test\HttpRequestTest;
 
+use Swoole\Coroutine;
 use Yurun\Util\HttpRequest;
 use Yurun\Util\YurunHttp\Co\Batch;
 use Yurun\Util\YurunHttp\Test\BaseTest;
@@ -492,6 +493,21 @@ class HttpRequestTest extends BaseTest
             }
             unset($memorys[0]);
             $this->assertEquals(1, count(array_unique($memorys)));
+        });
+    }
+
+    public function test304()
+    {
+        $this->call(function(){
+            if(method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(SWOOLE_VERSION, '4.4.17', '<'))
+            {
+                $this->markTestSkipped('Swoole must >= 4.4.17');
+            }
+            $http = new HttpRequest;
+            $response = $http->get($this->host . '?a=304');
+            $this->assertResponse($response);
+            $this->assertEquals(304, $response->getStatusCode());
+            $this->assertEquals('', $response->body());
         });
     }
 

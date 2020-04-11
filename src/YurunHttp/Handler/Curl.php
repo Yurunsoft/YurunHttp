@@ -176,12 +176,12 @@ class Curl implements IHandler
                     break;
                 }
             }
-            if($this->request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400))
+            if($this->request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $this->result->getHeaderLine('location')))
             {
                 if(++$redirectCount <= ($maxRedirects = $this->request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
                 {
                     $isLocation = true;
-                    $uri = $this->parseRedirectLocation($this->result->getHeaderLine('location'), $uri);
+                    $uri = $this->parseRedirectLocation($location, $uri);
                     continue;
                 }
                 else
