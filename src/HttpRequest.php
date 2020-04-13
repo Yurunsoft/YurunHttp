@@ -31,19 +31,19 @@ class HttpRequest
      * `curl_setopt_array()`所需要的第二个参数
      * @var array
      */
-    public $options = array();
+    public $options =[];
 
     /**
      * 请求头
      * @var array
      */
-    public $headers = array();
+    public $headers =[];
 
     /**
      * Cookies
      * @var array
      */
-    public $cookies = array();
+    public $cookies =[];
 
     /**
      * 失败重试次数，默认为0
@@ -61,7 +61,7 @@ class HttpRequest
      * 代理设置
      * @var array
      */
-    public $proxy = array();
+    public $proxy =[];
 
     /**
      * 是否验证证书
@@ -115,10 +115,10 @@ class HttpRequest
      * 请求结果保存至文件的配置
      * @var mixed
      */
-    public $saveFileOption = array();
+    public $saveFileOption =[];
 
     /**
-     * 根据location自动重定向
+     * 是否启用重定向
      * @var bool
      */
     public $followLocation = true;
@@ -166,6 +166,13 @@ class HttpRequest
     public $keyPassword = null;
 
     /**
+     * 请求方法
+     *
+     * @var string
+     */
+    public $method = 'GET';
+
+    /**
      * Http 协议版本
      *
      * @var string
@@ -175,12 +182,12 @@ class HttpRequest
     /**
      * 代理认证方式
      */
-    public static $proxyAuths = array();
+    public static $proxyAuths =[];
 
     /**
      * 代理类型
      */
-    public static $proxyType = array();
+    public static $proxyType =[];
 
     /**
      * 构造方法
@@ -205,16 +212,15 @@ class HttpRequest
      */
     public function open()
     {
-        $handlerClass = YurunHttp::getDefaultHandler();
-        $this->handler = new $handlerClass;
+        $this->handler = YurunHttp::getHandler();
         $this->retry = 0;
-        $this->headers = $this->options = array();
+        $this->headers = $this->options =[];
         $this->url = $this->content = '';
         $this->useProxy = false;
-        $this->proxy = array(
+        $this->proxy = [
             'auth'    =>    'basic',
             'type'    =>    'http',
-        );
+        ];
         $this->isVerifyCA = false;
         $this->caCert = null;
         $this->connectTimeout = 30000;
@@ -223,7 +229,7 @@ class HttpRequest
         $this->uploadSpeed = null;
         $this->username = null;
         $this->password = null;
-        $this->saveFileOption = array();
+        $this->saveFileOption =[];
     }
 
     /**
@@ -232,6 +238,7 @@ class HttpRequest
      */
     public function close()
     {
+        $this->handler->close();
         $this->handler = null;
     }
 
@@ -478,7 +485,7 @@ class HttpRequest
     }
 
     /**
-     * 设置失败重试次数，状态码非200时重试
+     * 设置失败重试次数，状态码为5XX或者0才需要重试
      * @param string $retry 
      * @return static
      */
@@ -499,12 +506,12 @@ class HttpRequest
     public function proxy($server, $port, $type = 'http', $auth = 'basic')
     {
         $this->useProxy = true;
-        $this->proxy = array(
-            'server'    =>    $server,
-            'port'        =>    $port,
-            'type'        =>    $type,
-            'auth'        =>    $auth,
-        );
+        $this->proxy = [
+            'server'    =>  $server,
+            'port'      =>  $port,
+            'type'      =>  $type,
+            'auth'      =>  $auth,
+        ];
         return $this;
     }
 
@@ -631,6 +638,17 @@ class HttpRequest
     }
 
     /**
+     * 设置请求方法
+     * @param string $method 
+     * @return static
+     */
+    public function method($method)
+    {
+        $this->method = $method;
+        return $this;
+    }
+
+    /**
      * 处理请求主体
      * @param string|array $requestBody
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
@@ -678,15 +696,19 @@ class HttpRequest
      *
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param array $method 请求方法，GET、POST等
+     * @param string|null $method 请求方法，GET、POST等
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Request
      */
-    public function buildRequest($url = null, $requestBody = null, $method = 'GET', $contentType = null)
+    public function buildRequest($url = null, $requestBody = null, $method = null, $contentType = null)
     {
         if(null === $url)
         {
             $url = $this->url;
+        }
+        if(null === $method)
+        {
+            $method = $this->method;
         }
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
         $request = new Request($url, $this->headers, $body, $method);
@@ -724,11 +746,11 @@ class HttpRequest
      * 发送请求，所有请求的老祖宗
      * @param string $url 请求地址，如果为null则取url属性值
      * @param array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param array $method 请求方法，GET、POST等
+     * @param string|null $method 请求方法，GET、POST等
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function send($url = null, $requestBody = null, $method = 'GET', $contentType = null)
+    public function send($url = null, $requestBody = null, $method = null, $contentType = null)
     {
         $request = $this->buildRequest($url, $requestBody, $method, $contentType);
         return YurunHttp::send($request, $this->handler);
@@ -770,7 +792,7 @@ class HttpRequest
             }
             $url .= http_build_query($requestBody, '', '&');
         }
-        return $this->send($url, array(), 'GET');
+        return $this->send($url,[], 'GET');
     }
 
     /**
@@ -858,7 +880,7 @@ class HttpRequest
             }
             rename($fileName, $basename . '.' . $ext);
         }
-        $this->saveFileOption = array();
+        $this->saveFileOption =[];
         return $result;
     }
 
@@ -879,16 +901,16 @@ class HttpRequest
 if(extension_loaded('curl'))
 {
     // 代理认证方式
-    HttpRequest::$proxyAuths = array(
-        'basic'        =>    CURLAUTH_BASIC,
-        'ntlm'        =>    CURLAUTH_NTLM
-    );
+    HttpRequest::$proxyAuths = [
+        'basic' =>  CURLAUTH_BASIC,
+        'ntlm'  =>  CURLAUTH_NTLM
+    ];
 
     // 代理类型
-    HttpRequest::$proxyType = array(
-        'http'        =>    CURLPROXY_HTTP,
-        'socks4'    =>    CURLPROXY_SOCKS4,
-        'socks4a'    =>    6,    // CURLPROXY_SOCKS4A
-        'socks5'    =>    CURLPROXY_SOCKS5,
-    );
+    HttpRequest::$proxyType = [
+        'http'      =>  CURLPROXY_HTTP,
+        'socks4'    =>  CURLPROXY_SOCKS4,
+        'socks4a'   =>  6,    // CURLPROXY_SOCKS4A
+        'socks5'    =>  CURLPROXY_SOCKS5,
+    ];
 }

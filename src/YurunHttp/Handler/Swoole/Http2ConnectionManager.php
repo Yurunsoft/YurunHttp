@@ -22,7 +22,7 @@ class Http2ConnectionManager extends BaseConnectionManager
         }
         else
         {
-            throw new \RuntimeException(sprintf('Http2 connect failed! errCode: %s, errMsg:%', $client->errCode, socket_strerror($client->errCode)));
+            throw new \RuntimeException(sprintf('Http2 connect failed! errCode: %s, errMsg:%s', $client->errCode, swoole_strerror($client->errCode)));
         }
     }
 

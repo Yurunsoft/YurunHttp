@@ -21,8 +21,18 @@ $server->on('message', function (Swoole\WebSocket\Server $server, $frame) use(&$
     }
 });
 
-$server->on('close', function ($ser, $fd) {
-    
+$server->on('close', function ($ser, $fd) use(&$userNameStore){
+    if(isset($userNameStore[$fd]))
+    {
+        unset($userNameStore[$fd]);
+    }
 });
+
+$wssServer = $server->addlistener('127.0.0.1', 8902, SWOOLE_SOCK_TCP | SWOOLE_SSL);
+$wssServer->set([
+    'open_websocket_protocol'   =>  true,
+    'ssl_cert_file'             =>  dirname(__DIR__, 2) . '/ssl/server.crt',
+    'ssl_key_file'              =>  dirname(__DIR__, 2) . '/ssl/server.key',
+]);
 
 $server->start();

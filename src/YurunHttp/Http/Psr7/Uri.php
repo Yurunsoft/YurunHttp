@@ -133,7 +133,7 @@ class Uri implements UriInterface
      * 获取连接到服务器的端口
      *
      * @param \Psr\Http\Message\UriInterface $uri
-     * @return void
+     * @return int
      */
     public static function getServerPort(UriInterface $uri)
     {

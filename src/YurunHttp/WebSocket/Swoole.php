@@ -55,7 +55,7 @@ class Swoole implements IWebSocketClient
         $this->request = $request;
         $this->response = $response;
         $uri = $request->getUri();
-        $this->handler = $this->httpHandler->getHttpConnectionManager()->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
+        $this->handler = $this->httpHandler->getHttpConnectionManager()->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
         $this->connected = true;
     }
 
@@ -122,7 +122,7 @@ class Swoole implements IWebSocketClient
         $result = $this->handler->push($data);
         if(!$result)
         {
-            throw new WebSocketException(sprintf('Send Failed, error: %s, errorCode: %s', socket_strerror($this->handler->errCode), $this->handler->errCode), $this->handler->errCode);
+            throw new WebSocketException(sprintf('Send Failed, error: %s, errorCode: %s', swoole_strerror($this->handler->errCode), $this->handler->errCode), $this->handler->errCode);
         }
         return $result;
     }

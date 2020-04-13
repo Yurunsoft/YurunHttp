@@ -150,7 +150,7 @@ class CookieManager
                         foreach($idList as $id)
                         {
                             $cookieItem = $this->cookieList[$id];
-                            if((0 === $cookieItem->expires || $cookieItem->expires > time()) && (!$cookieItem->secure || 'https' === $uri->getScheme()) )
+                            if((0 === $cookieItem->expires || $cookieItem->expires > time()) && (!$cookieItem->secure || 'https' === $uri->getScheme() || 'wss' === $uri->getScheme()) )
                             {
                                 $result[$cookieItem->name] = $cookieItem->value;
                             }
@@ -287,7 +287,7 @@ class CookieManager
      * 查找 Cookie ID
      *
      * @param \Yurun\Util\YurunHttp\Cookie\CookieItem $item
-     * @return void
+     * @return int|null
      */
     private function findCookie($item)
     {

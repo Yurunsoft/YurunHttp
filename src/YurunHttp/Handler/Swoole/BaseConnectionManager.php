@@ -71,18 +71,15 @@ abstract class BaseConnectionManager implements IConnectionManager
                 return false;
             }
         }
+        else if(isset($this->connections[$key]))
+        {
+            $connection = $this->connections[$key];
+            unset($this->connections[$key]);
+            return $connection;
+        }
         else
         {
-            if(isset($this->connections[$key]))
-            {
-                $connection = $this->connections[$key];
-                unset($this->connections[$key]);
-                return $connection;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -114,18 +111,15 @@ abstract class BaseConnectionManager implements IConnectionManager
                 return false;
             }
         }
+        else if(isset($this->connections[$key]))
+        {
+            $this->connections[$key]->close();
+            unset($this->connections[$key]);
+            return true;
+        }
         else
         {
-            if(isset($this->connections[$key]))
-            {
-                $this->connections[$key]->close();
-                unset($this->connections[$key]);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
     }
 

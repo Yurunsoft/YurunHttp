@@ -75,12 +75,13 @@ class SwooleHttp2Test extends BaseTest
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
             $client->setTimeout(3);
+
+            $this->assertTrue($client->connect());
+
             go(function() use($client){
                 $result = $client->recv();
                 $this->assertFalse($result->success);
             });
-
-            $this->assertTrue($client->connect());
 
             $httpRequest = new HttpRequest;
             $date = strtotime('2017-03-24 17:12:14');

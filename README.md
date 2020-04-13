@@ -1,14 +1,37 @@
 # YurunHttp
 
 [![Latest Version](https://poser.pugx.org/yurunsoft/yurun-http/v/stable)](https://packagist.org/packages/yurunsoft/yurun-http)
+[![Travis](https://img.shields.io/travis/Yurunsoft/yurunhttp.svg)](https://travis-ci.org/Yurunsoft/yurunhttp)
+[![Php Version](https://img.shields.io/badge/php-%3E=5.5-brightgreen.svg)](https://secure.php.net/)
 [![IMI Doc](https://img.shields.io/badge/docs-passing-green.svg)](http://doc.yurunsoft.com/YurunHttp)
 [![IMI License](https://img.shields.io/github/license/Yurunsoft/YurunHttp.svg)](https://github.com/Yurunsoft/YurunHttp/blob/master/LICENSE)
 
 ## 简介
 
-YurunHttp 是开源的 PHP HTTP 类库，支持链式操作，简单易用。
+YurunHttp，支持智能识别 Curl/Swoole 场景的高性能 Http Client。
 
-支持所有常见的 GET、POST、PUT、DELETE、UPDATE 等请求方式，支持 Http2、WebSocket、浏览器级别 Cookies 管理、上传下载、设置和读取 header、Cookie、请求参数、失败重试、限速、代理、证书等。
+支持链式操作，简单易用。支持并发批量请求、HTTP2、WebSocket 全双工通信协议。
+
+非常适合用于开发通用 SDK 包，不必再为 Swoole 协程兼容而头疼！
+
+YurunHttp 的目标是做最好用的 PHP HTTP Client 开发包！
+
+### 特性
+
+* GET/POST/PUT/DELETE/UPDATE 等请求方式
+* 浏览器级别 Cookies 管理
+* 上传及下载
+* 请求头和响应头
+* 失败重试
+* 自动重定向
+* HTTP 代理方式请求
+* SSL 证书（HTTPS）
+* 并发批量请求
+* HTTP2
+* WebSocket
+* Curl & Swoole 环境智能兼容
+
+---
 
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
@@ -19,6 +42,14 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 ## 重大版本更新日志
 
 > 每个小版本的更新日志请移步到 Release 查看
+
+v4.2.0 重构 Swoole 处理器，并发请求性能大幅提升 (PHP 版本依赖降为 >= 5.5)
+
+v4.1.0 实现智能识别场景，自动选择适合 Curl/Swoole 环境的处理器
+
+v4.0.0 新增支持 `Swoole` 并发批量请求 (PHP >= 7.1)
+
+v3.5.0 新增支持 `Curl` 并发批量请求 (PHP >= 5.5)
 
 v3.4.0 新增支持 `Http2` 全双工用法
 
@@ -43,7 +74,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^3.4.0"
+        "yurunsoft/yurun-http": "^4.2.0"
     }
 }
 ```
@@ -67,6 +98,22 @@ $response = $http->ua('YurunHttp')
                  ->get('http://www.baidu.com');
 
 echo 'html:', PHP_EOL, $response->body();
+```
+
+### 并发批量请求
+
+```php
+use \Yurun\Util\YurunHttp\Co\Batch;
+use \Yurun\Util\HttpRequest;
+
+$result = Batch::run([
+    (new HttpRequest)->url('https://www.imiphp.com'),
+    (new HttpRequest)->url('https://www.yurunsoft.com'),
+]);
+
+var_dump($result[0]->getHeaders(), strlen($result[0]->body()), $result[0]->getStatusCode());
+
+var_dump($result[1]->getHeaders(), strlen($result[1]->body()), $result[1]->getStatusCode());
 ```
 
 ### PSR-7 请求构建
@@ -94,10 +141,6 @@ var_dump($response);
 use Yurun\Util\YurunHttp;
 use Yurun\Util\HttpRequest;
 
-// 设置默认请求处理器为 Swoole
-YurunHttp::setDefaultHandler('Yurun\Util\YurunHttp\Handler\Swoole'); // php 5.4
-// YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class); // php 5.5+
-
 // Swoole 处理器必须在协程中调用
 go('test');
 
@@ -112,7 +155,6 @@ function test()
 ### WebSocket Client
 
 ```php
-YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
 go(function(){
     $url = 'ws://127.0.0.1:1234/';
     $http = new HttpRequest;

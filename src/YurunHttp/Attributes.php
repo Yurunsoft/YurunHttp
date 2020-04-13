@@ -169,6 +169,11 @@ abstract class Attributes
     const HTTP2_PIPELINE = 'http2_pipeline';
 
     /**
+     * 重试计数
+     */
+    const PRIVATE_RETRY_COUNT = '__retryCount';
+
+    /**
      * 重定向计数
      */
     const PRIVATE_REDIRECT_COUNT = '__redirectCount';
@@ -177,5 +182,25 @@ abstract class Attributes
      * WebSocket 请求
      */
     const PRIVATE_WEBSOCKET = '__websocket';
+
+    /**
+     * Http2 流ID
+     */
+    const PRIVATE_HTTP2_STREAM_ID = '__http2StreamId';
+
+    /**
+     * 是否为 Http2
+     */
+    const PRIVATE_IS_HTTP2 = '__isHttp2';
+
+    /**
+     * 是否为 WebSocket
+     */
+    const PRIVATE_IS_WEBSOCKET = '__isWebSocket';
+
+    /**
+     * 连接对象
+     */
+    const PRIVATE_CONNECTION = '__connection';
 
 }

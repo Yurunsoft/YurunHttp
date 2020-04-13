@@ -4,46 +4,54 @@ dist: trusty
 
 matrix:
   include:
-  - php: '5.4'
-    env: PHPUNIT_VERSION="4"
   - php: '5.5'
     env: PHPUNIT_VERSION="4"
   - php: '5.6'
     env: PHPUNIT_VERSION="5"
   - php: '7.0'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="6"
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.3.6"
+    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
   - php: '7.4'
-    env: SWOOLE_VERSION="v4.4.14"
+    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
   - php: '7.1'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
   - php: '7.2'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
   - php: '7.3'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
   - php: '7.4'
-    env: SWOOLE_VERSION="master"
+    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
+  - php: '7.1'
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+  - php: '7.2'
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+  - php: '7.3'
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+  - php: '7.4'
+    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: 'nightly'
     env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7" INSTALL_REDIS_EXT=true
   allow_failures:
-  - env: SWOOLE_VERSION="master"
+  - env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: nightly
+  - env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
 
 env:
   global:
     - HTTP_SERVER_HOST=http://127.0.0.1:8898/
     - WS_SERVER_HOST=ws://127.0.0.1:8900/
+    - WSS_SERVER_HOST=wss://127.0.0.1:8902/
 
 services:
   - redis-server
