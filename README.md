@@ -33,6 +33,8 @@ YurunHttp 的目标是做最好用的 PHP HTTP Client 开发包！
 
 ---
 
+开发手册文档：<https://doc.yurunsoft.com/YurunHttp>
+
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
 欢迎各位加入技术支持群17916227[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://jq.qq.com/?_wv=1027&k=5wXf4Zq)，如有问题可以及时解答和修复。
