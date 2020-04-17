@@ -464,15 +464,18 @@ class HttpRequestTest extends BaseTest
                     case 0:
                         $this->assertResponse($response);
                         $this->assertEquals($response->body(), 'YurunHttp');
+                        $this->assertNotNull($response->getRequest());
                         break;
                     case 1:
                         $data = $response->json(true);
                         $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
                         $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
+                        $this->assertNotNull($response->getRequest());
                         break;
                     case 2:
                         $this->assertTrue(is_file($fileName));
                         $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+                        $this->assertNotNull($response->getRequest());
                         break;
                     default:
                         throw new \RuntimeException(sprintf('Unknown %s', $i));
