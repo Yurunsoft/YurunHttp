@@ -55,7 +55,7 @@ abstract class YurunHttp
         {
             $class = static::$defaultHandler;
         }
-        if(defined('SWOOLE_VERSION') && Coroutine::getuid() > -1)
+        else if(defined('SWOOLE_VERSION') && Coroutine::getuid() > -1)
         {
             $class = \Yurun\Util\YurunHttp\Handler\Swoole::class;
         }
