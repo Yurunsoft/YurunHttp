@@ -492,12 +492,10 @@ class Curl implements IHandler
                 $saveFilePath .= basename($this->url);
             }
             $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
-            $headerFileFp = fopen('php://memory', 'w+');
             curl_setopt_array($handler, [
                 CURLOPT_HEADER          => false,
                 CURLOPT_RETURNTRANSFER  => false,
                 CURLOPT_FILE            => $saveFileFp,
-                CURLOPT_WRITEHEADER     => $headerFileFp,
             ]);
         }
     }
