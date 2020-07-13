@@ -505,14 +505,14 @@ class Swoole implements IHandler
                 case 'http':
                     $settings['http_proxy_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
                     $settings['http_proxy_port'] = $request->getAttribute(Attributes::PROXY_PORT);
-                    $settings['http_proxy_user'] = $request->getAttribute(Attributes::PROXY_USERNAME, '');
-                    $settings['http_proxy_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, '');
+                    $settings['http_proxy_user'] = $request->getAttribute(Attributes::PROXY_USERNAME, null);
+                    $settings['http_proxy_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, null);
                     break;
                 case 'socks5':
                     $settings['socks5_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
                     $settings['socks5_port'] = $request->getAttribute(Attributes::PROXY_PORT);
-                    $settings['socks5_username'] = $request->getAttribute(Attributes::PROXY_USERNAME, '');
-                    $settings['socks5_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, '');
+                    $settings['socks5_username'] = $request->getAttribute(Attributes::PROXY_USERNAME, null);
+                    $settings['socks5_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, null);
                     break;
             }
         }
@@ -529,10 +529,26 @@ class Swoole implements IHandler
         $settings = $request->getAttribute(Attributes::OPTIONS, []);
         // 用户名密码认证处理
         $username = $request->getAttribute(Attributes::USERNAME);
-        if(null != $username)
+        if(null === $username)
         {
-            $auth = base64_encode($username . ':' . $request->getAttribute(Attributes::PASSWORD, ''));
-            $request = $request->withHeader('Authorization', 'Basic ' . $auth);
+            $uri = $request->getUri();
+            $userInfo = $uri->getUserInfo();
+            if($userInfo)
+            {
+                $authorization = 'Basic ' . base64_encode($userInfo);
+            }
+            else
+            {
+                $authorization = null;
+            }
+        }
+        else
+        {
+            $authorization = 'Basic ' . base64_encode($username . ':' . $request->getAttribute(Attributes::PASSWORD, ''));
+        }
+        if($authorization)
+        {
+            $request = $request->withHeader('Authorization', $authorization);
         }
         // 超时
         $settings['timeout'] = $request->getAttribute(Attributes::TIMEOUT, 30000) / 1000;

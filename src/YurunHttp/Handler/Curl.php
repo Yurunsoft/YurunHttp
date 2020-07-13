@@ -168,7 +168,7 @@ class Curl implements IHandler
                     $length = curl_getinfo($this->handler, CURLINFO_HEADER_SIZE);
                     $this->curlResult = fread($this->headerFileFp, $length);
                 }
-                $this->result = $this->getResponse($this->handler, $this->curlResult, !!$this->headerFileFp, $this->receiveHeaders);
+                $this->result = $this->getResponse($this->request, $this->handler, $this->curlResult, !!$this->headerFileFp, $this->receiveHeaders);
                 $statusCode = $this->result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
                 if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
@@ -312,9 +312,14 @@ class Curl implements IHandler
     /**
      * 获取响应对象
      *
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * @param string $curlResult
+     * @param bool $isDownload
+     * @param array $receiveHeaders
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse($handler, $curlResult, $isDownload, $receiveHeaders)
+    private function getResponse($request, $handler, $curlResult, $isDownload, $receiveHeaders)
     {
         // 分离header和body
         $headerSize = curl_getinfo($handler, CURLINFO_HEADER_SIZE);
@@ -361,7 +366,7 @@ class Curl implements IHandler
             $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
             $cookies[$cookieItem->name] = (array)$cookieItem;
         }
-        return $result->withRequest($this->request)
+        return $result->withRequest($request)
                       ->withCookieOriginParams($cookies)
                       ->withError(curl_error($handler))
                       ->withErrno(curl_errno($handler));
@@ -487,12 +492,10 @@ class Curl implements IHandler
                 $saveFilePath .= basename($this->url);
             }
             $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
-            $headerFileFp = fopen('php://memory', 'w+');
             curl_setopt_array($handler, [
                 CURLOPT_HEADER          => false,
                 CURLOPT_RETURNTRANSFER  => false,
                 CURLOPT_FILE            => $saveFileFp,
-                CURLOPT_WRITEHEADER     => $headerFileFp,
             ]);
         }
     }
@@ -672,7 +675,7 @@ class Curl implements IHandler
                         $curlResult = fread($headerFileFps[$k], $length);
                     }
                 }
-                $result[$k] = $this->getResponse($handler, $curlResult, $isDownload, $receiveHeaders);
+                $result[$k] = $this->getResponse($request, $handler, $curlResult, $isDownload, $receiveHeaders);
             }
             return $result;
         } finally {

@@ -4,6 +4,7 @@ namespace Yurun\Util\YurunHttp\Test\HttpRequestTest;
 use Swoole\Coroutine;
 use Yurun\Util\HttpRequest;
 use Yurun\Util\YurunHttp\Co\Batch;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
@@ -464,15 +465,18 @@ class HttpRequestTest extends BaseTest
                     case 0:
                         $this->assertResponse($response);
                         $this->assertEquals($response->body(), 'YurunHttp');
+                        $this->assertNotNull($response->getRequest());
                         break;
                     case 1:
                         $data = $response->json(true);
                         $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
                         $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
+                        $this->assertNotNull($response->getRequest());
                         break;
                     case 2:
                         $this->assertTrue(is_file($fileName));
                         $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+                        $this->assertNotNull($response->getRequest());
                         break;
                     default:
                         throw new \RuntimeException(sprintf('Unknown %s', $i));
@@ -508,6 +512,17 @@ class HttpRequestTest extends BaseTest
             $this->assertResponse($response);
             $this->assertEquals(304, $response->getStatusCode());
             $this->assertEquals('', $response->body());
+        });
+    }
+
+    public function testUriWithAuth()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $uri = (new Uri($this->host . '?a=auth'))->withUserInfo('test', '123456');
+            $response = $http->get($uri);
+            $this->assertResponse($response);
+            $this->assertEquals('Basic ' . base64_encode('test:123456'), $response->body());
         });
     }
 

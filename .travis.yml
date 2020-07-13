@@ -1,5 +1,6 @@
 sudo: required
 language: php
+sudo: required
 dist: trusty
 
 matrix:
@@ -8,6 +9,22 @@ matrix:
     env: PHPUNIT_VERSION="4"
   - php: '5.6'
     env: PHPUNIT_VERSION="5"
+  - php: '7.1'
+    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+  - php: '7.2'
+    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+  - php: '7.3'
+    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+  - php: '7.4'
+    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+  - php: '7.1'
+    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+  - php: '7.2'
+    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+  - php: '7.3'
+    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+  - php: '7.4'
+    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
   - php: '7.0'
     env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="6"
   - php: '7.1'
@@ -16,22 +33,6 @@ matrix:
     env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
   - php: '7.3'
     env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
-  - php: '7.1'
-    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
-  - php: '7.2'
-    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
-  - php: '7.3'
-    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
-  - php: '7.4'
-    env: SWOOLE_VERSION="v4.4.17" PHPUNIT_VERSION="7"
-  - php: '7.1'
-    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
-  - php: '7.2'
-    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
-  - php: '7.3'
-    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
-  - php: '7.4'
-    env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
   - php: '7.1'
     env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: '7.2'
@@ -45,7 +46,6 @@ matrix:
   allow_failures:
   - env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
   - php: nightly
-  - env: SWOOLE_VERSION="v4.5.0RC1" PHPUNIT_VERSION="7"
 
 env:
   global:
@@ -62,6 +62,7 @@ addons:
     - nginx
 
 install:
+  - dd if=/dev/zero of=swap bs=1024 count=2048000 && chmod 600 swap && sudo mkswap swap && sudo swapon swap
   - if [[ $INSTALL_REDIS_EXT == true ]]; then
       wget https://github.com/phpredis/phpredis/archive/develop.zip;
       unzip develop.zip;

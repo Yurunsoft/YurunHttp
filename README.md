@@ -33,6 +33,8 @@ YurunHttp 的目标是做最好用的 PHP HTTP Client 开发包！
 
 ---
 
+开发手册文档：<https://doc.yurunsoft.com/YurunHttp>
+
 API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee.com/yurunsoft/YurunHttp)
 
 欢迎各位加入技术支持群17916227[![点击加群](https://pub.idqqimg.com/wpa/images/group.png "点击加群")](https://jq.qq.com/?_wv=1027&k=5wXf4Zq)，如有问题可以及时解答和修复。
@@ -219,6 +221,14 @@ for($i = 0; $i < 10; ++$i)
 ```
 
 > 具体用法请看 `examples/http2Client.php`
+
+## 商业合作
+
+现在使用 Swoole 的项目越来越多，使用 YurunHttp 开发的代码，可以原生兼容 php-fpm 和 Swoole 两种环境。
+
+YurunHttp 相比 Guzzle 性能更强，功能更加强大！
+
+现承接使用 PHP 开发相关系统、SDK 等业务，有需要的请联系 QQ: 369124067
 
 ## 捐赠
 

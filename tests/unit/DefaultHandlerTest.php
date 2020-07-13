@@ -30,4 +30,12 @@ class DefaultHandlerTest extends BaseTest
         });
     }
 
+    public function testSetDefaultHandler()
+    {
+        $this->assertNull(YurunHttp::getDefaultHandler());
+        YurunHttp::setDefaultHandler(\Exception::class);
+        $this->assertEquals(\Exception::class, YurunHttp::getDefaultHandler());
+        $this->assertInstanceOf(\Exception::class, YurunHttp::getHandler());
+    }
+
 }

@@ -68,6 +68,9 @@ switch($action)
     case '304':
         header('HTTP/1.1 304 Not Modified');
         break;
+    case 'auth':
+        echo isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
+        break;
     default:
         // 默认
         echo 'YurunHttp';
