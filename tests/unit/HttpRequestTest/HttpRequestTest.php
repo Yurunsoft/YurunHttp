@@ -4,6 +4,7 @@ namespace Yurun\Util\YurunHttp\Test\HttpRequestTest;
 use Swoole\Coroutine;
 use Yurun\Util\HttpRequest;
 use Yurun\Util\YurunHttp\Co\Batch;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
@@ -511,6 +512,17 @@ class HttpRequestTest extends BaseTest
             $this->assertResponse($response);
             $this->assertEquals(304, $response->getStatusCode());
             $this->assertEquals('', $response->body());
+        });
+    }
+
+    public function testUriWithAuth()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $uri = (new Uri($this->host . '?a=auth'))->withUserInfo('test', '123456');
+            $response = $http->get($uri);
+            $this->assertResponse($response);
+            $this->assertEquals('Basic ' . base64_encode('test:123456'), $response->body());
         });
     }
 
