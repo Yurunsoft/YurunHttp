@@ -1,3 +1,4 @@
 #!/usr/bin/env php
 <?php
-require dirname(__DIR__) . '/vendor/bin/phpunit';
+require dirname(__DIR__) . '/vendor/autoload.php';
+PHPUnit\TextUI\Command::main();

@@ -1,5 +1,5 @@
-sudo: required
 language: php
+os: linux
 dist: trusty
 
 jobs:
@@ -9,41 +9,41 @@ jobs:
   - php: '5.6'
     env: PHPUNIT_VERSION="5"
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.5.2"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.5.2"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.5.2"
   - php: '7.4'
-    env: SWOOLE_VERSION="v4.5.2" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.5.2"
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.4.19"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.4.19"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.4.19"
   - php: '7.4'
-    env: SWOOLE_VERSION="v4.4.19" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.4.19"
   - php: '7.0'
-    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="6"
+    env: SWOOLE_VERSION="v4.3.6"
   - php: '7.1'
-    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.3.6"
   - php: '7.2'
-    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.3.6"
   - php: '7.3'
-    env: SWOOLE_VERSION="v4.3.6" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="v4.3.6"
   - php: '7.1'
-    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="master"
   - php: '7.2'
-    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="master"
   - php: '7.3'
-    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="master"
   - php: '7.4'
-    env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+    env: SWOOLE_VERSION="master"
   - php: 'nightly'
-    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false PHPUNIT_VERSION="7" INSTALL_REDIS_EXT=true
+    env: SWOOLE_VERSION="master" DISABLE_XDEBUG=false INSTALL_REDIS_EXT=true
   allow_failures:
-  - env: SWOOLE_VERSION="master" PHPUNIT_VERSION="7"
+  - env: SWOOLE_VERSION="master"
   - php: nightly
 
 env:
@@ -84,9 +84,6 @@ install:
       mkdir -p /opt/swoole;
       tar -C /opt/swoole -xvf swoole_4.4.12_e48bc457_x86-64_linux.tar.xz;
       /opt/swoole/bin/php --ri swoole;
-    fi
-  - if [[ $PHPUNIT_VERSION ]]; then
-      curl -sSfL -o ~/.phpenv/versions/$(phpenv version-name)/bin/phpunit https://phar.phpunit.de/phpunit-$PHPUNIT_VERSION.phar;
     fi
 
 before_script:
