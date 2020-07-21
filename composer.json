@@ -22,11 +22,10 @@
         }
     },
     "scripts": {
-        "test": "@php ./tests/phpunit -c ./tests/phpunit.xml",
+        "test": "./vendor/bin/phpunit -c ./tests/phpunit.xml",
         "install-test": [
             "@composer install",
             "@composer test"
-        ],
-        "test-no-dev": "phpunit -c ./tests/phpunit.xml"
+        ]
     }
 }
