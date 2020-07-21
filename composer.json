@@ -27,6 +27,6 @@
             "@composer install",
             "@composer test"
         ],
-        "test-no-dev": "phpunit -c ./tests/phpunit.xml",
+        "test-no-dev": "phpunit -c ./tests/phpunit.xml"
     }
 }
