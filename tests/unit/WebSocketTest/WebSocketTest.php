@@ -56,4 +56,20 @@ class WebSocketTest extends BaseTest
         });
     }
 
+    public function testMemoryLeak()
+    {
+        $this->call(function(){
+            $memorys = [1, 2, 3, 4, 5];
+            for($i = 0; $i < 5; ++$i)
+            {
+                $http = new HttpRequest;
+                $client = $http->websocket($this->wsHost);
+                $client->close();
+                $memorys[$i] = memory_get_usage();
+            }
+            unset($memorys[0]);
+            $this->assertEquals(1, count(array_unique($memorys)));
+        });
+    }
+
 }

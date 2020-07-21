@@ -77,15 +77,21 @@ abstract class YurunHttp
         if($handlerClass instanceof IHandler)
         {
             $handler = $handlerClass;
-        }
-        else if(null === $handlerClass)
-        {
-            $handler = static::getHandler();
+            $needClose = false;
         }
         else
         {
-            $handler = new $handlerClass();
+            $needClose = true;
+            if(null === $handlerClass)
+            {
+                $handler = static::getHandler();
+            }
+            else
+            {
+                $handler = new $handlerClass();
+            }
         }
+        /** @var IHandler $handler */
         $time = microtime(true);
         foreach(static::$attributes as $name => $value)
         {
@@ -101,6 +107,10 @@ abstract class YurunHttp
             return $response;
         }
         $response = $response->withTotalTime(microtime(true) - $time);
+        if($needClose)
+        {
+            $handler->close();
+        }
         return $response;
     }
 

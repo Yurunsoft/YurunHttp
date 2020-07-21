@@ -7,7 +7,7 @@
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "~2.0",
-        "phpunit/phpunit": ">=4 <8"
+        "phpunit/phpunit": ">=4"
     },
     "type": "library",
     "license": "MIT",
@@ -22,16 +22,10 @@
         }
     },
     "scripts": {
-        "test": "@php ./tests/phpunit -c ./tests/phpunit.xml",
+        "test": "./vendor/bin/phpunit -c ./tests/phpunit.xml",
         "install-test": [
             "@composer install",
             "@composer test"
-        ],
-        "test-no-dev": "phpunit -c ./tests/phpunit.xml",
-        "install-test-no-dev": [
-            "@php ./.travis/composer-no-phpunit.php",
-            "@composer install",
-            "@composer test-no-dev"
         ]
     }
 }

@@ -3,11 +3,13 @@ namespace Yurun\Util\YurunHttp\Test\HttpRequestTest;
 
 use Swoole\Coroutine;
 use Yurun\Util\HttpRequest;
+use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Co\Batch;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Http\Request;
 
 class HttpRequestTest extends BaseTest
 {
@@ -485,21 +487,6 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testMemoryLeak()
-    {
-        $this->call(function(){
-            $memorys = [1, 2, 3, 4, 5];
-            for($i = 0; $i < 5; ++$i)
-            {
-                $http = new HttpRequest;
-                $http->get($this->host);
-                $memorys[$i] = memory_get_usage();
-            }
-            unset($memorys[0]);
-            $this->assertEquals(1, count(array_unique($memorys)));
-        });
-    }
-
     public function test304()
     {
         $this->call(function(){
@@ -523,6 +510,43 @@ class HttpRequestTest extends BaseTest
             $response = $http->get($uri);
             $this->assertResponse($response);
             $this->assertEquals('Basic ' . base64_encode('test:123456'), $response->body());
+        });
+    }
+
+    public function testMemoryLeak()
+    {
+        $this->call(function(){
+            $memorys = [1, 2, 3, 4, 5];
+            for($i = 0; $i < 5; ++$i)
+            {
+                $http = new HttpRequest;
+                $http->get($this->host);
+                $memorys[$i] = memory_get_usage();
+            }
+            unset($memorys[0]);
+            $this->assertEquals(1, count(array_unique($memorys)));
+
+            $memorys = [1, 2, 3, 4, 5];
+            for($i = 0; $i < 5; ++$i)
+            {
+                YurunHttp::send(new Request($this->host));
+                $memorys[$i] = memory_get_usage();
+            }
+            unset($memorys[0]);
+            $this->assertEquals(1, count(array_unique($memorys)));
+
+            $memorys = [1, 2, 3, 4, 5];
+            $time = time();
+            for($i = 0; $i < 5; ++$i)
+            {
+                Batch::run([
+                    (new HttpRequest)->url($this->host),
+                    (new HttpRequest)->url($this->host . '?a=info&time=' . $time),
+                ]);
+                $memorys[$i] = memory_get_usage();
+            }
+            unset($memorys[0]);
+            $this->assertEquals(1, count(array_unique($memorys)));
         });
     }
 
