@@ -12,7 +12,9 @@ $url = 'http://www.baidu.com';
 
 $http = new HttpRequest;
 
-$http->download(__DIR__ . '/save.*', $url); // 如果文件名设为save.*，.* 则代表自动识别扩展名
+$response = $http->download(__DIR__ . '/save.*', $url); // 如果文件名设为save.*，.* 则代表自动识别扩展名
+
+var_dump($response->getSavedFileName()); // 获取保存文件名
 
 // 也支持 POST 下载：
 // $body = '';

@@ -115,7 +115,7 @@ class HttpRequest
      * 请求结果保存至文件的配置
      * @var mixed
      */
-    public $saveFileOption =[];
+    public $saveFileOption = [];
 
     /**
      * 是否启用重定向
@@ -229,7 +229,7 @@ class HttpRequest
         $this->uploadSpeed = null;
         $this->username = null;
         $this->password = null;
-        $this->saveFileOption =[];
+        $this->saveFileOption = [];
     }
 
     /**
@@ -238,8 +238,12 @@ class HttpRequest
      */
     public function close()
     {
-        $this->handler->close();
-        $this->handler = null;
+        if($this->handler)
+        {
+            $handler = $this->handler;
+            $this->handler = null;
+            $handler->close();
+        }
     }
 
     /**
@@ -878,9 +882,11 @@ class HttpRequest
             {
                 $ext = 'file';
             }
-            rename($fileName, $basename . '.' . $ext);
+            $savedFileName = $basename . '.' . $ext;
+            rename($fileName, $savedFileName);
+            $result = $result->withSavedFileName($savedFileName);
         }
-        $this->saveFileOption =[];
+        $this->saveFileOption = [];
         return $result;
     }
 
