@@ -181,6 +181,7 @@ abstract class MediaType
         'application/vnd.iphone' => 'ipa',
         'text/markdown' => 'md',
         'text/xml'  => 'xml',
+        'image/webp'=> 'webp',
     ];
 
     /**
