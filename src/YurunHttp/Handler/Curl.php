@@ -366,6 +366,13 @@ class Curl implements IHandler
             $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
             $cookies[$cookieItem->name] = (array)$cookieItem;
         }
+
+        // 下载文件名
+        if($savedFileName = $request->getAttribute(Attributes::SAVE_FILE_PATH))
+        {
+            $result = $result->withSavedFileName($savedFileName);
+        }
+
         return $result->withRequest($request)
                       ->withCookieOriginParams($cookies)
                       ->withError(curl_error($handler))

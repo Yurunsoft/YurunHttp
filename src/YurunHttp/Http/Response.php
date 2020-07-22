@@ -57,6 +57,13 @@ class Response extends Psr7Response
     protected $request;
 
     /**
+     * 保存到的文件名
+     *
+     * @var string|null
+     */
+    protected $savedFileName;
+
+    /**
      * Retrieve cookies.
      *
      * Retrieves cookies sent by the client to the server.
@@ -340,6 +347,29 @@ class Response extends Psr7Response
     public function getRequest()
     {
         return $this->request;
+    }
+
+    /**
+     * 设置保存到的文件名
+     *
+     * @param string|null $savedFileName
+     * @return static
+     */
+    public function withSavedFileName($savedFileName)
+    {
+        $self = clone $this;
+        $self->savedFileName = $savedFileName;
+        return $self;
+    }
+
+    /**
+     * 获取保存到的文件名
+     *
+     * @return string|null
+     */
+    public function getSavedFileName()
+    {
+        return $this->savedFileName;
     }
 
 }

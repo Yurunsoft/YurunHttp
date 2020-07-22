@@ -211,7 +211,7 @@ class Swoole implements IHandler
             $connection = $this->httpConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
             $connection->setDefer(true);
         }
-        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET);
+        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
         // 构建
         $this->buildRequest($request, $connection, $http2Request);
         // 发送
@@ -275,7 +275,7 @@ class Swoole implements IHandler
         $retryCount = $request->getAttribute(Attributes::PRIVATE_RETRY_COUNT, 0);
         $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
         $isHttp2 = '2.0' === $request->getProtocolVersion();
-        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET);
+        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
         $this->getResponse($request, $connection, $isWebSocket, $isHttp2);
         $statusCode = $this->result->getStatusCode();
         // 状态码为5XX或者0才需要重试
@@ -307,6 +307,12 @@ class Swoole implements IHandler
                                              ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                 return false;
             }
+        }
+        // 下载文件名
+        $savedFileName = $request->getAttribute(Attributes::SAVE_FILE_PATH);
+        if(null !== $savedFileName)
+        {
+            $this->result = $this->result->withSavedFileName($savedFileName);
         }
         return $this->result;
     }

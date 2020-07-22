@@ -12,6 +12,7 @@ trait TSwooleHandlerTest
         {
             $this->markTestSkipped('Does not installed ext/swoole');
         }
+        \Swoole\Runtime::enableCoroutine(true);
         $throwable = null;
         $end = false;
         go(function() use($callable, &$throwable, &$end){
@@ -27,6 +28,7 @@ trait TSwooleHandlerTest
         {
             swoole_event_dispatch();
         }
+        \Swoole\Runtime::enableCoroutine(false);
         if($throwable)
         {
             throw $throwable;
