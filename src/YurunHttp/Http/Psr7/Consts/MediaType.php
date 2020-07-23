@@ -182,6 +182,7 @@ abstract class MediaType
         'text/markdown' => 'md',
         'text/xml'  => 'xml',
         'image/webp'=> 'webp',
+        'image/png' => 'png',
     ];
 
     /**
