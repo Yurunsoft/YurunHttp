@@ -46,13 +46,6 @@ class Curl implements IHandler
     private $saveFileFp;
 
     /**
-     * 下载文件上时，header 写入的文件句柄
-     *
-     * @var resource
-     */
-    private $headerFileFp;
-
-    /**
      * 接收的响应头
      *
      * @var array
@@ -128,7 +121,7 @@ class Curl implements IHandler
             $body = FormDataBuilder::build($body, $files, $boundary);
             $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
         }
-        $this->buildCurlHandlerBase($this->request, $this->handler, $this->receiveHeaders, $this->saveFileFp, $this->headerFileFp);
+        $this->buildCurlHandlerBase($this->request, $this->handler, $this->receiveHeaders, $this->saveFileFp);
         if([] !== ($queryParams = $this->request->getQueryParams()))
         {
             $this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
@@ -161,14 +154,7 @@ class Curl implements IHandler
             {
                 $this->receiveHeaders = [];
                 $this->curlResult = curl_exec($this->handler);
-                // 下载文件特别处理 header
-                if($this->headerFileFp)
-                {
-                    fseek($this->headerFileFp, 0);
-                    $length = curl_getinfo($this->handler, CURLINFO_HEADER_SIZE);
-                    $this->curlResult = fread($this->headerFileFp, $length);
-                }
-                $this->result = $this->getResponse($this->request, $this->handler, $this->curlResult, !!$this->headerFileFp, $this->receiveHeaders);
+                $this->result = $this->getResponse($this->request, $this->handler, $this->curlResult, $this->receiveHeaders);
                 $statusCode = $this->result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
                 if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
@@ -198,11 +184,6 @@ class Curl implements IHandler
             fclose($this->saveFileFp);
             $this->saveFileFp = null;
         }
-        if(null !== $this->headerFileFp)
-        {
-            fclose($this->headerFileFp);
-            $this->headerFileFp = null;
-        }
     }
 
     /**
@@ -212,13 +193,11 @@ class Curl implements IHandler
      * @param resource $handler
      * @return void
      */
-    public function buildCurlHandlerBase(&$request, $handler, &$headers = null, &$saveFileFp = null, &$headerFileFp = null)
+    public function buildCurlHandlerBase(&$request, $handler, &$headers = null, &$saveFileFp = null)
     {
         $options = [
             // 返回内容
             CURLOPT_RETURNTRANSFER  => true,
-            // 返回header
-            CURLOPT_HEADER          => true,
             // 保存cookie
             CURLOPT_COOKIEJAR       => 'php://memory',
         ];
@@ -237,7 +216,7 @@ class Curl implements IHandler
         }
         curl_setopt_array($handler, $options);
         $this->parseSSL($request, $handler);
-        $this->parseOptions($request, $handler, $headers, $saveFileFp, $headerFileFp);
+        $this->parseOptions($request, $handler, $headers, $saveFileFp);
         $this->parseProxy($request, $handler);
         $this->parseHeaders($request, $handler);
         $this->parseCookies($request, $handler);
@@ -271,7 +250,7 @@ class Curl implements IHandler
         switch($request->getProtocolVersion())
         {
             case '1.0':
-                $httpVersion = CURL_HTTP_VERSION_1;
+                $httpVersion = CURL_HTTP_VERSION_1_0;
                 break;
             case '2.0':
                 $ssl = 'https' === $uri->getScheme();
@@ -314,17 +293,12 @@ class Curl implements IHandler
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param resource $handler
-     * @param string $curlResult
-     * @param bool $isDownload
+     * @param string $body
      * @param array $receiveHeaders
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse($request, $handler, $curlResult, $isDownload, $receiveHeaders)
+    private function getResponse($request, $handler, $body,  $receiveHeaders)
     {
-        // 分离header和body
-        $headerSize = curl_getinfo($handler, CURLINFO_HEADER_SIZE);
-        $headerContent = substr($curlResult, 0, $headerSize);
-        $body = substr($curlResult, $headerSize);
         // PHP 7.0.0开始substr()的 string 字符串长度与 start 相同时将返回一个空字符串。在之前的版本中，这种情况将返回 FALSE 。
         if(false === $body)
         {
@@ -335,32 +309,16 @@ class Curl implements IHandler
         $result = new Response($body, curl_getinfo($handler, CURLINFO_HTTP_CODE));
 
         // headers
-        if($isDownload)
+        $rawHeaders = implode('', $receiveHeaders);
+        $headers = $this->parseHeaderOneRequest($rawHeaders);
+        foreach($headers as $name => $value)
         {
-            $rawHeaders = explode("\r\n\r\n", trim($headerContent));
-            $requestCount = count($rawHeaders);
-            if($requestCount > 0)
-            {
-                $headers = $this->parseHeaderOneRequest($rawHeaders[$requestCount - 1]);
-                foreach($headers as $name => $value)
-                {
-                    $result = $result->withAddedHeader($name, $value);
-                }
-            }
-        }
-        else
-        {
-            $rawHeaders = implode('', $receiveHeaders);
-            $headers = $this->parseHeaderOneRequest($rawHeaders);
-            foreach($headers as $name => $value)
-            {
-                $result = $result->withAddedHeader($name, $value);
-            }
+            $result = $result->withAddedHeader($name, $value);
         }
         
         // cookies
         $cookies = [];
-        $count = preg_match_all('/set-cookie\s*:\s*([^\r\n]+)/i', $headerContent, $matches);
+        $count = preg_match_all('/([^\r\n]+)/i', implode(PHP_EOL, $result->getHeader('set-cookie')), $matches);
         for($i = 0; $i < $count; ++$i)
         {
             $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
@@ -386,7 +344,7 @@ class Curl implements IHandler
      */
     private function parseHeaderOneRequest($piece)
     {
-        $tmpHeaders =[];
+        $tmpHeaders = [];
         $lines = explode("\r\n", $piece);
         $linesCount = count($lines);
         //从1开始，第0行包含了协议信息和状态信息，排除该行
@@ -468,7 +426,7 @@ class Curl implements IHandler
      * 处理设置项
      * @return void
      */
-    private function parseOptions(&$request, $handler, &$headers = null, &$saveFileFp = null, &$headerFileFp = null)
+    private function parseOptions(&$request, $handler, &$headers = null, &$saveFileFp = null)
     {
         $options = $request->getAttribute(Attributes::OPTIONS, []);
         if(isset($options[CURLOPT_HEADERFUNCTION]))
@@ -545,7 +503,7 @@ class Curl implements IHandler
      */
     private function parseHeadersFormat($request)
     {
-        $headers =[];
+        $headers = [];
         foreach($request->getHeaders() as $name => $value)
         {
             $headers[] = $name . ':' . implode(',', $value);
@@ -630,13 +588,13 @@ class Curl implements IHandler
     {
         $this->checkRequests($requests);
         $mh = curl_multi_init();
-        $curlHandlers = $recvHeaders = $saveFileFps = $headerFileFps = [];
+        $curlHandlers = $recvHeaders = $saveFileFps = [];
         try {
             foreach($requests as $k => $request)
             {
                 $curlHandler = curl_init();
-                $recvHeaders[$k] = $saveFileFps[$k] = $headerFileFps[$k] = [];
-                $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k], $headerFileFps[$k]);
+                $recvHeaders[$k] = $saveFileFps[$k] = null;
+                $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k]);
                 $files = $request->getUploadedFiles();
                 $body = (string)$request->getBody();
                 if(!empty($files))
@@ -670,19 +628,9 @@ class Curl implements IHandler
             foreach($requests as $k => $request)
             {
                 $handler = $curlHandlers[$k];
-                $isDownload = null !== $request->getAttribute(Attributes::SAVE_FILE_PATH);
                 $receiveHeaders = $recvHeaders[$k];
                 $curlResult = curl_multi_getcontent($handler);
-                if($isDownload)
-                {
-                    if($headerFileFps[$k])
-                    {
-                        fseek($headerFileFps[$k], 0);
-                        $length = curl_getinfo($curlHandlers[$k], CURLINFO_HEADER_SIZE);
-                        $curlResult = fread($headerFileFps[$k], $length);
-                    }
-                }
-                $result[$k] = $this->getResponse($request, $handler, $curlResult, $isDownload, $receiveHeaders);
+                $result[$k] = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
             }
             return $result;
         } finally {

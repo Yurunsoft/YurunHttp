@@ -472,7 +472,7 @@ class Swoole implements IHandler
         if($request->getAttribute(Attributes::IS_VERIFY_CA, false))
         {
             $settings['ssl_verify_peer'] = true;
-            $caCert =$request->getAttribute(Attributes::CA_CERT);
+            $caCert = $request->getAttribute(Attributes::CA_CERT);
             if(null !== $caCert)
             {
                 $settings['ssl_cafile'] = $caCert;

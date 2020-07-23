@@ -31,19 +31,19 @@ class HttpRequest
      * `curl_setopt_array()`所需要的第二个参数
      * @var array
      */
-    public $options =[];
+    public $options = [];
 
     /**
      * 请求头
      * @var array
      */
-    public $headers =[];
+    public $headers = [];
 
     /**
      * Cookies
      * @var array
      */
-    public $cookies =[];
+    public $cookies = [];
 
     /**
      * 失败重试次数，默认为0
@@ -61,7 +61,7 @@ class HttpRequest
      * 代理设置
      * @var array
      */
-    public $proxy =[];
+    public $proxy = [];
 
     /**
      * 是否验证证书
@@ -182,12 +182,22 @@ class HttpRequest
     /**
      * 代理认证方式
      */
-    public static $proxyAuths =[];
+    public static $proxyAuths = [];
 
     /**
      * 代理类型
      */
-    public static $proxyType =[];
+    public static $proxyType = [];
+
+    /**
+     * 自动扩展名标志
+     */
+    const AUTO_EXT_FLAG = '.*';
+
+    /**
+     * 自动扩展名用的临时文件名
+     */
+    const AUTO_EXT_TEMP_EXT = '.tmp';
 
     /**
      * 构造方法
@@ -214,7 +224,7 @@ class HttpRequest
     {
         $this->handler = YurunHttp::getHandler();
         $this->retry = 0;
-        $this->headers = $this->options =[];
+        $this->headers = $this->options = [];
         $this->url = $this->content = '';
         $this->useProxy = false;
         $this->proxy = [
@@ -592,11 +602,11 @@ class HttpRequest
 
     /**
      * 获取文件保存路径
-     * @return string 
+     * @return string|null
      */
     public function getSavePath()
     {
-        return $this->saveFileOption['savePath'];
+        return isset($this->saveFileOption['filePath']) ? $this->saveFileOption['filePath'] : null;
     }
 
     /**
@@ -868,23 +878,11 @@ class HttpRequest
      */
     public function download($fileName, $url = null, $requestBody = null, $method = 'GET')
     {
-        static $autoExtFlag = '.*';
-        if($isAutoExt = (substr($fileName, -strlen($autoExtFlag)) === $autoExtFlag))
-        {
-            $basename = substr($fileName, 0, -2);
-            $fileName = $basename . '.tmp';
-        }
+        $isAutoExt = self::checkDownloadIsAutoExt($fileName, $fileName);
         $result = $this->saveFile($fileName)->send($url, $requestBody, $method);
         if($isAutoExt)
         {
-            $ext = MediaType::getExt($result->getHeaderLine('Content-Type'));
-            if(null === $ext)
-            {
-                $ext = 'file';
-            }
-            $savedFileName = $basename . '.' . $ext;
-            rename($fileName, $savedFileName);
-            $result = $result->withSavedFileName($savedFileName);
+            self::parseDownloadAutoExt($result, $fileName);
         }
         $this->saveFileOption = [];
         return $result;
@@ -900,6 +898,43 @@ class HttpRequest
     {
         $request = $this->buildRequest($url);
         return YurunHttp::websocket($request, $this->handler);
+    }
+
+    /**
+     * 检查下载文件名是否要自动扩展名
+     *
+     * @param string $fileName
+     * @param string $tempFileName
+     * @return bool
+     */
+    public static function checkDownloadIsAutoExt($fileName, &$tempFileName)
+    {
+        $flagLength = strlen(self::AUTO_EXT_FLAG);
+        if(self::AUTO_EXT_FLAG !== substr($fileName, -$flagLength))
+        {
+            return false;
+        }
+        $tempFileName = substr($fileName, 0, -$flagLength) . self::AUTO_EXT_TEMP_EXT;
+        return true;
+    }
+
+    /**
+     * 处理下载的自动扩展名
+     *
+     * @param \Yurun\Util\YurunHttp\Http\Response $response
+     * @param string $tempFileName
+     * @return void
+     */
+    public static function parseDownloadAutoExt(&$response, $tempFileName)
+    {
+        $ext = MediaType::getExt($response->getHeaderLine('Content-Type'));
+        if(null === $ext)
+        {
+            $ext = 'file';
+        }
+        $savedFileName = substr($tempFileName, 0, -strlen(self::AUTO_EXT_TEMP_EXT)) . '.' . $ext;
+        rename($tempFileName, $savedFileName);
+        $response = $response->withSavedFileName($savedFileName);
     }
 
 }
