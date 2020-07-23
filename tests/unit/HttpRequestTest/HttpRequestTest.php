@@ -441,8 +441,34 @@ class HttpRequestTest extends BaseTest
         });
     }
 
+    public function test304()
+    {
+        $this->call(function(){
+            if(method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(SWOOLE_VERSION, '4.4.17', '<'))
+            {
+                $this->markTestSkipped('Swoole must >= 4.4.17');
+            }
+            $http = new HttpRequest;
+            $response = $http->get($this->host . '?a=304');
+            $this->assertResponse($response);
+            $this->assertEquals(304, $response->getStatusCode());
+            $this->assertEquals('', $response->body());
+        });
+    }
+
+    public function testUriWithAuth()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $uri = (new Uri($this->host . '?a=auth'))->withUserInfo('test', '123456');
+            $response = $http->get($uri);
+            $this->assertResponse($response);
+            $this->assertEquals('Basic ' . base64_encode('test:123456'), $response->body());
+        });
+    }
+
     /**
-     * co
+     * batch
      *
      * @return void
      */
@@ -481,37 +507,13 @@ class HttpRequestTest extends BaseTest
                         $this->assertTrue(is_file($fileName));
                         $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
                         $this->assertNotNull($response->getRequest());
+                        $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
+                        $this->assertEquals('1', $response->getCookie('a'));
                         break;
                     default:
                         throw new \RuntimeException(sprintf('Unknown %s', $i));
                 }
             }
-        });
-    }
-
-    public function test304()
-    {
-        $this->call(function(){
-            if(method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(SWOOLE_VERSION, '4.4.17', '<'))
-            {
-                $this->markTestSkipped('Swoole must >= 4.4.17');
-            }
-            $http = new HttpRequest;
-            $response = $http->get($this->host . '?a=304');
-            $this->assertResponse($response);
-            $this->assertEquals(304, $response->getStatusCode());
-            $this->assertEquals('', $response->body());
-        });
-    }
-
-    public function testUriWithAuth()
-    {
-        $this->call(function(){
-            $http = new HttpRequest;
-            $uri = (new Uri($this->host . '?a=auth'))->withUserInfo('test', '123456');
-            $response = $http->get($uri);
-            $this->assertResponse($response);
-            $this->assertEquals('Basic ' . base64_encode('test:123456'), $response->body());
         });
     }
 

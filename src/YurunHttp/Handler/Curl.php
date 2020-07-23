@@ -335,32 +335,16 @@ class Curl implements IHandler
         $result = new Response($body, curl_getinfo($handler, CURLINFO_HTTP_CODE));
 
         // headers
-        if($isDownload)
+        $rawHeaders = implode('', $receiveHeaders);
+        $headers = $this->parseHeaderOneRequest($rawHeaders);
+        foreach($headers as $name => $value)
         {
-            $rawHeaders = explode("\r\n\r\n", trim($headerContent));
-            $requestCount = count($rawHeaders);
-            if($requestCount > 0)
-            {
-                $headers = $this->parseHeaderOneRequest($rawHeaders[$requestCount - 1]);
-                foreach($headers as $name => $value)
-                {
-                    $result = $result->withAddedHeader($name, $value);
-                }
-            }
-        }
-        else
-        {
-            $rawHeaders = implode('', $receiveHeaders);
-            $headers = $this->parseHeaderOneRequest($rawHeaders);
-            foreach($headers as $name => $value)
-            {
-                $result = $result->withAddedHeader($name, $value);
-            }
+            $result = $result->withAddedHeader($name, $value);
         }
         
         // cookies
         $cookies = [];
-        $count = preg_match_all('/set-cookie\s*:\s*([^\r\n]+)/i', $headerContent, $matches);
+        $count = preg_match_all('/([^\r\n]+)/i', implode(PHP_EOL, $result->getHeader('set-cookie')), $matches);
         for($i = 0; $i < $count; ++$i)
         {
             $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
@@ -635,7 +619,7 @@ class Curl implements IHandler
             foreach($requests as $k => $request)
             {
                 $curlHandler = curl_init();
-                $recvHeaders[$k] = $saveFileFps[$k] = $headerFileFps[$k] = [];
+                $recvHeaders[$k] = $saveFileFps[$k] = $headerFileFps[$k] = null;
                 $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k], $headerFileFps[$k]);
                 $files = $request->getUploadedFiles();
                 $body = (string)$request->getBody();
