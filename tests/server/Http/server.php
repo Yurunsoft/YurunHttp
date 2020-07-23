@@ -53,6 +53,7 @@ switch($action)
     case 'download1':
         if('nb' === (isset($_POST['yurunhttp']) ? $_POST['yurunhttp'] : null) && 'POST' === $_SERVER['REQUEST_METHOD'])
         {
+            header('Content-Type: text/html; charset=UTF-8');
             setcookie('a', '1');
             echo 'YurunHttp Hello World';
         }
