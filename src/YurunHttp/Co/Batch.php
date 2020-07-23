@@ -2,6 +2,8 @@
 namespace Yurun\Util\YurunHttp\Co;
 
 use Yurun\Util\YurunHttp;
+use Yurun\Util\HttpRequest;
+use Yurun\Util\YurunHttp\Attributes;
 
 abstract class Batch
 {
@@ -15,11 +17,19 @@ abstract class Batch
      */
     public static function run($requests, $timeout = null, $handlerClass = null)
     {
-        foreach($requests as &$request)
+        $batchRequests = [];
+        $downloadAutoExt = [];
+        foreach($requests as $i => $request)
         {
-            if($request instanceof \Yurun\Util\HttpRequest)
+            if($request instanceof HttpRequest)
             {
-                $request = $request->buildRequest();
+                $savePath = $request->getSavePath();
+                if(null !== $savePath && HttpRequest::checkDownloadIsAutoExt($savePath, $savePath))
+                {
+                    $request->saveFileOption['filePath'] = $savePath;
+                    $downloadAutoExt[] = $i;
+                }
+                $batchRequests[] = $request->buildRequest();
             }
             else if(!$request instanceof \Yurun\Util\YurunHttp\Http\Request)
             {
@@ -35,7 +45,13 @@ abstract class Batch
             $handler = new $handlerClass;
         }
         /** @var \Yurun\Util\YurunHttp\Handler\IHandler $handler */
-        return $handler->coBatch($requests, $timeout);
+        $result = $handler->coBatch($batchRequests, $timeout);
+        foreach($downloadAutoExt as $i)
+        {
+            $response = &$result[$i];
+            HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
+        }
+        return $result;
     }
 
 }

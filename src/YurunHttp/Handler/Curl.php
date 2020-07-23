@@ -344,7 +344,7 @@ class Curl implements IHandler
      */
     private function parseHeaderOneRequest($piece)
     {
-        $tmpHeaders =[];
+        $tmpHeaders = [];
         $lines = explode("\r\n", $piece);
         $linesCount = count($lines);
         //从1开始，第0行包含了协议信息和状态信息，排除该行
@@ -503,7 +503,7 @@ class Curl implements IHandler
      */
     private function parseHeadersFormat($request)
     {
-        $headers =[];
+        $headers = [];
         foreach($request->getHeaders() as $name => $value)
         {
             $headers[] = $name . ':' . implode(',', $value);

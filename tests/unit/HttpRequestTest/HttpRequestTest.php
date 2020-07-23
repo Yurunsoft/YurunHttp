@@ -482,10 +482,18 @@ class HttpRequestTest extends BaseTest
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
+            $fileName2Temp = __DIR__ . '/download2.*';
+            $fileName2 = __DIR__ . '/download2.html';
+            if(is_file($fileName2))
+            {
+                unlink($fileName2);
+            }
+            $this->assertFalse(is_file($fileName2));
             $result = Batch::run([
                 (new HttpRequest)->url($this->host),
                 (new HttpRequest)->url($this->host . '?a=info&time=' . $time),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName)->method('POST'),
+                (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName2Temp)->method('POST'),
             ]);
 
             foreach($result as $i => $response)
@@ -506,6 +514,13 @@ class HttpRequestTest extends BaseTest
                     case 2:
                         $this->assertTrue(is_file($fileName));
                         $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+                        $this->assertNotNull($response->getRequest());
+                        $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
+                        $this->assertEquals('1', $response->getCookie('a'));
+                        break;
+                    case 3:
+                        $this->assertTrue(is_file($fileName2));
+                        $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName2));
                         $this->assertNotNull($response->getRequest());
                         $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                         $this->assertEquals('1', $response->getCookie('a'));
