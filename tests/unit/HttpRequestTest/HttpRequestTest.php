@@ -523,48 +523,68 @@ class HttpRequestTest extends BaseTest
                 (new HttpRequest)->url($this->host . '?a=info&time=' . $time),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName)->method('POST'),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName2Temp)->method('POST'),
-                (new HttpRequest)->url($this->host . '?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
+                'a' => (new HttpRequest)->url($this->host . '?a=redirect&url=/?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
             ]);
 
             foreach($result as $i => $response)
             {
-                switch($i)
+                if(0 === $i)
                 {
-                    case 0:
-                        $this->assertResponse($response);
-                        $this->assertEquals($response->body(), 'YurunHttp');
-                        $this->assertNotNull($response->getRequest());
-                        break;
-                    case 1:
-                        $data = $response->json(true);
-                        $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
-                        $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
-                        $this->assertNotNull($response->getRequest());
-                        break;
-                    case 2:
-                        $this->assertTrue(is_file($fileName));
-                        $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
-                        $this->assertNotNull($response->getRequest());
-                        $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
-                        $this->assertEquals('1', $response->getCookie('a'));
-                        break;
-                    case 3:
-                        $this->assertTrue(is_file($fileName2));
-                        $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName2));
-                        $this->assertNotNull($response->getRequest());
-                        $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
-                        $this->assertEquals('1', $response->getCookie('a'));
-                        break;
-                    case 4:
-                        $this->assertTrue(is_file($fileName3));
-                        $this->assertEquals('download3', file_get_contents($fileName3));
-                        $this->assertNotNull($response->getRequest());
-                        $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
-                        break;
-                    default:
-                        throw new \RuntimeException(sprintf('Unknown %s', $i));
+                    $this->assertResponse($response);
+                    $this->assertEquals('YurunHttp', $response->body());
+                    $this->assertNotNull($response->getRequest());
+                }
+                else if(1 === $i)
+                {
+                    $data = $response->json(true);
+                    $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+                    $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
+                    $this->assertNotNull($response->getRequest());
+                }
+                else if(2 === $i)
+                {
+                    $this->assertTrue(is_file($fileName));
+                    $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+                    $this->assertNotNull($response->getRequest());
+                    $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
+                    $this->assertEquals('1', $response->getCookie('a'));
+                }
+                else if(3 === $i)
+                {
+                    $this->assertTrue(is_file($fileName2));
+                    $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName2));
+                    $this->assertNotNull($response->getRequest());
+                    $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
+                    $this->assertEquals('1', $response->getCookie('a'));
+                }
+                else if('a' === $i)
+                {
+                    $this->assertTrue(is_file($fileName3));
+                    $this->assertEquals('download3', file_get_contents($fileName3));
+                    $this->assertNotNull($response->getRequest());
+                    $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
+                }
+                else
+                {
+                    throw new \RuntimeException(sprintf('Unknown %s', $i));
                 }
             }
+        });
+    }
+
+    /**
+     * batch
+     *
+     * @return void
+     */
+    public function testCoBatchTimeout()
+    {
+        $this->call(function(){
+            $result = Batch::run([
+                'gg' => (new HttpRequest)->url($this->host . '?a=sleep&time=3'),
+            ], 1);
+            $this->assertArrayHasKey('gg', $result);
+            $this->assertFalse($result['gg']->success);
         });
     }
 

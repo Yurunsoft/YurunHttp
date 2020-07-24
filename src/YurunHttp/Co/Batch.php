@@ -29,7 +29,7 @@ abstract class Batch
                     $request->saveFileOption['filePath'] = $savePath;
                     $downloadAutoExt[] = $i;
                 }
-                $batchRequests[] = $request->buildRequest();
+                $batchRequests[$i] = $request->buildRequest();
             }
             else if(!$request instanceof \Yurun\Util\YurunHttp\Http\Request)
             {
@@ -49,7 +49,10 @@ abstract class Batch
         foreach($downloadAutoExt as $i)
         {
             $response = &$result[$i];
-            HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
+            if($response)
+            {
+                HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
+            }
         }
         return $result;
     }

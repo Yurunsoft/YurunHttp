@@ -9,6 +9,7 @@ use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Traits\THandler;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Stream\MemoryStream;
 
 class Curl implements IHandler
 {
@@ -595,9 +596,12 @@ class Curl implements IHandler
         $this->checkRequests($requests);
         $mh = curl_multi_init();
         $curlHandlers = $recvHeaders = $saveFileFps = [];
+        $result = [];
+        $needRedirectRequests = [];
         try {
             foreach($requests as $k => $request)
             {
+                $result[$k] = null;
                 $curlHandler = curl_init();
                 $recvHeaders[$k] = $saveFileFps[$k] = null;
                 $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k]);
@@ -630,16 +634,44 @@ class Curl implements IHandler
                     break;
                 }
             } while (true);
-            $result = [];
             foreach($requests as $k => $request)
             {
                 $handler = $curlHandlers[$k];
                 $receiveHeaders = $recvHeaders[$k];
                 $curlResult = curl_multi_getcontent($handler);
-                $result[$k] = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
+                $response = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
+                // 重定向处理
+                $statusCode = $response->getStatusCode();
+                $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT);
+                if($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $response->getHeaderLine('location')))
+                {
+                    if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
+                    {
+                        $request = $request->withAttribute(Attributes::PRIVATE_REDIRECT_COUNT, $redirectCount);
+                        if(in_array($statusCode, [301, 302, 303]))
+                        {
+                            $request = $request->withMethod('GET')->withBody(new MemoryStream);
+                        }
+                        $request = $request->withUri($this->parseRedirectLocation($location, $request->getUri()));
+                        $needRedirectRequests[$k] = $request;
+                        continue;
+                    }
+                    else
+                    {
+                        $response = $response->withErrno(-1)
+                                                    ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                    }
+                }
+                $result[$k] = $response;
             }
-            return $result;
         } finally {
+            foreach($saveFileFps as $fp)
+            {
+                if($fp)
+                {
+                    fclose($fp);
+                }
+            }
             foreach($curlHandlers as $curlHandler)
             {
                 curl_multi_remove_handle($mh, $curlHandler);
@@ -647,6 +679,14 @@ class Curl implements IHandler
             }
             curl_multi_close($mh);
         }
+        if($needRedirectRequests)
+        {
+            foreach($this->coBatch($needRedirectRequests, $timeout) as $k => $response)
+            {
+                $result[$k] = $response;
+            }
+        }
+        return $result;
     }
 
 }
