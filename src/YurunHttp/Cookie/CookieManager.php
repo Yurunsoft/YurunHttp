@@ -237,7 +237,19 @@ class CookieManager
         }
         if($uriPathDSCount > $cookiePathDSCount)
         {
-            $path = dirname($uriPath, $uriPathDSCount - $cookiePathDSCount);
+            if(version_compare(PHP_VERSION, '7.0', '>='))
+            {
+                $path = dirname($uriPath, $uriPathDSCount - $cookiePathDSCount);
+            }
+            else
+            {
+                $count = $uriPathDSCount - $cookiePathDSCount;
+                $path = $uriPath;
+                while($count--)
+                {
+                    $path = dirname($path);
+                }
+            }
             if('\\' === DIRECTORY_SEPARATOR && false !== strpos($path, DIRECTORY_SEPARATOR))
             {
                 $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
