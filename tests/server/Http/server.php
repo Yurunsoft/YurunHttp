@@ -50,6 +50,12 @@ switch($action)
         header('HTTP/1.1 302 Found');
         header('Location:https://www.httpbin.org/get?id=1');
         exit;
+    case 'redirect':
+        header('HTTP/1.1 302 Found');
+        header('Location:' . (isset($_GET['url']) ? $_GET['url'] : '/'));
+        echo 'test';
+        exit;
+        break;
     case 'download1':
         if('nb' === (isset($_POST['yurunhttp']) ? $_POST['yurunhttp'] : null) && 'POST' === $_SERVER['REQUEST_METHOD'])
         {
@@ -63,6 +69,10 @@ switch($action)
         {
             echo '<h1>YurunHttp Hello World</h1>';
         }
+        break;
+    case 'download3':
+        header('Content-Type: text/html; charset=UTF-8');
+        echo 'download3';
         break;
     case 'body':
         echo file_get_contents('php://input');
