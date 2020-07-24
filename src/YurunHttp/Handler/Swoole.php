@@ -266,9 +266,10 @@ class Swoole implements IHandler
      * 延迟接收
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param float|null $timeout
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public function recvDefer($request)
+    public function recvDefer($request, $timeout = null)
     {
         /** @var \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client $connection */
         $connection = $request->getAttribute(Attributes::PRIVATE_CONNECTION);
@@ -276,14 +277,14 @@ class Swoole implements IHandler
         $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
         $isHttp2 = '2.0' === $request->getProtocolVersion();
         $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
-        $this->getResponse($request, $connection, $isWebSocket, $isHttp2);
+        $this->getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout);
         $statusCode = $this->result->getStatusCode();
         // 状态码为5XX或者0才需要重试
         if((0 === $statusCode || (5 === (int)($statusCode/100))) && $retryCount < $request->getAttribute(Attributes::RETRY, 0))
         {
             $request = $request->withAttribute(Attributes::RETRY, ++$retryCount);
             $deferRequest = $this->sendDefer($request);
-            return $this->recvDefer($deferRequest);
+            return $this->recvDefer($deferRequest, $timeout);
         }
         if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $this->result->getHeaderLine('location')))
         {
@@ -303,7 +304,7 @@ class Swoole implements IHandler
                                    ->withUri($uri)
                                    ->withAttribute(Attributes::PRIVATE_REDIRECT_COUNT, $redirectCount);
                 $deferRequest = $this->sendDefer($request);
-                return $this->recvDefer($deferRequest);
+                return $this->recvDefer($deferRequest, $timeout);
             }
             else
             {
@@ -424,18 +425,19 @@ class Swoole implements IHandler
      * @param \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client $connection
      * @param bool $isWebSocket
      * @param bool $isHttp2
+     * @param float|null $timeout
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse($request, $connection, $isWebSocket, $isHttp2)
+    private function getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout = null)
     {
         if($isHttp2)
         {
-            $response = $connection->recv();
+            $response = $connection->recv($timeout);
             $this->result = $this->buildHttp2Response($request, $connection, $response);
         }
         else
         {
-            $success = $isWebSocket ? true : $connection->recv();
+            $success = $isWebSocket ? true : $connection->recv($timeout);
             $this->result = new Response((string)$connection->body, $connection->statusCode);
             if($success)
             {
@@ -620,9 +622,19 @@ class Swoole implements IHandler
             $request = $handler->sendDefer($request);
         }
         unset($request);
+        $beginTime = microtime(true);
+        $recvTimeout = null;
         foreach($requests as $i => $request)
         {
-            $results[$i] = $handlers[$i]->recvDefer($request);
+            if(null !== $timeout)
+            {
+                $recvTimeout = $timeout - (microtime(true) - $beginTime);
+                if($recvTimeout <= 0)
+                {
+                    break;
+                }
+            }
+            $results[$i] = $handlers[$i]->recvDefer($request, $recvTimeout);
         }
         return $results;
     }

@@ -83,6 +83,10 @@ switch($action)
     case 'auth':
         echo isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
         break;
+    case 'sleep':
+        sleep(isset($_GET['time']) ? $_GET['time'] : 0);
+        echo 'sleep';
+        break;
     default:
         // 默认
         echo 'YurunHttp';

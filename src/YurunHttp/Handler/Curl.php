@@ -601,6 +601,7 @@ class Curl implements IHandler
         try {
             foreach($requests as $k => $request)
             {
+                $result[$k] = null;
                 $curlHandler = curl_init();
                 $recvHeaders[$k] = $saveFileFps[$k] = null;
                 $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k]);
