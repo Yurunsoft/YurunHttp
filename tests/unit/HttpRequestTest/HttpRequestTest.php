@@ -362,50 +362,6 @@ class HttpRequestTest extends BaseTest
     }
 
     /**
-     * Download file
-     *
-     * @return void
-     */
-    public function testDownload()
-    {
-        $this->call(function(){
-            $http = new HttpRequest;
-            $fileName = __DIR__ . '/download.txt';
-            if(is_file($fileName))
-            {
-                unlink($fileName);
-            }
-            $this->assertFalse(is_file($fileName));
-            $response = $http->download($fileName, $this->host . '?a=download1', 'yurunhttp=nb', 'POST');
-            $this->assertEquals($fileName, $response->getSavedFileName());
-            $this->assertTrue(is_file($fileName));
-            $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
-        });
-    }
-
-    /**
-     * Download file auto extension
-     *
-     * @return void
-     */
-    public function testDownloadAutoExt()
-    {
-        $this->call(function(){
-            $http = new HttpRequest;
-            $fileName = __DIR__ . '/download.html';
-            if(is_file($fileName))
-            {
-                unlink($fileName);
-            }
-            $this->assertFalse(is_file($fileName));
-            $response = $http->download(__DIR__ . '/download.*', $this->host . '?a=download2', 'yurunhttp=nb', 'POST');
-            $this->assertEquals($fileName, $response->getSavedFileName());
-            $this->assertTrue(is_file($fileName));
-            $this->assertEquals('<h1>YurunHttp Hello World</h1>', file_get_contents($fileName));
-        });
-    }
-
-    /**
      * body
      *
      * @return void
@@ -468,6 +424,72 @@ class HttpRequestTest extends BaseTest
     }
 
     /**
+     * Download file
+     *
+     * @return void
+     */
+    public function testDownload()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $fileName = __DIR__ . '/download.txt';
+            if(is_file($fileName))
+            {
+                unlink($fileName);
+            }
+            $this->assertFalse(is_file($fileName));
+            $response = $http->download($fileName, $this->host . '?a=download1', 'yurunhttp=nb', 'POST');
+            $this->assertEquals($fileName, $response->getSavedFileName());
+            $this->assertTrue(is_file($fileName));
+            $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
+        });
+    }
+
+    /**
+     * Download file auto extension
+     *
+     * @return void
+     */
+    public function testDownloadAutoExt()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $fileName = __DIR__ . '/download.html';
+            if(is_file($fileName))
+            {
+                unlink($fileName);
+            }
+            $this->assertFalse(is_file($fileName));
+            $response = $http->download(__DIR__ . '/download.*', $this->host . '?a=download2', 'yurunhttp=nb', 'POST');
+            $this->assertEquals($fileName, $response->getSavedFileName());
+            $this->assertTrue(is_file($fileName));
+            $this->assertEquals('<h1>YurunHttp Hello World</h1>', file_get_contents($fileName));
+        });
+    }
+
+    /**
+     * Download file with redirect
+     *
+     * @return void
+     */
+    public function testDownloadWithRedirect()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $fileName = __DIR__ . '/download.html';
+            if(is_file($fileName))
+            {
+                unlink($fileName);
+            }
+            $this->assertFalse(is_file($fileName));
+            $response = $http->download(__DIR__ . '/download.*', $this->host . '?a=redirect&url=/?a=download3', 'yurunhttp=nb', 'POST');
+            $this->assertEquals($fileName, $response->getSavedFileName());
+            $this->assertTrue(is_file($fileName));
+            $this->assertEquals('download3', file_get_contents($fileName));
+        });
+    }
+
+    /**
      * batch
      *
      * @return void
@@ -489,11 +511,19 @@ class HttpRequestTest extends BaseTest
                 unlink($fileName2);
             }
             $this->assertFalse(is_file($fileName2));
+            $fileName3Temp = __DIR__ . '/download3.*';
+            $fileName3 = __DIR__ . '/download3.html';
+            if(is_file($fileName3))
+            {
+                unlink($fileName3);
+            }
+            $this->assertFalse(is_file($fileName3));
             $result = Batch::run([
                 (new HttpRequest)->url($this->host),
                 (new HttpRequest)->url($this->host . '?a=info&time=' . $time),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName)->method('POST'),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName2Temp)->method('POST'),
+                (new HttpRequest)->url($this->host . '?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
             ]);
 
             foreach($result as $i => $response)
@@ -524,6 +554,12 @@ class HttpRequestTest extends BaseTest
                         $this->assertNotNull($response->getRequest());
                         $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                         $this->assertEquals('1', $response->getCookie('a'));
+                        break;
+                    case 4:
+                        $this->assertTrue(is_file($fileName3));
+                        $this->assertEquals('download3', file_get_contents($fileName3));
+                        $this->assertNotNull($response->getRequest());
+                        $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                         break;
                     default:
                         throw new \RuntimeException(sprintf('Unknown %s', $i));

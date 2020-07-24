@@ -166,6 +166,12 @@ class Curl implements IHandler
             {
                 if(++$redirectCount <= ($maxRedirects = $this->request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
                 {
+                    // 重定向清除之前下载的文件
+                    if(null !== $this->saveFileFp)
+                    {
+                        ftruncate($this->saveFileFp, 0);
+                        fseek($this->saveFileFp, 0);
+                    }
                     $isLocation = true;
                     $uri = $this->parseRedirectLocation($location, $uri);
                     continue;
