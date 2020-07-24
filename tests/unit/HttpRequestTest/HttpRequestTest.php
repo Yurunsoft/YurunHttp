@@ -523,7 +523,7 @@ class HttpRequestTest extends BaseTest
                 (new HttpRequest)->url($this->host . '?a=info&time=' . $time),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName)->method('POST'),
                 (new HttpRequest)->url($this->host . '?a=download1')->requestBody('yurunhttp=nb')->saveFile($fileName2Temp)->method('POST'),
-                (new HttpRequest)->url($this->host . '?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
+                (new HttpRequest)->url($this->host . '?a=redirect&url=/?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
             ]);
 
             foreach($result as $i => $response)

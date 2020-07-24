@@ -49,7 +49,10 @@ abstract class Batch
         foreach($downloadAutoExt as $i)
         {
             $response = &$result[$i];
-            HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
+            if($response)
+            {
+                HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
+            }
         }
         return $result;
     }

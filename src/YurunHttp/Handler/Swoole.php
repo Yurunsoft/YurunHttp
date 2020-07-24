@@ -299,7 +299,11 @@ class Swoole implements IHandler
                 {
                     $method = $request->getMethod();
                 }
-                return $this->send($request->withMethod($method)->withUri($uri)->withAttribute(Attributes::PRIVATE_REDIRECT_COUNT, $redirectCount));
+                $request = $request->withMethod($method)
+                                   ->withUri($uri)
+                                   ->withAttribute(Attributes::PRIVATE_REDIRECT_COUNT, $redirectCount);
+                $deferRequest = $this->sendDefer($request);
+                return $this->recvDefer($deferRequest);
             }
             else
             {
@@ -606,6 +610,7 @@ class Swoole implements IHandler
      */
     public function coBatch($requests, $timeout = null)
     {
+        /** @var Swoole[] $handlers */
         $handlers = [];
         $results = [];
         foreach($requests as $i => &$request)
