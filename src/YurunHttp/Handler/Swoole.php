@@ -278,7 +278,8 @@ class Swoole implements IHandler
         $isHttp2 = '2.0' === $request->getProtocolVersion();
         $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
         $this->getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout);
-        $statusCode = $this->result->getStatusCode();
+        $result = &$this->result;
+        $statusCode = $result->getStatusCode();
         // 状态码为5XX或者0才需要重试
         if((0 === $statusCode || (5 === (int)($statusCode/100))) && $retryCount < $request->getAttribute(Attributes::RETRY, 0))
         {
@@ -286,7 +287,7 @@ class Swoole implements IHandler
             $deferRequest = $this->sendDefer($request);
             return $this->recvDefer($deferRequest, $timeout);
         }
-        if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $this->result->getHeaderLine('location')))
+        if(!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $result->getHeaderLine('location')))
         {
             if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
             {
@@ -308,8 +309,8 @@ class Swoole implements IHandler
             }
             else
             {
-                $this->result = $this->result->withErrno(-1)
-                                             ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                $result = $result->withErrno(-1)
+                                 ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                 return false;
             }
         }
@@ -317,9 +318,9 @@ class Swoole implements IHandler
         $savedFileName = $request->getAttribute(Attributes::SAVE_FILE_PATH);
         if(null !== $savedFileName)
         {
-            $this->result = $this->result->withSavedFileName($savedFileName);
+            $result = $result->withSavedFileName($savedFileName);
         }
-        return $this->result;
+        return $result;
     }
 
     /**
@@ -360,11 +361,12 @@ class Swoole implements IHandler
     private function parseCookies(&$request, $connection, $http2Request)
     {
         $cookieParams = $request->getCookieParams();
+        $cookieManager = $this->cookieManager;
         foreach($cookieParams as $name => $value)
         {
-            $this->cookieManager->setCookie($name, $value);
+            $cookieManager->setCookie($name, $value);
         }
-        $cookies = $this->cookieManager->getRequestCookies($request->getUri());
+        $cookies = $cookieManager->getRequestCookies($request->getUri());
         if($http2Request)
         {
             $http2Request->cookies = $cookies;
@@ -402,9 +404,10 @@ class Swoole implements IHandler
             $cookies = [];
             if(isset($response->set_cookie_headers))
             {
+                $cookieManager = $this->cookieManager;
                 foreach($response->set_cookie_headers as $value)
                 {
-                    $cookieItem = $this->cookieManager->addSetCookie($value);
+                    $cookieItem = $cookieManager->addSetCookie($value);
                     $cookies[$cookieItem->name] = (array)$cookieItem;
                 }
             }
@@ -430,21 +433,22 @@ class Swoole implements IHandler
      */
     private function getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout = null)
     {
+        $result = &$this->result;
         if($isHttp2)
         {
             $response = $connection->recv($timeout);
-            $this->result = $this->buildHttp2Response($request, $connection, $response);
+            $result = $this->buildHttp2Response($request, $connection, $response);
         }
         else
         {
             $success = $isWebSocket ? true : $connection->recv($timeout);
-            $this->result = new Response((string)$connection->body, $connection->statusCode);
+            $result = new Response((string)$connection->body, $connection->statusCode);
             if($success)
             {
                 // headers
                 foreach($connection->headers as $name => $value)
                 {
-                    $this->result = $this->result->withHeader($name, $value);
+                    $result = $result->withHeader($name, $value);
                 }
 
                 // cookies
@@ -457,13 +461,13 @@ class Swoole implements IHandler
                         $cookies[$cookieItem->name] = (array)$cookieItem;
                     }
                 }
-                $this->result = $this->result->withCookieOriginParams($cookies);
+                $result = $result->withCookieOriginParams($cookies);
             }
-            $this->result = $this->result->withRequest($request)
-                                         ->withError(swoole_strerror($connection->errCode))
-                                         ->withErrno($connection->errCode);
+            $result = $result->withRequest($request)
+                             ->withError(swoole_strerror($connection->errCode))
+                             ->withErrno($connection->errCode);
         }
-        return $this->result;
+        return $result;
     }
 
     /**

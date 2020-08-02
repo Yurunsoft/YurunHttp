@@ -35,25 +35,6 @@ class Curl implements IHandler
     private $request;
 
     /**
-     * curl 请求结果
-     * @var string
-     */
-    private $curlResult;
-    
-    /**
-     * 保存到的文件的句柄
-     * @var resource
-     */
-    private $saveFileFp;
-
-    /**
-     * 接收的响应头
-     *
-     * @var array
-     */
-    private $receiveHeaders;
-
-    /**
      * 代理认证方式
      */
     public static $proxyAuths = [
@@ -110,24 +91,26 @@ class Curl implements IHandler
     public function send($request)
     {
         $this->request = $request;
-        if(!$this->handler)
+        $request = &$this->request;
+        $handler = &$this->handler;
+        if(!$handler)
         {
-            $this->handler = curl_init();
+            $handler = curl_init();
         }
-        $files = $this->request->getUploadedFiles();
-        $body = (string)$this->request->getBody();
+        $files = $request->getUploadedFiles();
+        $body = (string)$request->getBody();
         
         if(!empty($files))
         {
             $body = FormDataBuilder::build($body, $files, $boundary);
-            $this->request = $this->request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
+            $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
         }
-        $this->buildCurlHandlerBase($this->request, $this->handler, $this->receiveHeaders, $this->saveFileFp);
-        if([] !== ($queryParams = $this->request->getQueryParams()))
+        $this->buildCurlHandlerBase($request, $handler, $receiveHeaders, $saveFileFp);
+        if([] !== ($queryParams = $request->getQueryParams()))
         {
-            $this->request = $this->request->withUri($this->request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
+            $request = $request->withUri($request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
         }
-        $uri = $this->request->getUri();
+        $uri = $request->getUri();
         $isLocation = false;
         $statusCode = 0;
         $redirectCount = 0;
@@ -139,7 +122,7 @@ class Curl implements IHandler
             }
             else
             {
-                $method = $this->request->getMethod();
+                $method = $request->getMethod();
             }
             if('GET' !== $method)
             {
@@ -149,29 +132,30 @@ class Curl implements IHandler
             {
                 $bodyContent = false;
             }
-            $this->buildCurlHandlerEx($this->request, $this->handler, $uri, $method, $bodyContent);
-            $retry = $this->request->getAttribute(Attributes::RETRY, 0);
+            $this->buildCurlHandlerEx($request, $handler, $uri, $method, $bodyContent);
+            $retry = $request->getAttribute(Attributes::RETRY, 0);
             for($i = 0; $i <= $retry; ++$i)
             {
-                $this->receiveHeaders = [];
-                $this->curlResult = curl_exec($this->handler);
-                $this->result = $this->getResponse($this->request, $this->handler, $this->curlResult, $this->receiveHeaders);
-                $statusCode = $this->result->getStatusCode();
+                $receiveHeaders = [];
+                $curlResult = curl_exec($handler);
+                $this->result = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
+                $result = &$this->result;
+                $statusCode = $result->getStatusCode();
                 // 状态码为5XX或者0才需要重试
                 if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
                 {
                     break;
                 }
             }
-            if($this->request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $this->result->getHeaderLine('location')))
+            if($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $result->getHeaderLine('location')))
             {
-                if(++$redirectCount <= ($maxRedirects = $this->request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
+                if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
                 {
                     // 重定向清除之前下载的文件
-                    if(null !== $this->saveFileFp)
+                    if(null !== $saveFileFp)
                     {
-                        ftruncate($this->saveFileFp, 0);
-                        fseek($this->saveFileFp, 0);
+                        ftruncate($saveFileFp, 0);
+                        fseek($saveFileFp, 0);
                     }
                     $isLocation = true;
                     $uri = $this->parseRedirectLocation($location, $uri);
@@ -179,17 +163,17 @@ class Curl implements IHandler
                 }
                 else
                 {
-                    $this->result = $this->result->withErrno(-1)
-                                                 ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                    $result = $result->withErrno(-1)
+                                     ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                 }
             }
             break;
         }while(true);
         // 关闭保存至文件的句柄
-        if(null !== $this->saveFileFp)
+        if(null !== $saveFileFp)
         {
-            fclose($this->saveFileFp);
-            $this->saveFileFp = null;
+            fclose($saveFileFp);
+            $saveFileFp = null;
         }
     }
 
@@ -326,9 +310,10 @@ class Curl implements IHandler
         // cookies
         $cookies = [];
         $count = preg_match_all('/([^\r\n]+)/i', implode(PHP_EOL, $result->getHeader('set-cookie')), $matches);
+        $cookieManager = $this->cookieManager;
         for($i = 0; $i < $count; ++$i)
         {
-            $cookieItem = $this->cookieManager->addSetCookie($matches[1][$i]);
+            $cookieItem = $cookieManager->addSetCookie($matches[1][$i]);
             $cookies[$cookieItem->name] = (array)$cookieItem;
         }
 
@@ -524,11 +509,12 @@ class Curl implements IHandler
      */
     private function parseCookies(&$request, $handler)
     {
+        $cookieManager = $this->cookieManager;
         foreach($request->getCookieParams() as $name => $value)
         {
-            $this->cookieManager->setCookie($name, $value);
+            $cookieManager->setCookie($name, $value);
         }
-        $cookie = $this->cookieManager->getRequestCookieString($request->getUri());
+        $cookie = $cookieManager->getRequestCookieString($request->getUri());
         curl_setopt($handler, CURLOPT_COOKIE, $cookie);
     }
     

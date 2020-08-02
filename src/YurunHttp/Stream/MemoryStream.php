@@ -179,9 +179,11 @@ class MemoryStream implements StreamInterface
      */
     public function write($string)
     {
-        $this->content = substr_replace($this->content, $string, $this->position, 0);
+        $content = &$this->content;
+        $position = &$this->position;
+        $content = substr_replace($content, $string, $position, 0);
         $len = strlen($string);
-        $this->position += $len;
+        $position += $len;
         $this->size += $len;
         return $len;
     }
@@ -208,8 +210,9 @@ class MemoryStream implements StreamInterface
      */
     public function read($length)
     {
-        $result = substr($this->content, $this->position, $length);
-        $this->position += $length;
+        $position = &$this->position;
+        $result = substr($this->content, $position, $length);
+        $position += $length;
         return $result;
     }
 
@@ -222,7 +225,16 @@ class MemoryStream implements StreamInterface
      */
     public function getContents()
     {
-        return $this->read($this->size - $this->position);
+        $position = &$this->position;
+        if(0 === $position)
+        {
+            $position = $this->size;
+            return $this->content;
+        }
+        else
+        {
+            return $this->read($this->size - $position);
+        }
     }
 
     /**

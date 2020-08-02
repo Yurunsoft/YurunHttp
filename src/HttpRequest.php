@@ -324,9 +324,10 @@ class HttpRequest
      */
     public function options($options)
     {
+        $thisOptions = &$this->options;
         foreach($options as $key => $value)
         {
-            $this->options[$key] = $value;
+            $thisOptions[$key] = $value;
         }
         return $this;
     }
@@ -350,7 +351,8 @@ class HttpRequest
      */
     public function headers($headers)
     {
-        $this->headers = array_merge($this->headers, $headers);
+        $thisHeaders = &$this->headers;
+        $thisHeaders = array_merge($thisHeaders, $headers);
         return $this;
     }
 
@@ -606,7 +608,8 @@ class HttpRequest
      */
     public function getSavePath()
     {
-        return isset($this->saveFileOption['filePath']) ? $this->saveFileOption['filePath'] : null;
+        $saveFileOption = $this->saveFileOption;
+        return isset($saveFileOption['filePath']) ? $saveFileOption['filePath'] : null;
     }
 
     /**
@@ -726,6 +729,7 @@ class HttpRequest
         }
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
         $request = new Request($url, $this->headers, $body, $method);
+        $saveFileOption = $this->saveFileOption;
         $request = $request->withUploadedFiles($files)
                             ->withCookieParams($this->cookies)
                             ->withAttribute('maxRedirects', $this->maxRedirects)
@@ -738,7 +742,7 @@ class HttpRequest
                             ->withAttribute('keyPassword', $this->keyPassword)
                             ->withAttribute('keyType', $this->keyType)
                             ->withAttribute('options', $this->options)
-                            ->withAttribute('saveFilePath', isset($this->saveFileOption['filePath']) ? $this->saveFileOption['filePath'] : null)
+                            ->withAttribute('saveFilePath', isset($saveFileOption['filePath']) ? $saveFileOption['filePath'] : null)
                             ->withAttribute('useProxy', $this->useProxy)
                             ->withAttribute('username', $this->username)
                             ->withAttribute('password', $this->password)
