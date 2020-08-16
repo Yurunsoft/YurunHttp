@@ -395,9 +395,12 @@ class Swoole implements IHandler
             $result = $result->withStreamId($response->streamId);
 
             // headers
-            foreach($response->headers as $name => $value)
+            if($response->headers)
             {
-                $result = $result->withHeader($name, $value);
+                foreach($response->headers as $name => $value)
+                {
+                    $result = $result->withHeader($name, $value);
+                }
             }
 
             // cookies
@@ -446,9 +449,12 @@ class Swoole implements IHandler
             if($success)
             {
                 // headers
-                foreach($connection->headers as $name => $value)
+                if($connection->headers)
                 {
-                    $result = $result->withHeader($name, $value);
+                    foreach($connection->headers as $name => $value)
+                    {
+                        $result = $result->withHeader($name, $value);
+                    }
                 }
 
                 // cookies
