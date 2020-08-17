@@ -32,19 +32,21 @@ abstract class BaseConnectionManager implements IConnectionManager
         $key = $this->getKey($host, $port);
         if($ssl)
         {
-            if(!isset($this->sslConnections[$key]))
+            $sslConnections = &$this->sslConnections;
+            if(!isset($sslConnections[$key]))
             {
-                $this->sslConnections[$key] = $this->createConnection($host, $port, $ssl);
+                $sslConnections[$key] = $this->createConnection($host, $port, $ssl);
             }
-            return $this->sslConnections[$key];
+            return $sslConnections[$key];
         }
         else
         {
-            if(!isset($this->connections[$key]))
+            $connections = &$this->connections;
+            if(!isset($connections[$key]))
             {
-                $this->connections[$key] = $this->createConnection($host, $port, $ssl);
+                $connections[$key] = $this->createConnection($host, $port, $ssl);
             }
-            return $this->connections[$key];
+            return $connections[$key];
         }
     }
 
@@ -60,10 +62,11 @@ abstract class BaseConnectionManager implements IConnectionManager
         $key = $this->getKey($host, $port);
         if($ssl)
         {
-            if(isset($this->sslConnections[$key]))
+            $sslConnections = &$this->sslConnections;
+            if(isset($sslConnections[$key]))
             {
-                $connection = $this->sslConnections[$key];
-                unset($this->sslConnections[$key]);
+                $connection = $sslConnections[$key];
+                unset($sslConnections[$key]);
                 return $connection;
             }
             else
@@ -71,15 +74,19 @@ abstract class BaseConnectionManager implements IConnectionManager
                 return false;
             }
         }
-        else if(isset($this->connections[$key]))
-        {
-            $connection = $this->connections[$key];
-            unset($this->connections[$key]);
-            return $connection;
-        }
         else
         {
-            return false;
+            $connections = &$this->connections;
+            if(isset($connections[$key]))
+            {
+                $connection = $connections[$key];
+                unset($connections[$key]);
+                return $connection;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
@@ -100,10 +107,11 @@ abstract class BaseConnectionManager implements IConnectionManager
         $key = $this->getKey($host, $port);
         if($ssl)
         {
-            if(isset($this->sslConnections[$key]))
+            $sslConnections = &$this->sslConnections;
+            if(isset($sslConnections[$key]))
             {
-                $this->sslConnections[$key]->close();
-                unset($this->sslConnections[$key]);
+                $sslConnections[$key]->close();
+                unset($sslConnections[$key]);
                 return true;
             }
             else
@@ -111,15 +119,19 @@ abstract class BaseConnectionManager implements IConnectionManager
                 return false;
             }
         }
-        else if(isset($this->connections[$key]))
-        {
-            $this->connections[$key]->close();
-            unset($this->connections[$key]);
-            return true;
-        }
         else
         {
-            return false;
+            $connections = &$this->connections;
+            if(isset($connections[$key]))
+            {
+                $connections[$key]->close();
+                unset($connections[$key]);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 

@@ -26,19 +26,31 @@ class FileStream implements StreamInterface
 
     public function __construct($uri, $mode = StreamMode::READ_WRITE)
     {
-        if(! $uri instanceof Uri)
+        if(is_string($uri))
         {
-            $this->uri = new Uri($uri);
+            $this->uri = $uri = new Uri($uri);
         }
-        else if(null !== $uri)
+        else if($uri instanceof Uri)
         {
             $this->uri = $uri;
         }
+        else
+        {
+            $uri = $this->uri;
+        }
         $this->mode = $mode;
-        $this->stream = fopen($this->uri, $this->mode);
+        $this->stream = fopen($uri, $mode);
         if(false === $this->stream)
         {
-            throw new \RuntimeException(sprintf('Open stream %s error', (string)$this->uri));
+            throw new \RuntimeException(sprintf('Open stream %s error', (string)$uri));
+        }
+    }
+
+    public function __destruct()
+    {
+        if($this->stream)
+        {
+            $this->close();
         }
     }
 

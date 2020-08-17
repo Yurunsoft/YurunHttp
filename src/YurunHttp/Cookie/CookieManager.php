@@ -139,6 +139,7 @@ class CookieManager
         }
         $uriDomain = Uri::getDomain($uri);
         $uriPath = $uri->getPath();
+        $cookieList = &$this->cookieList;
         foreach($this->relationMap as $relationDomain => $list1)
         {
             if('' === $relationDomain || $this->checkDomain($uriDomain, $relationDomain))
@@ -149,7 +150,7 @@ class CookieManager
                     {
                         foreach($idList as $id)
                         {
-                            $cookieItem = $this->cookieList[$id];
+                            $cookieItem = $cookieList[$id];
                             if((0 === $cookieItem->expires || $cookieItem->expires > time()) && (!$cookieItem->secure || 'https' === $uri->getScheme() || 'wss' === $uri->getScheme()) )
                             {
                                 $result[$cookieItem->name] = $cookieItem->value;
