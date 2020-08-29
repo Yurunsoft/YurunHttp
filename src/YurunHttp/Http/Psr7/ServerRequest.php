@@ -58,7 +58,6 @@ class ServerRequest extends Request implements ServerRequestInterface
         $this->server = $server;
         $this->cookies = $cookies;
         parent::__construct($uri, $headers, $body, $method, $version);
-        $this->parseParsedBody();
         $this->setUploadedFiles($this, $files);
     }
 
@@ -234,7 +233,46 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getParsedBody()
     {
-        return $this->parsedBody;
+        $parsedBody = &$this->parsedBody;
+        if(null === $parsedBody)
+        {
+            $body = $this->body;
+            $contentType = strtolower($this->getHeaderLine(RequestHeader::CONTENT_TYPE));
+            // post
+            if('POST' === $this->method && in_array($contentType, [
+                MediaType::APPLICATION_FORM_URLENCODED,
+                MediaType::MULTIPART_FORM_DATA,
+            ]))
+            {
+                $parsedBody = $this->post;
+            }
+            // json
+            else if(in_array($contentType, [
+                MediaType::APPLICATION_JSON,
+                MediaType::APPLICATION_JSON_UTF8,
+            ]))
+            {
+                $parsedBody = json_decode($body, true);
+            }
+            // xml
+            else if(in_array($contentType, [
+                MediaType::TEXT_XML,
+                MediaType::APPLICATION_ATOM_XML,
+                MediaType::APPLICATION_RSS_XML,
+                MediaType::APPLICATION_XHTML_XML,
+                MediaType::APPLICATION_XML,
+            ]))
+            {
+                $parsedBody = new \DOMDocument();
+                $parsedBody->loadXML($body);
+            }
+            // 其它
+            else
+            {
+                $parsedBody = (object)(string)$body;
+            }
+        }
+        return $parsedBody;
     }
 
     /**
@@ -305,9 +343,10 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getAttribute($name, $default = null)
     {
-        if(array_key_exists($name, $this->attributes))
+        $attributes = $this->attributes;
+        if(array_key_exists($name, $attributes))
         {
-            return $this->attributes[$name];
+            return $attributes[$name];
         }
         else
         {
@@ -382,47 +421,6 @@ class ServerRequest extends Request implements ServerRequestInterface
             }
         }
         return $object;
-    }
-
-    /**
-     * 处理处理后的主体内容
-     * @return void
-     */
-    protected function parseParsedBody()
-    {
-        // post
-        if('POST' === $this->method && in_array($this->getHeaderLine(RequestHeader::CONTENT_TYPE), [
-            MediaType::APPLICATION_FORM_URLENCODED,
-            MediaType::MULTIPART_FORM_DATA,
-        ]))
-        {
-            $this->parsedBody = $this->post;
-        }
-        // json
-        else if(in_array($this->getHeaderLine(RequestHeader::CONTENT_TYPE), [
-            MediaType::APPLICATION_JSON,
-            MediaType::APPLICATION_JSON_UTF8,
-        ]))
-        {
-            $this->parsedBody = json_decode($this->body, true);
-        }
-        // xml
-        else if(in_array($this->getHeaderLine(RequestHeader::CONTENT_TYPE), [
-            MediaType::TEXT_XML,
-            MediaType::APPLICATION_ATOM_XML,
-            MediaType::APPLICATION_RSS_XML,
-            MediaType::APPLICATION_XHTML_XML,
-            MediaType::APPLICATION_XML,
-        ]))
-        {
-            $this->parsedBody = new \DOMDocument();
-            $this->parsedBody->loadXML($this->body);
-        }
-        // 其它
-        else
-        {
-            $this->parsedBody = (object)(string)$this->body;
-        }
     }
 
 }
