@@ -10,7 +10,7 @@ class Request extends AbstractMessage implements RequestInterface
 {
     /**
      * 请求地址
-     * @var Yurun\Util\YurunHttp\Http\Psr7\Uri
+     * @var \Yurun\Util\YurunHttp\Http\Psr7\Uri
      */
     protected $uri;
 
@@ -28,7 +28,7 @@ class Request extends AbstractMessage implements RequestInterface
 
     /**
      * 构造方法
-     * @param string|Yurun\Util\YurunHttp\Http\Psr7\Uri $url
+     * @param string|\Yurun\Util\YurunHttp\Http\Psr7\Uri $url
      * @param array $headers
      * @param string $body
      * @param string $method
