@@ -542,6 +542,7 @@ class HttpRequest
     {
         $this->proxy['username'] = $username;
         $this->proxy['password'] = $password;
+        return $this;
     }
 
     /**
