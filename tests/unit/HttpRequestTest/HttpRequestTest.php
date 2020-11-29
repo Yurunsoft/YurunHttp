@@ -24,7 +24,7 @@ class HttpRequestTest extends BaseTest
             $http = new HttpRequest;
             $response = $http->get($this->host);
             $this->assertResponse($response);
-            $this->assertEquals($response->body(), 'YurunHttp');
+            $this->assertEquals('YurunHttp', $response->body());
         });
     }
 
@@ -192,18 +192,25 @@ class HttpRequestTest extends BaseTest
             
             $http->get($this->host . '?a=setCookie');
 
-            sleep(1);
-
-            $response = $http->get($this->host . '?a=info');
-            $this->assertResponse($response);
-            $data = $response->json(true);
-
-            $compareCookie = [
+            static $compareCookie = [
                 'a' =>  '1',
                 'c' =>  '3',
             ];
 
-            $this->assertEquals($data['cookie'], $compareCookie);
+            for($i = 0; $i < 2; ++$i)
+            {
+                sleep(1);
+                
+                $response = $http->get($this->host . '?a=info');
+                $this->assertResponse($response);
+                $data = $response->json(true);
+
+                if($compareCookie === $data['cookie'])
+                {
+                    break;
+                }
+            }
+            $this->assertEquals($compareCookie, $data['cookie']);
 
             $cookieManager = $http->getHandler()->getCookieManager();
 
@@ -391,7 +398,7 @@ class HttpRequestTest extends BaseTest
             $http = new HttpRequest;
             $response = $http->get($this->host);
             $this->assertResponse($response);
-            $this->assertEquals($response->body(), 'YurunHttp');
+            $this->assertEquals('YurunHttp', $response->body());
             $this->assertNotNull($response->getRequest());
             $this->assertEquals($this->host, $response->getRequest()->getUri());
         });
