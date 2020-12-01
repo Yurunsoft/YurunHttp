@@ -1,7 +1,7 @@
 <?php
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-define('SWOOLE_ON', version_compare(PHP_VERSION, '7.0', '>='));
+define('SWOOLE_ON', extension_loaded('swoole'));
 
 function testEnv($name, $default = null)
 {
