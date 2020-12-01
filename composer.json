@@ -6,7 +6,7 @@
         "psr/http-message": "~1.0"
     },
     "require-dev": {
-        "swoft/swoole-ide-helper": "~2.0",
+        "swoole/ide-helper": "^4.5",
         "phpunit/phpunit": ">=4"
     },
     "type": "library",
