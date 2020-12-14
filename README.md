@@ -121,6 +121,8 @@ var_dump($result[0]->getHeaders(), strlen($result[0]->body()), $result[0]->getSt
 var_dump($result[1]->getHeaders(), strlen($result[1]->body()), $result[1]->getStatusCode());
 ```
 
+> 只有 Swoole 并发请求会受到连接池限制，Curl 不受影响
+
 ### Swoole 协程模式
 
 ```php
@@ -182,9 +184,13 @@ $http->connectionPool(false);
 
 ```php
 use Yurun\Util\YurunHttp\Handler\Curl\CurlHttpConnectionManager;
+use Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager;
 
-// 首先获取连接池管理器
-$manager = CurlHttpConnectionManager::getInstance();
+// 获取 Curl 连接池管理器，选择你所处环境对应的类，其实一般 Curl 不太需要连接池
+// $manager = CurlHttpConnectionManager::getInstance();
+
+// 获取 Swoole 连接池管理器，选择你所处环境对应的类
+$manager = SwooleHttpConnectionManager::getInstance();
 
 // 获取连接池对象集合
 $pool = $manager->getConnectionPool('https://imiphp.com');
