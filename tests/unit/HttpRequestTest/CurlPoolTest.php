@@ -23,7 +23,7 @@ class CurlPoolTest extends BaseTest
                 $http = new HttpRequest;
                 $response = $http->get($this->host . '?a=info');
                 $data = $response->json(true);
-                $remote = $data['remote'] ?? null;
+                $remote = isset($data['remote']) ? $data['remote'] : null;
                 $this->assertNotNull($remote);
 
                 $pool = CurlHttpConnectionManager::getInstance()->getConnectionPool($url);
@@ -35,7 +35,7 @@ class CurlPoolTest extends BaseTest
                 $response = $http->get($this->host . '?a=info');
                 $data = $response->json(true);
 
-                $this->assertEquals($remote, $data['remote'] ?? null);
+                $this->assertEquals($remote, isset($data['remote']) ? $data['remote'] : null);
 
                 $pool = CurlHttpConnectionManager::getInstance()->getConnectionPool($url);
                 $this->assertEquals(1, $pool->getCount());
