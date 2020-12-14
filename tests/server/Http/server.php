@@ -4,7 +4,7 @@ use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
 use Workerman\Connection\TcpConnection;
 
-require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+require_once dirname(dirname(dirname(__DIR__))) . '/vendor/autoload.php';
 require_once __DIR__ . '/WorkermanHttp.php';
 
 // #### http worker ####
