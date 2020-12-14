@@ -27,7 +27,7 @@ abstract class FormDataBuilder
         {
             $result .= sprintf("--%s\r\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: %s\r\n\r\n", $boundary, $name, basename($file->getClientFilename()), $file->getClientMediaType()) . $file->getStream()->getContents() . "\r\n";
         }
-        $result .= sprintf("--%s--\r\n\r\n", $boundary);
+        $result .= sprintf("--%s--\r\n", $boundary);
         return $result;
     }
 }

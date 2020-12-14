@@ -169,6 +169,11 @@ abstract class Attributes
     const HTTP2_PIPELINE = 'http2_pipeline';
 
     /**
+     * 启用连接池
+     */
+    const CONNECTION_POOL = 'connection_pool';
+
+    /**
      * 重试计数
      */
     const PRIVATE_RETRY_COUNT = '__retryCount';
@@ -202,5 +207,10 @@ abstract class Attributes
      * 连接对象
      */
     const PRIVATE_CONNECTION = '__connection';
+
+    /**
+     * 连接池的键
+     */
+    const PRIVATE_POOL_KEY = '__poolKey';
 
 }

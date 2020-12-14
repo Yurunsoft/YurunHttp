@@ -8,7 +8,7 @@ trait TSwooleHandlerTest
 {
     protected function call($callable)
     {
-        if(!function_exists('\go'))
+        if(!extension_loaded('swoole'))
         {
             $this->markTestSkipped('Does not installed ext/swoole');
         }

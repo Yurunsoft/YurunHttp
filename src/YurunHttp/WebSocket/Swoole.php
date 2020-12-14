@@ -1,8 +1,10 @@
 <?php
 namespace Yurun\Util\YurunHttp\WebSocket;
 
-use Yurun\Util\YurunHttp\Exception\WebSocketException;
+use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
+use Yurun\Util\YurunHttp\ConnectionPool;
+use Yurun\Util\YurunHttp\Exception\WebSocketException;
 
 class Swoole implements IWebSocketClient
 {
@@ -54,8 +56,7 @@ class Swoole implements IWebSocketClient
         $this->httpHandler = $httpHandler;
         $this->request = $request;
         $this->response = $response;
-        $uri = $request->getUri();
-        $this->handler = $httpHandler->getHttpConnectionManager()->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
+        $this->handler = $request->getAttribute(Attributes::PRIVATE_CONNECTION);
         $this->connected = true;
     }
 

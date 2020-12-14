@@ -11,7 +11,7 @@ class DefaultHandlerTest extends BaseTest
 
     public function testCurl()
     {
-        if(function_exists('\go'))
+        if(extension_loaded('swoole'))
         {
             $this->assertEquals(-1, Coroutine::getuid());
         }

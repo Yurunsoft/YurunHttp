@@ -6,3 +6,5 @@
 logs
 vendor
 *.pid
+tests/unit/HttpRequestTest/download*
+*.cache

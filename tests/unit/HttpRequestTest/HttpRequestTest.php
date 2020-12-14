@@ -24,7 +24,7 @@ class HttpRequestTest extends BaseTest
             $http = new HttpRequest;
             $response = $http->get($this->host);
             $this->assertResponse($response);
-            $this->assertEquals($response->body(), 'YurunHttp');
+            $this->assertEquals('YurunHttp', $response->body());
         });
     }
 
@@ -57,7 +57,7 @@ class HttpRequestTest extends BaseTest
             $response = $http->get($this->host . '?a=info&time=' . $time);
             $this->assertResponse($response);
             $data = $response->json(true);
-            $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+            $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
             $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
         });
     }
@@ -78,7 +78,7 @@ class HttpRequestTest extends BaseTest
             ]);
             $this->assertResponse($response);
             $data = $response->json(true);
-            $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+            $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
             $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
         });
     }
@@ -98,7 +98,7 @@ class HttpRequestTest extends BaseTest
             ]);
             $this->assertResponse($response);
             $data = $response->json(true);
-            $this->assertEquals('POST', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+            $this->assertEquals('POST', isset($data['method']) ? $data['method'] : null);
             $this->assertEquals($time, isset($data['post']['time']) ? $data['post']['time'] : null);
         });
     }
@@ -112,10 +112,10 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function(){
             $http = new HttpRequest;
-            $response = $http->put($this->host . '?a=info');
+            $response = $http->put($this->host . '?a=info', 'test');
             $this->assertResponse($response);
             $data = $response->json(true);
-            $this->assertEquals('PUT', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+            $this->assertEquals('PUT', isset($data['method']) ? $data['method'] : null);
         });
     }
 
@@ -160,8 +160,8 @@ class HttpRequestTest extends BaseTest
                                 ->get($this->host . '?a=info');
             $this->assertResponse($response);
             $data = $response->json(true);
-            $this->assertEquals($time, isset($data['server']['HTTP_TIME']) ? $data['server']['HTTP_TIME'] : null);
-            $this->assertEquals($hash, isset($data['server']['HTTP_HASH']) ? $data['server']['HTTP_HASH'] : null);
+            $this->assertEquals($time, isset($data['header']['time']) ? $data['header']['time'] : null);
+            $this->assertEquals($hash, isset($data['header']['hash']) ? $data['header']['hash'] : null);
         });
     }
 
@@ -192,18 +192,25 @@ class HttpRequestTest extends BaseTest
             
             $http->get($this->host . '?a=setCookie');
 
-            sleep(1);
-
-            $response = $http->get($this->host . '?a=info');
-            $this->assertResponse($response);
-            $data = $response->json(true);
-
-            $compareCookie = [
+            static $compareCookie = [
                 'a' =>  '1',
                 'c' =>  '3',
             ];
 
-            $this->assertEquals($data['cookie'], $compareCookie);
+            for($i = 0; $i < 2; ++$i)
+            {
+                sleep(1);
+                
+                $response = $http->get($this->host . '?a=info');
+                $this->assertResponse($response);
+                $data = $response->json(true);
+
+                if($compareCookie === $data['cookie'])
+                {
+                    break;
+                }
+            }
+            $this->assertEquals($compareCookie, $data['cookie']);
 
             $cookieManager = $http->getHandler()->getCookieManager();
 
@@ -229,20 +236,18 @@ class HttpRequestTest extends BaseTest
             
             foreach([301, 302] as $statusCode)
             {
-                $time = time();
-                $response = $http->post($this->host . '?a=redirect' . $statusCode, 'time=' . $time);
+                $response = $http->post($this->host . '?a=redirect' . $statusCode);
                 $this->assertResponse($response);
                 $data = $response->json(true);
-                $this->assertEquals('GET', $data['server']['REQUEST_METHOD'], $statusCode . ' method error');
+                $this->assertEquals('GET', $data['method'], $statusCode . ' method error');
             }
             
             foreach([307, 308] as $statusCode)
             {
-                $time = time();
-                $response = $http->post($this->host . '?a=redirect' . $statusCode, 'time=' . $time);
+                $response = $http->post($this->host . '?a=redirect' . $statusCode);
                 $this->assertResponse($response);
                 $data = $response->json(true);
-                $this->assertEquals('POST', $data['server']['REQUEST_METHOD'], $statusCode . ' method error');
+                $this->assertEquals('POST', $data['method'], $statusCode . ' method error');
             }
 
         });
@@ -391,7 +396,7 @@ class HttpRequestTest extends BaseTest
             $http = new HttpRequest;
             $response = $http->get($this->host);
             $this->assertResponse($response);
-            $this->assertEquals($response->body(), 'YurunHttp');
+            $this->assertEquals('YurunHttp', $response->body());
             $this->assertNotNull($response->getRequest());
             $this->assertEquals($this->host, $response->getRequest()->getUri());
         });
@@ -537,7 +542,7 @@ class HttpRequestTest extends BaseTest
                 else if(1 === $i)
                 {
                     $data = $response->json(true);
-                    $this->assertEquals('GET', isset($data['server']['REQUEST_METHOD']) ? $data['server']['REQUEST_METHOD'] : null);
+                    $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
                     $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
                     $this->assertNotNull($response->getRequest());
                 }
