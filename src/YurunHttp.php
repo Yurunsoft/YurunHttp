@@ -23,7 +23,7 @@ abstract class YurunHttp
     /**
      * 版本号
      */
-    const VERSION = '4.2';
+    const VERSION = '4.3';
 
     /**
      * 设置默认处理器类

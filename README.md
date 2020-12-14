@@ -79,7 +79,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^4.2.0"
+        "yurunsoft/yurun-http": "^4.3.0"
     }
 }
 ```
