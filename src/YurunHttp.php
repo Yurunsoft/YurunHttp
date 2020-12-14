@@ -135,7 +135,6 @@ abstract class YurunHttp
         {
             $handler = new $handlerClass();
         }
-        $time = microtime(true);
         foreach(static::$attributes as $name => $value)
         {
             if(null === $request->getAttribute($name))
@@ -143,10 +142,7 @@ abstract class YurunHttp
                 $request = $request->withAttribute($name, $value);
             }
         }
-        $websocketClient = $handler->websocket($request);
-        $response = $websocketClient->getHttpResponse()->withTotalTime(microtime(true) - $time);
-        $websocketClient->init($handler, $request, $response);
-        return $websocketClient;
+        return $handler->websocket($request);
     }
 
     /**

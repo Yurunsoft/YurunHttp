@@ -29,18 +29,3 @@ services:
             core: -1
         privileged: true
         command: tail -f /etc/group
-
-    php8:
-        container_name: "php8"
-        build:
-            context: .
-            dockerfile: ./swoole-php8.dockerfile
-            args:
-                SWOOLE_DOCKER_VERSION: ${SWOOLE_DOCKER_VERSION}
-        volumes:
-            - "${GITHUB_WORKSPACE}:/imi:rw"
-        working_dir: /imi
-        ulimits:
-            core: -1
-        privileged: true
-        command: tail -f /etc/group

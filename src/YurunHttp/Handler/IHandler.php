@@ -8,7 +8,7 @@ interface IHandler
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @return void
      */
-    public function send($request);
+    public function send(&$request);
 
     /**
      * 接收请求
@@ -23,7 +23,7 @@ interface IHandler
      * @param \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient $websocketClient
      * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
      */
-    public function websocket($request, $websocketClient = null);
+    public function websocket(&$request, $websocketClient = null);
 
     /**
      * Get cookie 管理器

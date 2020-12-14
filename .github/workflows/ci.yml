@@ -3,27 +3,6 @@ name: ci
 on: [push, pull_request]
 
 jobs:
-  ci-php8:
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        swoole: [4.5.9-php8.0]
-
-    env:
-      SWOOLE_DOCKER_VERSION: ${{ matrix.swoole }}
-
-    steps:
-      - uses: actions/checkout@v1
-
-      - name: prepare
-        run: |
-          ./.github/prepare-test.sh php8
-
-      - name: test
-        run: docker exec php8 composer test
-
   ci-only-curl:
     runs-on: ubuntu-latest
 
@@ -59,10 +38,11 @@ jobs:
       matrix:
         swoole:
           [
-            4.5.8-php7.1,
-            4.5.8-php7.2,
-            4.5.8-php7.3,
-            4.5.8-php7.4,
+            4.5.9-php7.1,
+            4.5.9-php7.2,
+            4.5.9-php7.3,
+            4.5.9-php7.4,
+            4.5.9-php8.0,
             4.4.22-php7.1,
             4.4.22-php7.2,
             4.4.22-php7.3,

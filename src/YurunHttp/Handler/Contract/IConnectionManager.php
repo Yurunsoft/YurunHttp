@@ -1,47 +1,59 @@
 <?php
 namespace Yurun\Util\YurunHttp\Handler\Contract;
 
+use Yurun\Util\YurunHttp\Pool\Config\PoolConfig;
+use Yurun\Util\YurunHttp\Pool\Contract\IConnectionPool;
+
 interface IConnectionManager
 {
     /**
-     * 获取连接
+     * 获取连接池数组
      *
-     * @param string $host
-     * @param int $port
-     * @param bool $ssl
-     * @return mixed
+     * @return IConnectionPool[]
      */
-    public function getConnection($host, $port, $ssl);
+    public function getConnectionPools();
 
     /**
-     * 将指定连接从本管理器中移除，但不会关闭该连接
+     * 获取连接池对象
      *
-     * @param string $host
-     * @param int $port
-     * @param bool $ssl
-     * @return mixed|bool
+     * @param string $url
+     * @return IConnectionPool
      */
-    public function removeConnection($host, $port, $ssl);
+    public function getConnectionPool($url);
+
+    /**
+     * 获取连接
+     *
+     * @param string $url
+     * @return mixed
+     */
+    public function getConnection($url);
+
+    /**
+     * 释放连接占用.
+     *
+     * @param string $url
+     * @param mixed $connection
+     *
+     * @return void
+     */
+    public function release($url, $connection);
 
     /**
      * 关闭指定连接
      *
-     * @param string $host
-     * @param int $port
-     * @param bool $ssl
+     * @param string $url
      * @return bool
      */
-    public function closeConnection($host, $port, $ssl);
+    public function closeConnection($url);
 
     /**
      * 创建新连接，但不归本管理器管理
      *
-     * @param string $host
-     * @param int $port
-     * @param bool $ssl
+     * @param string $url
      * @return mixed
      */
-    public function createConnection($host, $port, $ssl);
+    public function createConnection($url);
 
     /**
      * 关闭连接管理器
@@ -49,5 +61,23 @@ interface IConnectionManager
      * @return void
      */
     public function close();
+
+    /**
+     * 设置连接池配置
+     *
+     * @param string $url
+     * @param integer $maxConnections
+     * @param integer $waitTimeout
+     * @return PoolConfig
+     */
+    public function setConfig($url, $maxConnections = 0, $waitTimeout = 30);
+
+    /**
+     * 获取连接池配置
+     *
+     * @param string $url
+     * @return PoolConfig|null
+     */
+    public function getConfig($url);
 
 }
