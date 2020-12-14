@@ -5,11 +5,13 @@ use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
+use Yurun\Util\YurunHttp\ConnectionPool;
 use Yurun\Util\YurunHttp\FormDataBuilder;
 use Yurun\Util\YurunHttp\Traits\THandler;
+use Yurun\Util\YurunHttp\Stream\MemoryStream;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
-use Yurun\Util\YurunHttp\Stream\MemoryStream;
+use Yurun\Util\YurunHttp\Handler\Curl\CurlHttpConnectionManager;
 
 class Curl implements IHandler
 {
@@ -33,6 +35,20 @@ class Curl implements IHandler
      * @var \Yurun\Util\YurunHttp\Http\Request
      */
     private $request;
+
+    /**
+     * 连接池键
+     *
+     * @var string
+     */
+    private $poolKey;
+
+    /**
+     * 连接池是否启用
+     *
+     * @var bool
+     */
+    private $poolIsEnabled = false;
 
     /**
      * 代理认证方式
@@ -78,7 +94,14 @@ class Curl implements IHandler
     {
         if($this->handler)
         {
-            curl_close($this->handler);
+            if($this->poolIsEnabled)
+            {
+                CurlHttpConnectionManager::getInstance()->release($this->poolKey, $this->handler);
+            }
+            else
+            {
+                curl_close($this->handler);
+            }
             $this->handler = null;
         }
     }
@@ -88,92 +111,114 @@ class Curl implements IHandler
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @return void
      */
-    public function send($request)
+    public function send(&$request)
     {
-        $this->request = $request;
-        $request = &$this->request;
-        $handler = &$this->handler;
-        if(!$handler)
+        $this->poolIsEnabled = $poolIsEnabled = ConnectionPool::isEnabled() && false !== $request->getAttribute(Attributes::CONNECTION_POOL);
+        if($poolIsEnabled)
         {
-            $handler = curl_init();
+            $httpConnectionManager = CurlHttpConnectionManager::getInstance();
         }
-        $files = $request->getUploadedFiles();
-        $body = (string)$request->getBody();
-        
-        if(!empty($files))
-        {
-            $body = FormDataBuilder::build($body, $files, $boundary);
-            $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
-        }
-        $this->buildCurlHandlerBase($request, $handler, $receiveHeaders, $saveFileFp);
-        if([] !== ($queryParams = $request->getQueryParams()))
-        {
-            $request = $request->withUri($request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
-        }
-        $uri = $request->getUri();
-        $isLocation = false;
-        $statusCode = 0;
-        $redirectCount = 0;
-        do{
-            // 请求方法
-            if($isLocation && in_array($statusCode, [301, 302, 303]))
+        try {
+            $this->request = $request;
+            $request = &$this->request;
+            $handler = &$this->handler;
+            if(!$handler)
             {
-                $method = 'GET';
-            }
-            else
-            {
-                $method = $request->getMethod();
-            }
-            if('GET' !== $method)
-            {
-                $bodyContent = $body;
-            }
-            else
-            {
-                $bodyContent = false;
-            }
-            $this->buildCurlHandlerEx($request, $handler, $uri, $method, $bodyContent);
-            $retry = $request->getAttribute(Attributes::RETRY, 0);
-            for($i = 0; $i <= $retry; ++$i)
-            {
-                $receiveHeaders = [];
-                $curlResult = curl_exec($handler);
-                $this->result = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
-                $result = &$this->result;
-                $statusCode = $result->getStatusCode();
-                // 状态码为5XX或者0才需要重试
-                if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
+                if($poolIsEnabled)
                 {
-                    break;
-                }
-            }
-            if($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $result->getHeaderLine('location')))
-            {
-                if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
-                {
-                    // 重定向清除之前下载的文件
-                    if(null !== $saveFileFp)
-                    {
-                        ftruncate($saveFileFp, 0);
-                        fseek($saveFileFp, 0);
-                    }
-                    $isLocation = true;
-                    $uri = $this->parseRedirectLocation($location, $uri);
-                    continue;
+                    $this->poolKey = $poolKey = ConnectionPool::getKey($request->getUri());
+                    $handler = $httpConnectionManager->getConnection($poolKey);
                 }
                 else
                 {
-                    $result = $result->withErrno(-1)
-                                     ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                    $handler = curl_init();
                 }
             }
-            break;
-        }while(true);
-        // 关闭保存至文件的句柄
-        if(null !== $saveFileFp)
-        {
-            fclose($saveFileFp);
-            $saveFileFp = null;
+            $files = $request->getUploadedFiles();
+            $body = (string)$request->getBody();
+            
+            if(!empty($files))
+            {
+                $body = FormDataBuilder::build($body, $files, $boundary);
+                $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
+            }
+            $this->buildCurlHandlerBase($request, $handler, $receiveHeaders, $saveFileFp);
+            if([] !== ($queryParams = $request->getQueryParams()))
+            {
+                $request = $request->withUri($request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
+            }
+            $uri = $request->getUri();
+            $isLocation = false;
+            $statusCode = 0;
+            $redirectCount = 0;
+            do{
+                // 请求方法
+                if($isLocation && in_array($statusCode, [301, 302, 303]))
+                {
+                    $method = 'GET';
+                }
+                else
+                {
+                    $method = $request->getMethod();
+                }
+                if('GET' !== $method)
+                {
+                    $bodyContent = $body;
+                }
+                else
+                {
+                    $bodyContent = false;
+                }
+                $this->buildCurlHandlerEx($request, $handler, $uri, $method, $bodyContent);
+                $retry = $request->getAttribute(Attributes::RETRY, 0);
+                for($i = 0; $i <= $retry; ++$i)
+                {
+                    $receiveHeaders = [];
+                    $curlResult = curl_exec($handler);
+                    $this->result = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
+                    $result = &$this->result;
+                    $statusCode = $result->getStatusCode();
+                    // 状态码为5XX或者0才需要重试
+                    if(!(0 === $statusCode || (5 === (int)($statusCode/100))))
+                    {
+                        break;
+                    }
+                }
+                if($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $result->getHeaderLine('location')))
+                {
+                    $maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
+                    if(++$redirectCount <= $maxRedirects)
+                    {
+                        // 重定向清除之前下载的文件
+                        if(null !== $saveFileFp)
+                        {
+                            ftruncate($saveFileFp, 0);
+                            fseek($saveFileFp, 0);
+                        }
+                        $isLocation = true;
+                        $uri = $this->parseRedirectLocation($location, $uri);
+                        continue;
+                    }
+                    else
+                    {
+                        $result = $result->withErrno(-1)
+                                        ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                    }
+                }
+                break;
+            }while(true);
+            // 关闭保存至文件的句柄
+            if(null !== $saveFileFp)
+            {
+                fclose($saveFileFp);
+                $saveFileFp = null;
+            }
+        } finally {
+            if($poolIsEnabled && $this->handler)
+            {
+                $httpConnectionManager->release($this->poolKey, $this->handler);
+                $this->handler = null;
+            }
         }
     }
 
@@ -191,6 +236,8 @@ class Curl implements IHandler
             CURLOPT_RETURNTRANSFER  => true,
             // 保存cookie
             CURLOPT_COOKIEJAR       => 'php://memory',
+            // 允许复用连接
+            CURLOPT_FORBID_REUSE    => false
         ];
         // 自动重定向
         $options[CURLOPT_MAXREDIRS] = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
@@ -288,7 +335,7 @@ class Curl implements IHandler
      * @param array $receiveHeaders
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    private function getResponse($request, $handler, $body,  $receiveHeaders)
+    private function getResponse($request, $handler, $body, $receiveHeaders)
     {
         // PHP 7.0.0开始substr()的 string 字符串长度与 start 相同时将返回一个空字符串。在之前的版本中，这种情况将返回 FALSE 。
         if(false === $body)
@@ -375,6 +422,10 @@ class Curl implements IHandler
 
     /**
      * 处理加密访问
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * 
      * @return void
      */
     private function parseSSL(&$request, $handler)
@@ -416,6 +467,12 @@ class Curl implements IHandler
     
     /**
      * 处理设置项
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * @param array $headers
+     * @param resource|null $saveFileFp
+     * 
      * @return void
      */
     private function parseOptions(&$request, $handler, &$headers = null, &$saveFileFp = null)
@@ -459,6 +516,10 @@ class Curl implements IHandler
 
     /**
      * 处理代理
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * 
      * @return void
      */
     private function parseProxy(&$request, $handler)
@@ -478,6 +539,10 @@ class Curl implements IHandler
     
     /**
      * 处理headers
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * 
      * @return void
      */
     private function parseHeaders(&$request, $handler)
@@ -486,11 +551,18 @@ class Curl implements IHandler
         {
             $request = $request->withHeader('User-Agent', $request->getAttribute(Attributes::USER_AGENT, static::$defaultUA));
         }
+        if(!$request->hasHeader('Connection'))
+        {
+            $request = $request->withHeader('Connection', 'Keep-Alive')->withHeader('Keep-Alive', '300');
+        }
         curl_setopt($handler, CURLOPT_HTTPHEADER, $this->parseHeadersFormat($request));
     }
     
     /**
      * 处理成CURL可以识别的headers格式
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * 
      * @return array 
      */
     private function parseHeadersFormat($request)
@@ -505,6 +577,10 @@ class Curl implements IHandler
 
     /**
      * 处理cookie
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * 
      * @return void
      */
     private function parseCookies(&$request, $handler)
@@ -520,6 +596,10 @@ class Curl implements IHandler
     
     /**
      * 处理网络相关
+     * 
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource $handler
+     * 
      * @return void
      */
     private function parseNetwork(&$request, $handler)
@@ -555,7 +635,7 @@ class Curl implements IHandler
      * @param \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient $websocketClient
      * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
      */
-    public function websocket($request, $websocketClient = null)
+    public function websocket(&$request, $websocketClient = null)
     {
         throw new \RuntimeException('Curl Handler does not support WebSocket');
     }
@@ -631,7 +711,8 @@ class Curl implements IHandler
                 $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT);
                 if($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $response->getHeaderLine('location')))
                 {
-                    if(++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
+                    $maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
+                    if(++$redirectCount <= $maxRedirects)
                     {
                         $request = $request->withAttribute(Attributes::PRIVATE_REDIRECT_COUNT, $redirectCount);
                         if(in_array($statusCode, [301, 302, 303]))

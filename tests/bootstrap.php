@@ -20,7 +20,8 @@ echo `{$cmd}`, PHP_EOL;
 $serverStarted = false;
 for($i = 0; $i < 10; ++$i)
 {
-    if('YurunHttp' === @file_get_contents(testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8899/')))
+    $context = stream_context_create(['http' => ['timeout' => 1]]);
+    if('YurunHttp' === @file_get_contents(testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8899/'), false, $context))
     {
         $serverStarted = true;
         break;

@@ -5,29 +5,47 @@ use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
+use Yurun\Util\YurunHttp\ConnectionPool;
 use Swoole\Http2\Request as Http2Request;
 use Yurun\Util\YurunHttp\Traits\THandler;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
+use Yurun\Util\YurunHttp\Pool\Config\PoolConfig;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
-use Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager;
 use Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager;
+use Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionPool;
+use Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager;
+use Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttp2ConnectionManager;
 
 class Swoole implements IHandler
 {
     use TCookieManager, THandler;
 
+    // /**
+    //  * Http 连接管理器
+    //  *
+    //  * @var \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager
+    //  */
+    // private $SwooleHttpConnectionManager;
+
+    // /**
+    //  * Http2 连接管理器
+    //  *
+    //  * @var \Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager
+    //  */
+    // private $http2ConnectionManager;
+
     /**
-     * Http 连接管理器
+     * http 连接管理器
      *
-     * @var \Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager
+     * @var SwooleHttpConnectionManager
      */
     private $httpConnectionManager;
 
     /**
-     * Http2 连接管理器
+     * http2 连接管理器
      *
-     * @var \Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager
+     * @var SwooleHttp2ConnectionManager
      */
     private $http2ConnectionManager;
 
@@ -37,6 +55,20 @@ class Swoole implements IHandler
      * @var \Yurun\Util\YurunHttp\Http\Response
      */
     private $result;
+
+    /**
+     * 连接池键
+     *
+     * @var string
+     */
+    private $poolKey;
+
+    /**
+     * 连接池是否启用
+     *
+     * @var bool
+     */
+    private $poolIsEnabled = false;
 
     /**
      * 本 Handler 默认的 User-Agent
@@ -52,8 +84,10 @@ class Swoole implements IHandler
             static::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Swoole/%s', YurunHttp::VERSION, defined('SWOOLE_VERSION') ? SWOOLE_VERSION : 'unknown');
         }
         $this->initCookieManager();
-        $this->httpConnectionManager = new HttpConnectionManager;
-        $this->http2ConnectionManager = new Http2ConnectionManager;
+        $this->httpConnectionManager = new SwooleHttpConnectionManager;
+        $this->http2ConnectionManager = new SwooleHttp2ConnectionManager;
+        // $this->SwooleHttpConnectionManager = new SwooleHttpConnectionManager;
+        // $this->http2ConnectionManager = new Http2ConnectionManager;
     }
 
     /**
@@ -65,6 +99,8 @@ class Swoole implements IHandler
     {
         $this->httpConnectionManager->close();
         $this->http2ConnectionManager->close();
+        // $this->SwooleHttpConnectionManager->close();
+        // $this->http2ConnectionManager->close();
     }
 
     /**
@@ -178,14 +214,15 @@ class Swoole implements IHandler
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @return bool
      */
-    public function send($request)
+    public function send(&$request)
     {
-        $deferRequest = $this->sendDefer($request);
+        $this->poolIsEnabled = ConnectionPool::isEnabled() && false !== $request->getAttribute(Attributes::CONNECTION_POOL);
+        $request = $this->sendDefer($request);
         if($request->getAttribute(Attributes::PRIVATE_IS_HTTP2) && $request->getAttribute(Attributes::HTTP2_NOT_RECV))
         {
             return true;
         }
-        return !!$this->recvDefer($deferRequest);
+        return !!$this->recvDefer($request);
     }
 
     /**
@@ -196,70 +233,110 @@ class Swoole implements IHandler
      */
     public function sendDefer($request)
     {
+        $isHttp2 = '2.0' === $request->getProtocolVersion();
+        if($poolIsEnabled = $this->poolIsEnabled)
+        {
+            if($isHttp2)
+            {
+                $http2ConnectionManager = SwooleHttp2ConnectionManager::getInstance();
+            }
+            else
+            {
+                $httpConnectionManager = SwooleHttpConnectionManager::getInstance();
+            }
+        }
+        else
+        {
+            if($isHttp2)
+            {
+                $http2ConnectionManager = $this->http2ConnectionManager;
+            }
+            else
+            {
+                $httpConnectionManager = $this->httpConnectionManager;
+            }
+        }
         if([] !== ($queryParams = $request->getQueryParams()))
         {
             $request = $request->withUri($request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
         }
         $uri = $request->getUri();
-        $isHttp2 = '2.0' === $request->getProtocolVersion();
-        if($isHttp2)
-        {
-            $connection = $this->http2ConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
-        }
-        else
-        {
-            $connection = $this->httpConnectionManager->getConnection($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme() || 'wss' === $uri->getScheme());
-            $connection->setDefer(true);
-        }
-        $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
-        // 构建
-        $this->buildRequest($request, $connection, $http2Request);
-        // 发送
-        $path = $uri->getPath();
-        if('' === $path)
-        {
-            $path = '/';
-        }
-        $query = $uri->getQuery();
-        if('' !== $query)
-        {
-            $path .= '?' . $query;
-        }
-        if($isWebSocket)
-        {
+        try {
+            $this->poolKey = $poolKey = ConnectionPool::getKey($uri);
             if($isHttp2)
             {
-                throw new \RuntimeException('Http2 swoole handler does not support websocket');
-            }
-            if(!$connection->upgrade($path))
-            {
-                throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
-            }
-        }
-        else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
-        {
-            if($isHttp2)
-            {
-                $result = $connection->send($http2Request);
-                $request = $request->withAttribute(Attributes::PRIVATE_HTTP2_STREAM_ID, $result);
+                $connection = $http2ConnectionManager->getConnection($poolKey);
             }
             else
             {
-                $connection->execute($path);
+                $connection = $httpConnectionManager->getConnection($poolKey);
+                $connection->setDefer(true);
             }
-        }
-        else
-        {
-            if($isHttp2)
+            $request = $request->withAttribute(Attributes::PRIVATE_POOL_KEY, $poolKey);
+            $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
+            // 构建
+            $this->buildRequest($request, $connection, $http2Request);
+            // 发送
+            $path = $uri->getPath();
+            if('' === $path)
             {
-                throw new \RuntimeException('Http2 swoole handler does not support download file');
+                $path = '/';
             }
-            $connection->download($path, $saveFilePath);
+            $query = $uri->getQuery();
+            if('' !== $query)
+            {
+                $path .= '?' . $query;
+            }
+            if($isWebSocket)
+            {
+                if($isHttp2)
+                {
+                    throw new \RuntimeException('Http2 swoole handler does not support websocket');
+                }
+                if(!$connection->upgrade($path))
+                {
+                    throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
+                }
+            }
+            else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
+            {
+                if($isHttp2)
+                {
+                    $result = $connection->send($http2Request);
+                    $request = $request->withAttribute(Attributes::PRIVATE_HTTP2_STREAM_ID, $result);
+                }
+                else
+                {
+                    $connection->execute($path);
+                }
+            }
+            else
+            {
+                if($isHttp2)
+                {
+                    throw new \RuntimeException('Http2 swoole handler does not support download file');
+                }
+                $connection->download($path, $saveFilePath);
+            }
+        
+            return $request->withAttribute(Attributes::PRIVATE_IS_HTTP2, $isHttp2)
+                        ->withAttribute(Attributes::PRIVATE_IS_WEBSOCKET, $isHttp2)
+                        ->withAttribute(Attributes::PRIVATE_CONNECTION, $connection);
+        } catch(\Throwable $th) {
+            throw $th;
+        } finally {
+            if($poolIsEnabled && isset($connection) && isset($th))
+            {
+                if($isHttp2)
+                {
+                    $http2ConnectionManager->release($poolKey, $connection);
+                }
+                else
+                {
+                    $httpConnectionManager->release($poolKey, $connection);
+                }
+            }
         }
-       
-        return $request->withAttribute(Attributes::PRIVATE_IS_HTTP2, $isHttp2)
-                       ->withAttribute(Attributes::PRIVATE_IS_WEBSOCKET, $isHttp2)
-                       ->withAttribute(Attributes::PRIVATE_CONNECTION, $connection);
     }
 
     /**
@@ -273,11 +350,42 @@ class Swoole implements IHandler
     {
         /** @var \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client $connection */
         $connection = $request->getAttribute(Attributes::PRIVATE_CONNECTION);
+        $poolKey = $request->getAttribute(Attributes::PRIVATE_POOL_KEY);
         $retryCount = $request->getAttribute(Attributes::PRIVATE_RETRY_COUNT, 0);
         $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
         $isHttp2 = '2.0' === $request->getProtocolVersion();
         $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
-        $this->getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout);
+        try {
+            $this->getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout);
+        } finally {
+            if(!$isWebSocket)
+            {
+                if($isHttp2)
+                {
+                    if($this->poolIsEnabled)
+                    {
+                        $http2ConnectionManager = SwooleHttp2ConnectionManager::getInstance();
+                    }
+                    else
+                    {
+                        $http2ConnectionManager = $this->http2ConnectionManager;
+                    }
+                    $http2ConnectionManager->release($poolKey, $connection);
+                }
+                else
+                {
+                    if($this->poolIsEnabled)
+                    {
+                        $httpConnectionManager = SwooleHttpConnectionManager::getInstance();
+                    }
+                    else
+                    {
+                        $httpConnectionManager = $this->httpConnectionManager;
+                    }
+                    $httpConnectionManager->release($poolKey, $connection);
+                }
+            }
+        }
         $result = &$this->result;
         $statusCode = $result->getStatusCode();
         // 状态码为5XX或者0才需要重试
@@ -330,13 +438,14 @@ class Swoole implements IHandler
      * @param \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient $websocketClient
      * @return \Yurun\Util\YurunHttp\WebSocket\IWebSocketClient
      */
-    public function websocket($request, $websocketClient = null)
+    public function websocket(&$request, $websocketClient = null)
     {
         if(!$websocketClient)
         {
             $websocketClient = new \Yurun\Util\YurunHttp\WebSocket\Swoole;
         }
-        $this->send($request->withAttribute(Attributes::PRIVATE_WEBSOCKET, true));
+        $request = $request->withAttribute(Attributes::PRIVATE_WEBSOCKET, true);
+        $this->send($request);
         $websocketClient->init($this, $request, $this->result);
         return $websocketClient;
     }
@@ -596,11 +705,11 @@ class Swoole implements IHandler
     /**
      * Get http 连接管理器
      *
-     * @return \Yurun\Util\YurunHttp\Handler\Swoole\HttpConnectionManager
+     * @return \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager
      */ 
-    public function getHttpConnectionManager()
+    public function getSwooleHttpConnectionManager()
     {
-        return $this->httpConnectionManager;
+        return $this->SwooleHttpConnectionManager;
     }
 
     /**
@@ -647,6 +756,18 @@ class Swoole implements IHandler
             $results[$i] = $handlers[$i]->recvDefer($request, $recvTimeout);
         }
         return $results;
+    }
+
+    public function getHttpConnectionManager(): SwooleHttpConnectionManager
+    {
+        if(ConnectionPool::isEnabled())
+        {
+            return SwooleHttpConnectionManager::getInstance();
+        }
+        else
+        {
+            return $this->httpConnectionManager;
+        }
     }
 
 }

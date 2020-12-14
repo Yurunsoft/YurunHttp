@@ -106,7 +106,8 @@ class SwooleClient implements IHttp2Client
      */
     public function connect()
     {
-        $client = $this->handler->getHttp2ConnectionManager()->getConnection($this->host, $this->port, $this->ssl);
+        $url = ($this->ssl ? 'https://' : 'http://') . $this->host . ':' . $this->port;
+        $client = $this->handler->getHttp2ConnectionManager()->getConnection($url);
         if($client)
         {
             $this->http2Client = $client;

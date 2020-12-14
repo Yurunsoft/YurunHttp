@@ -1,7 +1,7 @@
 # YurunHttp
 
 [![Latest Version](https://poser.pugx.org/yurunsoft/yurun-http/v/stable)](https://packagist.org/packages/yurunsoft/yurun-http)
-[![Travis](https://img.shields.io/travis/Yurunsoft/yurunhttp.svg)](https://travis-ci.org/Yurunsoft/yurunhttp)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Yurunsoft/YurunHttp/ci/dev)
 [![Php Version](https://img.shields.io/badge/php-%3E=5.5-brightgreen.svg)](https://secure.php.net/)
 [![IMI Doc](https://img.shields.io/badge/docs-passing-green.svg)](http://doc.yurunsoft.com/YurunHttp)
 [![IMI License](https://img.shields.io/github/license/Yurunsoft/YurunHttp.svg)](https://github.com/Yurunsoft/YurunHttp/blob/master/LICENSE)
@@ -30,6 +30,7 @@ YurunHttp 的目标是做最好用的 PHP HTTP Client 开发包！
 * HTTP2
 * WebSocket
 * Curl & Swoole 环境智能兼容
+* 连接池
 
 ---
 
@@ -44,6 +45,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 ## 重大版本更新日志
 
 > 每个小版本的更新日志请移步到 Release 查看
+
+v4.3.0 新增支持连接池
 
 v4.2.0 重构 Swoole 处理器，并发请求性能大幅提升 (PHP 版本依赖降为 >= 5.5)
 
@@ -118,24 +121,6 @@ var_dump($result[0]->getHeaders(), strlen($result[0]->body()), $result[0]->getSt
 var_dump($result[1]->getHeaders(), strlen($result[1]->body()), $result[1]->getStatusCode());
 ```
 
-### PSR-7 请求构建
-
-```php
-<?php
-use Yurun\Util\YurunHttp\Http\Request;
-use Yurun\Util\YurunHttp;
-
-$url = 'http://www.baidu.com';
-
-// 构造方法定义：__construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1', array $server = [], array $cookies = [], array $files = [])
-$request = new Request($url);
-
-// 发送请求并获取结果
-$response = YurunHttp::send($request);
-
-var_dump($response);
-```
-
 ### Swoole 协程模式
 
 ```php
@@ -152,6 +137,69 @@ function test()
     $response = $http->get('http://www.baidu.com');
     echo 'html:', PHP_EOL, $response->body();
 }
+```
+
+### 连接池
+
+在 YurunHttp 中，连接池是全局的，默认不启用。
+
+每个不同的 `host`、`port`、`ssl` 都在不同的连接池中，举个例子，下面两个 url 对应的连接池不是同一个：
+
+`http://www.imiphp.com`（`host=www.imiphp.com, port=80, ssl=false`）
+
+`https://www.imiphp.com`（`host=www.imiphp.com, port=443, ssl=true`）
+
+**启用全局连接池：**
+
+```php
+\Yurun\Util\YurunHttp\ConnectionPool::enable();
+```
+
+**禁用全局连接池：**
+
+```php
+\Yurun\Util\YurunHttp\ConnectionPool::disable();
+```
+
+**写入连接池设置：**
+
+```php
+// 最大连接数=16个，连接数满等待超时时间（仅 Swoole 有效）=30s
+// url 最后不要带斜杠 /
+\Yurun\Util\YurunHttp\ConnectionPool::setConfig('https://imiphp.com', 16, 30);
+```
+
+> YurunHttp 不会限制未设置的域名的连接数
+
+**特殊请求不启用连接池：**
+
+```php
+$http = new HttpRequest;
+$http->connectionPool(false);
+```
+
+**获取连接池对象及数据：**
+
+```php
+use Yurun\Util\YurunHttp\Handler\Curl\CurlHttpConnectionManager;
+
+// 首先获取连接池管理器
+$manager = CurlHttpConnectionManager::getInstance();
+
+// 获取连接池对象集合
+$pool = $manager->getConnectionPool('https://imiphp.com');
+
+// 获取连接总数
+$pool->getCount();
+
+// 获取空闲连接总数
+$pool->getFree();
+
+// 获取正在使用的连接总数
+$pool->getUsed();
+
+// 获取连接池配置
+$config = $pool->getConfig();
 ```
 
 ### WebSocket Client
@@ -221,6 +269,24 @@ for($i = 0; $i < 10; ++$i)
 ```
 
 > 具体用法请看 `examples/http2Client.php`
+
+### PSR-7 请求构建
+
+```php
+<?php
+use Yurun\Util\YurunHttp\Http\Request;
+use Yurun\Util\YurunHttp;
+
+$url = 'http://www.baidu.com';
+
+// 构造方法定义：__construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1', array $server = [], array $cookies = [], array $files = [])
+$request = new Request($url);
+
+// 发送请求并获取结果
+$response = YurunHttp::send($request);
+
+var_dump($response);
+```
 
 ## 商业合作
 

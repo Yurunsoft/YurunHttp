@@ -180,6 +180,13 @@ class HttpRequest
     public $protocolVersion = '1.1';
 
     /**
+     * 是否启用连接池，默认为 null 时取全局设置
+     *
+     * @var boolean|null
+     */
+    public $connectionPool = null;
+
+    /**
      * 代理认证方式
      */
     public static $proxyAuths = [];
@@ -667,6 +674,18 @@ class HttpRequest
     }
 
     /**
+     * 设置是否启用连接池
+     *
+     * @param bool $connectionPool
+     * @return static
+     */
+    public function connectionPool($connectionPool)
+    {
+        $this->connectionPool = $connectionPool;
+        return $this;
+    }
+
+    /**
      * 处理请求主体
      * @param string|array $requestBody
      * @param string|null $contentType 内容类型，支持null/json，为null时不处理
@@ -733,25 +752,26 @@ class HttpRequest
         $saveFileOption = $this->saveFileOption;
         $request = $request->withUploadedFiles($files)
                             ->withCookieParams($this->cookies)
-                            ->withAttribute('maxRedirects', $this->maxRedirects)
-                            ->withAttribute('isVerifyCA', $this->isVerifyCA)
-                            ->withAttribute('caCert', $this->caCert)
-                            ->withAttribute('certPath', $this->certPath)
-                            ->withAttribute('certPassword', $this->certPassword)
-                            ->withAttribute('certType', $this->certType)
-                            ->withAttribute('keyPath', $this->keyPath)
-                            ->withAttribute('keyPassword', $this->keyPassword)
-                            ->withAttribute('keyType', $this->keyType)
-                            ->withAttribute('options', $this->options)
-                            ->withAttribute('saveFilePath', isset($saveFileOption['filePath']) ? $saveFileOption['filePath'] : null)
-                            ->withAttribute('useProxy', $this->useProxy)
-                            ->withAttribute('username', $this->username)
-                            ->withAttribute('password', $this->password)
-                            ->withAttribute('connectTimeout', $this->connectTimeout)
-                            ->withAttribute('timeout', $this->timeout)
-                            ->withAttribute('downloadSpeed', $this->downloadSpeed)
-                            ->withAttribute('uploadSpeed', $this->uploadSpeed)
-                            ->withAttribute('followLocation', $this->followLocation)
+                            ->withAttribute(Attributes::MAX_REDIRECTS, $this->maxRedirects)
+                            ->withAttribute(Attributes::IS_VERIFY_CA, $this->isVerifyCA)
+                            ->withAttribute(Attributes::CA_CERT, $this->caCert)
+                            ->withAttribute(Attributes::CERT_PATH, $this->certPath)
+                            ->withAttribute(Attributes::CERT_PASSWORD, $this->certPassword)
+                            ->withAttribute(Attributes::CERT_TYPE, $this->certType)
+                            ->withAttribute(Attributes::KEY_PATH, $this->keyPath)
+                            ->withAttribute(Attributes::KEY_PASSWORD, $this->keyPassword)
+                            ->withAttribute(Attributes::KEY_TYPE, $this->keyType)
+                            ->withAttribute(Attributes::OPTIONS, $this->options)
+                            ->withAttribute(Attributes::SAVE_FILE_PATH, isset($saveFileOption['filePath']) ? $saveFileOption['filePath'] : null)
+                            ->withAttribute(Attributes::USE_PROXY, $this->useProxy)
+                            ->withAttribute(Attributes::USERNAME, $this->username)
+                            ->withAttribute(Attributes::PASSWORD, $this->password)
+                            ->withAttribute(Attributes::CONNECT_TIMEOUT, $this->connectTimeout)
+                            ->withAttribute(Attributes::TIMEOUT, $this->timeout)
+                            ->withAttribute(Attributes::DOWNLOAD_SPEED, $this->downloadSpeed)
+                            ->withAttribute(Attributes::UPLOAD_SPEED, $this->uploadSpeed)
+                            ->withAttribute(Attributes::FOLLOW_LOCATION, $this->followLocation)
+                            ->withAttribute(Attributes::CONNECTION_POOL, $this->connectionPool)
                             ->withProtocolVersion($this->protocolVersion)
                             ;
         foreach($this->proxy as $name => $value)
