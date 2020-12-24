@@ -353,7 +353,7 @@ class HttpRequest
 
     /**
      * 批量设置请求头
-     * @param array $headers 
+     * @param array $headers 键值数组
      * @return static
      */
     public function headers($headers)
@@ -372,6 +372,35 @@ class HttpRequest
     public function header($header, $value)
     {
         $this->headers[$header] = $value;
+        return $this;
+    }
+
+    /**
+     * 批量设置请求头，
+     *
+     * @param array $headers 纯文本 header 数组
+     * @return static
+     */
+    public function rawHeaders($headers)
+    {
+        $thisHeaders = &$this->headers;
+        foreach($headers as $header)
+        {
+            $list = explode(':', $header, 2);
+            $thisHeaders[trim($list[0])] = trim($list[1]);
+        }
+        return $this;
+    }
+
+    /**
+     * 设置请求头
+     * @param string $header 纯文本 header
+     * @return static
+     */
+    public function rawHeader($header)
+    {
+        $list = explode(':', $header, 2);
+        $this->headers[trim($list[0])] = trim($list[1]);
         return $this;
     }
 
