@@ -99,6 +99,20 @@ v1.0-1.3 初期版本迭代
 use Yurun\Util\HttpRequest;
 
 $http = new HttpRequest;
+
+// 设置 Header 4 种方法
+$http->header('aaa', 'value1')
+     ->headers([
+         'bbb' => 'value2',
+         'ccc' => 'value3',
+     ])
+     ->rawHeader('ddd:value4')
+     ->rawHeaders([
+         'eee:value5',
+         'fff:value6',
+     ]);
+
+// 请求
 $response = $http->ua('YurunHttp')
                  ->get('http://www.baidu.com');
 

@@ -21,20 +21,6 @@ class Swoole implements IHandler
 {
     use TCookieManager, THandler;
 
-    // /**
-    //  * Http 连接管理器
-    //  *
-    //  * @var \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager
-    //  */
-    // private $SwooleHttpConnectionManager;
-
-    // /**
-    //  * Http2 连接管理器
-    //  *
-    //  * @var \Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager
-    //  */
-    // private $http2ConnectionManager;
-
     /**
      * http 连接管理器
      *
@@ -86,8 +72,6 @@ class Swoole implements IHandler
         $this->initCookieManager();
         $this->httpConnectionManager = new SwooleHttpConnectionManager;
         $this->http2ConnectionManager = new SwooleHttp2ConnectionManager;
-        // $this->SwooleHttpConnectionManager = new SwooleHttpConnectionManager;
-        // $this->http2ConnectionManager = new Http2ConnectionManager;
     }
 
     /**
@@ -99,8 +83,6 @@ class Swoole implements IHandler
     {
         $this->httpConnectionManager->close();
         $this->http2ConnectionManager->close();
-        // $this->SwooleHttpConnectionManager->close();
-        // $this->http2ConnectionManager->close();
     }
 
     /**
@@ -173,7 +155,10 @@ class Swoole implements IHandler
             $connection->set($settings);
         }
         // headers
-        $request = $request->withHeader('Host', Uri::getDomain($uri));
+        if(!$request->hasHeader('Host'))
+        {
+            $request = $request->withHeader('Host', Uri::getDomain($uri));
+        }
         if(!$hasFile && !$request->hasHeader('Content-Type'))
         {
             $request = $request->withHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);

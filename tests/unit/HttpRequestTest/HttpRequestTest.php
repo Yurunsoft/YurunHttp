@@ -153,15 +153,22 @@ class HttpRequestTest extends BaseTest
             $http = new HttpRequest;
             $time = (string)time();
             $hash = uniqid();
+            $hash2 = uniqid();
             $response = $http->header('hash', $hash)
                                 ->headers([
                                     'time'  =>  $time,
+                                ])
+                                ->rawHeader('hash2: ' . $hash2)
+                                ->rawHeaders([
+                                    'a: 1',
                                 ])
                                 ->get($this->host . '?a=info');
             $this->assertResponse($response);
             $data = $response->json(true);
             $this->assertEquals($time, isset($data['header']['time']) ? $data['header']['time'] : null);
             $this->assertEquals($hash, isset($data['header']['hash']) ? $data['header']['hash'] : null);
+            $this->assertEquals($hash2, isset($data['header']['hash2']) ? $data['header']['hash2'] : null);
+            $this->assertEquals('1', isset($data['header']['a']) ? $data['header']['a'] : null);
         });
     }
 
@@ -491,6 +498,22 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals($fileName, $response->getSavedFileName());
             $this->assertTrue(is_file($fileName));
             $this->assertEquals('download3', file_get_contents($fileName));
+        });
+    }
+
+    /**
+     * Custom host
+     *
+     * @return void
+     */
+    public function testCustomHost()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $response = $http->header('host', 'www.imiphp.com')->get($this->host . '?a=info');
+            $this->assertResponse($response);
+            $data = $response->json(true);
+            $this->assertEquals('www.imiphp.com', isset($data['header']['host']) ? $data['header']['host'] : null);
         });
     }
 
