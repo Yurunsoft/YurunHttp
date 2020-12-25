@@ -502,6 +502,22 @@ class HttpRequestTest extends BaseTest
     }
 
     /**
+     * Custom host
+     *
+     * @return void
+     */
+    public function testCustomHost()
+    {
+        $this->call(function(){
+            $http = new HttpRequest;
+            $response = $http->header('host', 'www.imiphp.com')->get($this->host . '?a=info');
+            $this->assertResponse($response);
+            $data = $response->json(true);
+            $this->assertEquals('www.imiphp.com', isset($data['header']['host']) ? $data['header']['host'] : null);
+        });
+    }
+
+    /**
      * batch
      *
      * @return void
