@@ -257,6 +257,7 @@ class Swoole implements IHandler
                 $connection = $httpConnectionManager->getConnection($poolKey);
                 $connection->setDefer(true);
             }
+            /** @var \Swoole\Coroutine\Http\Client $connection */
             $request = $request->withAttribute(Attributes::PRIVATE_POOL_KEY, $poolKey);
             $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
             // 构建
@@ -280,7 +281,7 @@ class Swoole implements IHandler
                 }
                 if(!$connection->upgrade($path))
                 {
-                    throw new WebSocketException(sprintf('WebSocket connect faled, error: %s, errorCode: %s', swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
+                    throw new WebSocketException(sprintf('WebSocket connect faled, statusCode: %s, error: %s, errorCode: %s', $connection->statusCode, swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
                 }
             }
             else if(null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
