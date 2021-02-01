@@ -621,15 +621,31 @@ class Swoole implements IHandler
             {
                 case 'http':
                     $settings['http_proxy_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
-                    $settings['http_proxy_port'] = $request->getAttribute(Attributes::PROXY_PORT);
-                    $settings['http_proxy_user'] = $request->getAttribute(Attributes::PROXY_USERNAME, null);
-                    $settings['http_proxy_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, null);
+                    $port = $request->getAttribute(Attributes::PROXY_PORT);
+                    if(null !== $port)
+                    {
+                        $settings['http_proxy_port'] = $port;
+                    }
+                    $settings['http_proxy_user'] = $request->getAttribute(Attributes::PROXY_USERNAME);
+                    $password = $request->getAttribute(Attributes::PROXY_PASSWORD);
+                    if(null !== $password)
+                    {
+                        $settings['http_proxy_password'] = $password;
+                    }
                     break;
                 case 'socks5':
                     $settings['socks5_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
-                    $settings['socks5_port'] = $request->getAttribute(Attributes::PROXY_PORT);
-                    $settings['socks5_username'] = $request->getAttribute(Attributes::PROXY_USERNAME, null);
-                    $settings['socks5_password'] = $request->getAttribute(Attributes::PROXY_PASSWORD, null);
+                    $port = $request->getAttribute(Attributes::PROXY_PORT);
+                    if(null !== $port)
+                    {
+                        $settings['socks5_port'] = $port;
+                    }
+                    $settings['socks5_username'] = $request->getAttribute(Attributes::PROXY_USERNAME);
+                    $password = $request->getAttribute(Attributes::PROXY_PASSWORD);
+                    if(null !== $password)
+                    {
+                        $settings['socks5_password'] = $password;
+                    }
                     break;
             }
         }
