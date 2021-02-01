@@ -12,7 +12,19 @@ trait TSwooleHandlerTest
         {
             $this->markTestSkipped('Does not installed ext/swoole');
         }
-        \Swoole\Runtime::enableCoroutine(true);
+        if(defined('SWOOLE_HOOK_ALL'))
+        {
+            $flags = SWOOLE_HOOK_ALL;
+            if(defined('SWOOLE_HOOK_NATIVE_CURL'))
+            {
+                $flags ^= SWOOLE_HOOK_NATIVE_CURL;
+            }
+        }
+        else
+        {
+            $flags = true;
+        }
+        \Swoole\Runtime::enableCoroutine($flags);
         $throwable = null;
         $end = false;
         go(function() use($callable, &$throwable, &$end){
