@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp;
 
+use Psr\Http\Message\UriInterface;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Pool\Config\PoolConfig;
 use Yurun\Util\YurunHttp\Handler\Contract\IConnectionManager;
@@ -126,12 +127,12 @@ class ConnectionPool
     /**
      * 获取键
      *
-     * @param string|Uri $url
+     * @param string|UriInterface $url
      * @return void
      */
     public static function getKey($url)
     {
-        if($url instanceof Uri)
+        if($url instanceof UriInterface)
         {
             return $url->getScheme() . '://' . Uri::getDomain($url);
         }
