@@ -1,6 +1,7 @@
 <?php
 namespace Yurun\Util\YurunHttp\Stream;
 
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\StreamInterface;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
@@ -8,7 +9,7 @@ class FileStream implements StreamInterface
 {
     /**
      * 文件Uri
-     * @var \Yurun\Util\YurunHttp\Http\Psr7\Uri
+     * @var UriInterface
      */
     protected $uri;
 
@@ -30,7 +31,7 @@ class FileStream implements StreamInterface
         {
             $this->uri = $uri = new Uri($uri);
         }
-        else if($uri instanceof Uri)
+        else if($uri instanceof UriInterface)
         {
             $this->uri = $uri;
         }

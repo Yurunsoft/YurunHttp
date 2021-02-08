@@ -28,7 +28,7 @@ class Request extends AbstractMessage implements RequestInterface
 
     /**
      * 构造方法
-     * @param string|\Yurun\Util\YurunHttp\Http\Psr7\Uri $url
+     * @param string|UriInterface $url
      * @param array $headers
      * @param string $body
      * @param string $method
@@ -37,7 +37,7 @@ class Request extends AbstractMessage implements RequestInterface
     public function __construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1')
     {
         parent::__construct($body);
-        if(! $uri instanceof Uri)
+        if(! $uri instanceof UriInterface)
         {
             $this->uri = new Uri($uri);
         }
