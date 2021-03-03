@@ -598,6 +598,15 @@ class Swoole implements IHandler
         {
             $settings['ssl_cert_file'] = $certPath;
         }
+        $password = $request->getAttribute(Attributes::CERT_PASSWORD, '');
+        if('' === $password)
+        {
+            $password = $request->getAttribute(Attributes::KEY_PASSWORD, '');
+        }
+        if('' !== $password)
+        {
+            $settings['ssl_passphrase'] = $password;
+        }
         $keyPath = $request->getAttribute(Attributes::KEY_PATH , '');
         if('' !== $keyPath)
         {
