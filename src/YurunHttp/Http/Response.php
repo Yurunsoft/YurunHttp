@@ -26,7 +26,7 @@ class Response extends Psr7Response
 
     /**
      * 请求总耗时，单位：秒
-     * @var double
+     * @var float
      */
     protected $totalTime;
 
@@ -214,7 +214,7 @@ class Response extends Psr7Response
 
     /**
      * 获取请求总耗时，单位：秒
-     * @return double
+     * @return float
      */
     public function totalTime()
     {
@@ -223,7 +223,7 @@ class Response extends Psr7Response
 
     /**
      * 获取请求总耗时，单位：秒
-     * @return double
+     * @return float
      */
     public function getTotalTime()
     {
@@ -233,7 +233,7 @@ class Response extends Psr7Response
     /**
      * 设置请求总耗时
      * @param float $totalTime
-     * @return double
+     * @return float
      */
     public function withTotalTime($totalTime)
     {

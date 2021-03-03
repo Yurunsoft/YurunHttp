@@ -216,7 +216,7 @@ class SwooleClient implements IHttp2Client
      * 接收数据
      *
      * @param int|null $streamId 默认不传为 -1 时则监听服务端推送
-     * @param double|null $timeout 超时时间，单位：秒。默认为 null 不限制
+     * @param float|null $timeout 超时时间，单位：秒。默认为 null 不限制
      * @return \Yurun\Util\YurunHttp\Http\Response|bool
      */
     public function recv($streamId = -1, $timeout = null)

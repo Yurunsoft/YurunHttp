@@ -59,7 +59,7 @@ interface IWebSocketClient
     /**
      * 接收数据
      *
-     * @param double|null $timeout 超时时间，单位：秒。默认为 null 不限制
+     * @param float|null $timeout 超时时间，单位：秒。默认为 null 不限制
      * @return mixed
      */
     public function recv($timeout = null);
