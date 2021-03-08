@@ -71,4 +71,25 @@ interface IWebSocketClient
      */
     public function isConnected();
 
+    /**
+     * 获取错误码
+     *
+     * @return int
+     */
+    public function getErrorCode();
+
+    /**
+     * 获取错误信息
+     *
+     * @return string
+     */
+    public function getErrorMessage();
+
+    /**
+     * 获取原始客户端对象
+     *
+     * @return mixed
+     */
+    public function getClient();
+
 }

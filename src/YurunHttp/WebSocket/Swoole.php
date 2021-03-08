@@ -156,4 +156,34 @@ class Swoole implements IWebSocketClient
         return $this->connected;
     }
 
+    /**
+     * 获取错误码
+     *
+     * @return int
+     */
+    public function getErrorCode()
+    {
+        return $this->handler->errCode;
+    }
+
+    /**
+     * 获取错误信息
+     *
+     * @return string
+     */
+    public function getErrorMessage()
+    {
+        return $this->handler->errMsg;
+    }
+
+    /**
+     * 获取原始客户端对象
+     *
+     * @return \Swoole\Coroutine\Http\Client
+     */
+    public function getClient()
+    {
+        return $this->handler;
+    }
+
 }
