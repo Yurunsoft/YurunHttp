@@ -1,13 +1,13 @@
 <?php
 /**
- * json body
+ * json body.
  */
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use Yurun\Util\HttpRequest;
 
-$http = new HttpRequest;
+$http = new HttpRequest();
 $response = $http->post('http://www.baidu.com', [
-    'id'    =>  1,
+    'id'    => 1,
 ], 'json');
-echo 'html:', PHP_EOL, $response->body();
+echo 'html:', \PHP_EOL, $response->body();

@@ -8,7 +8,7 @@ use Yurun\Util\YurunHttp\Handler\Curl\CurlHttpConnectionManager;
 
 function dumpPoolInfo()
 {
-    foreach(CurlHttpConnectionManager::getInstance()->getConnectionPools() as $pool)
+    foreach (CurlHttpConnectionManager::getInstance()->getConnectionPools() as $pool)
     {
         var_dump($pool->getConfig()->getUrl() . ': Count=' . $pool->getCount() . ', Free=' . $pool->getFree() . ', Used=' . $pool->getUsed());
     }
@@ -23,11 +23,11 @@ ConnectionPool::setConfig('https://www.httpbin.org', 3);
 
 dumpPoolInfo();
 
-$http = new HttpRequest;
+$http = new HttpRequest();
 $response = $http->get('https://www.httpbin.org/get?id=1');
 var_dump($response->body());
 
-$http = new HttpRequest;
+$http = new HttpRequest();
 $response = $http->get('https://www.httpbin.org/get?id=1');
 var_dump($response->body());
 

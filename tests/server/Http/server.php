@@ -1,8 +1,9 @@
 <?php
-use Workerman\Worker;
+
+use Workerman\Connection\TcpConnection;
 use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
-use Workerman\Connection\TcpConnection;
+use Workerman\Worker;
 
 require_once dirname(dirname(dirname(__DIR__))) . '/vendor/autoload.php';
 require_once __DIR__ . '/WorkermanHttp.php';
@@ -18,11 +19,11 @@ $http_worker->count = 4;
 // Emitted when data received
 $http_worker->onMessage = function (TcpConnection $connection, Request $request) {
     // var_dump($request->method(), $request->get('a'));
-    switch($request->get('a'))
+    switch ($request->get('a'))
     {
         case 'info':
             $files = $request->file();
-            foreach($files as &$file)
+            foreach ($files as &$file)
             {
                 $file['hash'] = md5(file_get_contents($file['tmp_name']));
             }
@@ -30,13 +31,13 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
                 'Content-Type' => 'application/json',
                 'Yurun-Http'   => 'one suo',
             ], json_encode([
-                'get'       =>  $request->get(),
-                'post'      =>  $request->post(),
-                'cookie'    =>  $request->cookie(),
-                'header'    =>  $request->header(),
-                'files'     =>  $files,
-                'remote'    =>  $connection->getRemoteAddress(),
-                'method'    =>  $request->method(),
+                'get'       => $request->get(),
+                'post'      => $request->post(),
+                'cookie'    => $request->cookie(),
+                'header'    => $request->header(),
+                'files'     => $files,
+                'remote'    => $connection->getRemoteAddress(),
+                'method'    => $request->method(),
             ])));
             break;
         case 'setCookie':
@@ -84,7 +85,7 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             ], 'test'));
             break;
         case 'download1':
-            if('nb' === $request->post('yurunhttp') && 'POST' === $request->method())
+            if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method())
             {
                 $response = new Response(200, [
                     'Content-Type' => 'text/html; charset=UTF-8',
@@ -94,7 +95,7 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             }
             break;
         case 'download2':
-            if('nb' === $request->post('yurunhttp') && 'POST' === $request->method())
+            if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method())
             {
                 $connection->send('<h1>YurunHttp Hello World</h1>');
             }

@@ -1,11 +1,11 @@
 <?php
 /**
- * 使用 PSR-7 标准构建请求示例
+ * 使用 PSR-7 标准构建请求示例.
  */
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-use Yurun\Util\YurunHttp\Http\Request;
 use Yurun\Util\YurunHttp;
+use Yurun\Util\YurunHttp\Http\Request;
 
 $url = 'http://www.baidu.com';
 

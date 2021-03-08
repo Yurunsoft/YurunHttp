@@ -1,7 +1,7 @@
 <?php
+
 namespace Yurun\Util\YurunHttp\Test\WebSocketTest;
 
-use Yurun\Util\YurunHttp;
 use Yurun\Util\HttpRequest;
 use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\Test\Traits\TSwooleHandlerTest;
@@ -12,20 +12,20 @@ class WebSocketTest extends BaseTest
 
     public function testWebSocket()
     {
-        $this->call(function(){
-            $http = new HttpRequest;
+        $this->call(function () {
+            $http = new HttpRequest();
             $client = $http->websocket($this->wsHost);
             $this->assertTrue($client->isConnected());
             $this->assertTrue($client->send(json_encode([
-                'action'    =>  'login',
-                'username'  =>  'test',
+                'action'    => 'login',
+                'username'  => 'test',
             ])));
             $recv = $client->recv();
             $this->assertEquals('{"success":true}', $recv);
             $time = time();
             $this->assertTrue($client->send(json_encode([
-                'action'    =>  'send',
-                'message'   =>  $time,
+                'action'    => 'send',
+                'message'   => $time,
             ])));
             $recv = $client->recv();
             $this->assertEquals('test:' . $time, $recv);
@@ -35,20 +35,20 @@ class WebSocketTest extends BaseTest
 
     public function testWSS()
     {
-        $this->call(function(){
-            $http = new HttpRequest;
+        $this->call(function () {
+            $http = new HttpRequest();
             $client = $http->websocket($this->wssHost);
             $this->assertTrue($client->isConnected());
             $this->assertTrue($client->send(json_encode([
-                'action'    =>  'login',
-                'username'  =>  'test',
+                'action'    => 'login',
+                'username'  => 'test',
             ])));
             $recv = $client->recv();
             $this->assertEquals('{"success":true}', $recv);
             $time = time();
             $this->assertTrue($client->send(json_encode([
-                'action'    =>  'send',
-                'message'   =>  $time,
+                'action'    => 'send',
+                'message'   => $time,
             ])));
             $recv = $client->recv();
             $this->assertEquals('test:' . $time, $recv);
@@ -58,18 +58,17 @@ class WebSocketTest extends BaseTest
 
     public function testMemoryLeak()
     {
-        $this->call(function(){
+        $this->call(function () {
             $memorys = [1, 2, 3, 4, 5];
-            for($i = 0; $i < 5; ++$i)
+            for ($i = 0; $i < 5; ++$i)
             {
-                $http = new HttpRequest;
+                $http = new HttpRequest();
                 $client = $http->websocket($this->wsHost);
                 $client->close();
                 $memorys[$i] = memory_get_usage();
             }
             unset($memorys[0]);
-            $this->assertEquals(1, count(array_unique($memorys)));
+            $this->assertCount(1, array_unique($memorys));
         });
     }
-
 }

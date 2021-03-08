@@ -1,6 +1,6 @@
 <?php
 /**
- * 使用 PSR-7 标准构建请求扩展示例
+ * 使用 PSR-7 标准构建请求扩展示例.
  */
 require dirname(__DIR__) . '/vendor/autoload.php';
 

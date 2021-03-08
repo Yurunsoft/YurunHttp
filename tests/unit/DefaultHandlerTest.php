@@ -1,4 +1,5 @@
 <?php
+
 namespace Yurun\Util\YurunHttp\Test;
 
 use Swoole\Coroutine;
@@ -11,7 +12,7 @@ class DefaultHandlerTest extends BaseTest
 
     public function testCurl()
     {
-        if(extension_loaded('swoole'))
+        if (\extension_loaded('swoole'))
         {
             $this->assertEquals(-1, Coroutine::getuid());
         }
@@ -22,7 +23,7 @@ class DefaultHandlerTest extends BaseTest
 
     public function testSwoole()
     {
-        $this->call(function(){
+        $this->call(function () {
             $this->assertNotEquals(-1, Coroutine::getuid());
             YurunHttp::setDefaultHandler(null);
             $this->assertNull(YurunHttp::getDefaultHandler());
@@ -37,5 +38,4 @@ class DefaultHandlerTest extends BaseTest
         $this->assertEquals(\Exception::class, YurunHttp::getDefaultHandler());
         $this->assertInstanceOf(\Exception::class, YurunHttp::getHandler());
     }
-
 }

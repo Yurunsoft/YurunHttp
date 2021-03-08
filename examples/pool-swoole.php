@@ -9,7 +9,7 @@ use Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager;
 
 function dumpPoolInfo()
 {
-    foreach(SwooleHttpConnectionManager::getInstance()->getConnectionPools() as $pool)
+    foreach (SwooleHttpConnectionManager::getInstance()->getConnectionPools() as $pool)
     {
         var_dump($pool->getConfig()->getUrl() . ': Count=' . $pool->getCount() . ', Free=' . $pool->getFree() . ', Used=' . $pool->getUsed());
     }
@@ -22,19 +22,19 @@ ConnectionPool::enable();
 // 一定不要有 / 及后续参数等
 ConnectionPool::setConfig('https://www.httpbin.org', 3);
 
-Co\run(function(){
+Co\run(function () {
     dumpPoolInfo();
 
-    $timer = Timer::tick(500, function(){
+    $timer = Timer::tick(500, function () {
         dumpPoolInfo();
     });
 
     $wg = new \Swoole\Coroutine\WaitGroup();
-    for($i = 0; $i < 10; ++$i)
+    for ($i = 0; $i < 10; ++$i)
     {
         $wg->add();
-        go(function() use($wg){
-            $http = new HttpRequest;
+        go(function () use ($wg) {
+            $http = new HttpRequest();
             $response = $http->get('https://www.httpbin.org/get?id=1');
             var_dump($response->json(true));
             $wg->done();

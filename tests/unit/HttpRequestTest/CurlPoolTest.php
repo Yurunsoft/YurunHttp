@@ -1,26 +1,28 @@
 <?php
+
 namespace Yurun\Util\YurunHttp\Test\HttpRequestTest;
 
 use Yurun\Util\HttpRequest;
-use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\ConnectionPool;
 use Yurun\Util\YurunHttp\Handler\Curl\CurlHttpConnectionManager;
+use Yurun\Util\YurunHttp\Test\BaseTest;
 
 class CurlPoolTest extends BaseTest
 {
     public function test()
     {
-        $this->call(function(){
+        $this->call(function () {
             // 启用连接池
             ConnectionPool::enable();
 
-            try {
+            try
+            {
                 // 为这个地址设置限制连接池连接数量3个
                 // 一定不要有 / 及后续参数等
                 $url = rtrim($this->host, '/');
                 ConnectionPool::setConfig($url, 3);
 
-                $http = new HttpRequest;
+                $http = new HttpRequest();
                 $response = $http->get($this->host . '?a=info');
                 $data = $response->json(true);
                 $remote = isset($data['remote']) ? $data['remote'] : null;
@@ -31,7 +33,7 @@ class CurlPoolTest extends BaseTest
                 $this->assertEquals(1, $pool->getFree());
                 $this->assertEquals(0, $pool->getUsed());
 
-                $http = new HttpRequest;
+                $http = new HttpRequest();
                 $response = $http->get($this->host . '?a=info');
                 $data = $response->json(true);
 
@@ -41,8 +43,9 @@ class CurlPoolTest extends BaseTest
                 $this->assertEquals(1, $pool->getCount());
                 $this->assertEquals(1, $pool->getFree());
                 $this->assertEquals(0, $pool->getUsed());
-
-            } finally {
+            }
+            finally
+            {
                 ConnectionPool::disable();
             }
         });

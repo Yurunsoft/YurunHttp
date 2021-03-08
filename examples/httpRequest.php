@@ -1,24 +1,24 @@
 <?php
 /**
- * 使用HttpRequest类请求示例
+ * 使用HttpRequest类请求示例.
  */
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use Yurun\Util\HttpRequest;
-use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
+use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 
 $url = 'http://127.0.0.1:8080/Index/upload';
 
-$http = new HttpRequest;
+$http = new HttpRequest();
 
 // 设置 header
 $http->header('aa', '1');
 
 // 批量设置 header
 $http->headers([
-    'bb'    =>    '2',
-    'cc'    =>    '3',
+    'bb'    => '2',
+    'cc'    => '3',
 ]);
 
 // 设置 cookie
@@ -26,8 +26,8 @@ $http->cookie('c1', 'abc1');
 
 // 批量设置 cookie
 $http->cookies([
-    'c2'    =>    'abc2',
-    'c3'    =>    'abc3',
+    'c2'    => 'abc2',
+    'c3'    => 'abc3',
 ]);
 
 // 限速，单位字节，为0不限制
