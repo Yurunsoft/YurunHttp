@@ -1,36 +1,35 @@
 <?php
+
 namespace Yurun\Util\YurunHttp\WebSocket;
 
 use Yurun\Util\YurunHttp\Attributes;
-use Yurun\Util\YurunHttp\Http\Psr7\Uri;
-use Yurun\Util\YurunHttp\ConnectionPool;
 use Yurun\Util\YurunHttp\Exception\WebSocketException;
 
 class Swoole implements IWebSocketClient
 {
     /**
-     * Http Request
+     * Http Request.
      *
      * @var \Yurun\Util\YurunHttp\Http\Request
      */
     private $request;
 
     /**
-     * Http Response
+     * Http Response.
      *
      * @var \Yurun\Util\YurunHttp\Http\Response
      */
     private $response;
 
     /**
-     * Handler
+     * Handler.
      *
      * @var \Swoole\Coroutine\Http\Client
      */
     private $handler;
 
     /**
-     * Http Handler
+     * Http Handler.
      *
      * @var \Yurun\Util\YurunHttp\Handler\Swoole
      */
@@ -39,16 +38,17 @@ class Swoole implements IWebSocketClient
     /**
      * 连接状态
      *
-     * @var boolean
+     * @var bool
      */
     private $connected = false;
 
     /**
-     * 初始化
+     * 初始化.
      *
      * @param \Yurun\Util\YurunHttp\Handler\Swoole $httpHandler
-     * @param \Yurun\Util\YurunHttp\Http\Request $request
-     * @param \Yurun\Util\YurunHttp\Http\Response $response
+     * @param \Yurun\Util\YurunHttp\Http\Request   $request
+     * @param \Yurun\Util\YurunHttp\Http\Response  $response
+     *
      * @return void
      */
     public function init($httpHandler, $request, $response)
@@ -61,17 +61,17 @@ class Swoole implements IWebSocketClient
     }
 
     /**
-     * 获取 Http Handler
+     * 获取 Http Handler.
      *
-     * @return  \Yurun\Util\YurunHttp\Handler\IHandler
-     */ 
+     * @return \Yurun\Util\YurunHttp\Handler\IHandler
+     */
     public function getHttpHandler()
     {
         return $this->httpHandler;
     }
 
     /**
-     * 获取 Http Request
+     * 获取 Http Request.
      *
      * @return \Yurun\Util\YurunHttp\Http\Request
      */
@@ -81,7 +81,7 @@ class Swoole implements IWebSocketClient
     }
 
     /**
-     * 获取 Http Response
+     * 获取 Http Response.
      *
      * @return \Yurun\Util\YurunHttp\Http\Response
      */
@@ -91,18 +91,19 @@ class Swoole implements IWebSocketClient
     }
 
     /**
-     * 连接
+     * 连接.
      *
      * @return bool
      */
     public function connect()
     {
         $this->httpHandler->websocket($this->request, $this);
+
         return $this->isConnected();
     }
 
     /**
-     * 关闭连接
+     * 关闭连接.
      *
      * @return void
      */
@@ -113,43 +114,47 @@ class Swoole implements IWebSocketClient
     }
 
     /**
-     * 发送数据
+     * 发送数据.
      *
      * @param mixed $data
+     *
      * @return bool
      */
     public function send($data)
     {
         $handler = $this->handler;
         $result = $handler->push($data);
-        if(!$result)
+        if (!$result)
         {
             $errCode = $handler->errCode;
             throw new WebSocketException(sprintf('Send Failed, error: %s, errorCode: %s', swoole_strerror($errCode), $errCode), $errCode);
         }
+
         return $result;
     }
 
     /**
-     * 接收数据
+     * 接收数据.
      *
      * @param float|null $timeout 超时时间，单位：秒。默认为 null 不限制
+     *
      * @return mixed
      */
     public function recv($timeout = null)
     {
         $result = $this->handler->recv($timeout);
-        if(!$result)
+        if (!$result)
         {
             return false;
         }
+
         return $result->data;
     }
 
     /**
-     * 是否已连接
+     * 是否已连接.
      *
-     * @return boolean
+     * @return bool
      */
     public function isConnected()
     {
@@ -167,7 +172,7 @@ class Swoole implements IWebSocketClient
     }
 
     /**
-     * 获取错误信息
+     * 获取错误信息.
      *
      * @return string
      */
@@ -185,5 +190,4 @@ class Swoole implements IWebSocketClient
     {
         return $this->handler;
     }
-
 }

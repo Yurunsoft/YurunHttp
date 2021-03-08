@@ -1,11 +1,12 @@
 <?php
+
 namespace Yurun\Util\YurunHttp\Test\Http2;
 
 use Swoole\Coroutine;
-use Yurun\Util\HttpRequest;
 use Swoole\Coroutine\Channel;
-use Yurun\Util\YurunHttp\Http2\SwooleClient;
+use Yurun\Util\HttpRequest;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
+use Yurun\Util\YurunHttp\Http2\SwooleClient;
 use Yurun\Util\YurunHttp\Test\BaseTest;
 use Yurun\Util\YurunHttp\Test\Traits\TSwooleHandlerTest;
 
@@ -15,14 +16,14 @@ class SwooleHttp2Test extends BaseTest
 
     public function testHttp2()
     {
-        $this->call(function(){
-            $http = new HttpRequest;
+        $this->call(function () {
+            $http = new HttpRequest();
             $http->protocolVersion = '2.0';
             $http->timeout = 3000;
 
             $date = strtotime('2017-03-24 17:12:14');
             $response = $http->post($this->http2Host, [
-                'date'  =>  $date,
+                'date'  => $date,
             ], 'json');
             $data = $response->json(true);
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
@@ -32,7 +33,7 @@ class SwooleHttp2Test extends BaseTest
 
             $date = strtotime('2017-03-29 10:50:51');
             $response = $http->post($this->http2Host, [
-                'date'  =>  $date,
+                'date'  => $date,
             ], 'json');
             $data2 = $response->json(true);
             $this->assertEquals($date, isset($data2['date']) ? $data2['date'] : null);
@@ -44,8 +45,8 @@ class SwooleHttp2Test extends BaseTest
 
     public function testHttp2ByUrl()
     {
-        $this->call(function(){
-            $http = new HttpRequest;
+        $this->call(function () {
+            $http = new HttpRequest();
             $http->protocolVersion = '2.0';
             $http->timeout = 3000;
 
@@ -59,7 +60,7 @@ class SwooleHttp2Test extends BaseTest
 
             $date = strtotime('2017-03-29 10:50:51');
             $response = $http->post($this->http2Host, [
-                'date'  =>  $date,
+                'date'  => $date,
             ], 'json');
             $data2 = $response->json(true);
             $this->assertEquals($date, isset($data2['date']) ? $data2['date'] : null);
@@ -71,29 +72,29 @@ class SwooleHttp2Test extends BaseTest
 
     public function testMuiltCo()
     {
-        $this->call(function(){
+        $this->call(function () {
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
             $client->setTimeout(3);
 
             $this->assertTrue($client->connect());
 
-            go(function() use($client){
+            go(function () use ($client) {
                 $result = $client->recv();
                 $this->assertFalse($result->success);
             });
 
-            $httpRequest = new HttpRequest;
+            $httpRequest = new HttpRequest();
             $date = strtotime('2017-03-24 17:12:14');
             $request = $httpRequest->buildRequest($this->http2Host, [
-                'date'  =>  $date,
+                'date'  => $date,
             ], 'POST', 'json');
 
             $streamId = $client->send($request);
             $this->assertGreaterThan(0, $streamId);
 
             Coroutine::sleep(1);
-            
+
             $response = $client->recv($streamId, 3);
             $data = $response->json(true);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
@@ -101,11 +102,11 @@ class SwooleHttp2Test extends BaseTest
 
             $count = 10;
             $channel = new Channel($count);
-            for($i = 0; $i < $count; ++$i)
+            for ($i = 0; $i < $count; ++$i)
             {
-                go(function() use($i, $client, $channel, $httpRequest, $fd){
+                go(function () use ($i, $client, $channel, $httpRequest, $fd) {
                     $request = $httpRequest->buildRequest($this->http2Host, [
-                        'date'  =>  $i,
+                        'date'  => $i,
                     ], 'POST', 'json');
                     $streamId = $client->send($request);
                     $this->assertGreaterThan(0, $streamId);
@@ -116,12 +117,13 @@ class SwooleHttp2Test extends BaseTest
                 });
             }
             $returnCount = 0;
-            do {
-                if($channel->pop())
+            do
+            {
+                if ($channel->pop())
                 {
                     ++$returnCount;
                 }
-            } while($returnCount < $count);
+            } while ($returnCount < $count);
 
             $client->close();
         });
@@ -129,7 +131,7 @@ class SwooleHttp2Test extends BaseTest
 
     public function testPipeline1()
     {
-        $this->call(function(){
+        $this->call(function () {
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
 
@@ -137,13 +139,13 @@ class SwooleHttp2Test extends BaseTest
 
             $client->setTimeout(3);
 
-            $http = new HttpRequest;
+            $http = new HttpRequest();
             $http->protocolVersion = '2.0';
             $http->timeout = 3000;
 
             $date = strtotime('2017-03-24 17:12:14');
             $data = json_encode([
-                'date'  =>  $date,
+                'date'  => $date,
             ]);
 
             $request = $http->buildRequest($this->http2Host, substr($data, 0, 2));
@@ -158,10 +160,10 @@ class SwooleHttp2Test extends BaseTest
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
-            if(version_compare(SWOOLE_VERSION, '4.4.13', '<'))
+            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
-                $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', SWOOLE_VERSION));
+                $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', \SWOOLE_VERSION));
             }
             else
             {
@@ -172,19 +174,19 @@ class SwooleHttp2Test extends BaseTest
 
     public function testPipeline2()
     {
-        $this->call(function(){
+        $this->call(function () {
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
 
             $this->assertTrue($client->connect());
 
-            $http = new HttpRequest;
+            $http = new HttpRequest();
             $http->protocolVersion = '2.0';
             $http->timeout = 3000;
 
             $date = strtotime('2017-03-24 17:12:14');
             $data = json_encode([
-                'date'  =>  $date,
+                'date'  => $date,
             ]);
 
             $request = $http->buildRequest($this->http2Host, substr($data, 0, 2));
@@ -200,10 +202,10 @@ class SwooleHttp2Test extends BaseTest
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
-            if(version_compare(SWOOLE_VERSION, '4.4.13', '<'))
+            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
-                $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', SWOOLE_VERSION));
+                $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', \SWOOLE_VERSION));
             }
             else
             {
@@ -213,20 +215,20 @@ class SwooleHttp2Test extends BaseTest
     }
 
     /**
-     * $response->getRequest()
+     * $response->getRequest().
      *
      * @return void
      */
     public function testHttp2ResponseGetRequest()
     {
-        $this->call(function(){
-            $http = new HttpRequest;
+        $this->call(function () {
+            $http = new HttpRequest();
             $http->protocolVersion = '2.0';
             $http->timeout = 3000;
 
             $date = strtotime('2017-03-24 17:12:14');
             $response = $http->post($this->http2Host, [
-                'date'  =>  $date,
+                'date'  => $date,
             ], 'json');
             $data = $response->json(true);
             $this->assertEquals($date, isset($data['date']) ? $data['date'] : null);
@@ -239,25 +241,25 @@ class SwooleHttp2Test extends BaseTest
     }
 
     /**
-     * $response->getRequest()
+     * $response->getRequest().
      *
      * @return void
      */
     public function testHttp2ResponseGetRequest2()
     {
-        $this->call(function(){
+        $this->call(function () {
             $uri = new Uri($this->http2Host);
             $client = new SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
             $this->assertTrue($client->connect());
 
-            $httpRequest = new HttpRequest;
+            $httpRequest = new HttpRequest();
             $date = strtotime('2017-03-24 17:12:14');
             $request = $httpRequest->buildRequest($this->http2Host, [
-                'date'  =>  $date,
+                'date'  => $date,
             ], 'POST', 'json');
 
             $streamId = $client->send($request);
-            
+
             $response = $client->recv($streamId, 3);
             $data = $response->json(true);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
@@ -266,5 +268,4 @@ class SwooleHttp2Test extends BaseTest
             $client->close();
         });
     }
-
 }

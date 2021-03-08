@@ -1,17 +1,18 @@
 <?php
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-use Yurun\Util\YurunHttp;
 use Yurun\Util\HttpRequest;
+use Yurun\Util\YurunHttp;
 
 YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Swoole::class);
-go(function(){
+go(function () {
     // 该测试地址随时可能过期
     $url = 'ws://123.207.167.163:9010/ajaxchattest';
-    $http = new HttpRequest;
+    $http = new HttpRequest();
     $http->header('Origin', 'http://coolaf.com');
     $client = $http->websocket($url);
-    if(!$client->isConnected())
+    if (!$client->isConnected())
     {
         throw new \RuntimeException('Connect failed');
     }

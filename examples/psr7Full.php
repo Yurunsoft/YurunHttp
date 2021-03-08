@@ -1,14 +1,14 @@
 <?php
 /**
- * 使用 PSR-7 标准构建请求完整示例
+ * 使用 PSR-7 标准构建请求完整示例.
  */
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-use Yurun\Util\YurunHttp\Http\Request;
 use Yurun\Util\YurunHttp;
-use Yurun\Util\YurunHttp\Stream\MemoryStream;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
+use Yurun\Util\YurunHttp\Http\Request;
+use Yurun\Util\YurunHttp\Stream\MemoryStream;
 
 test();
 
@@ -30,8 +30,8 @@ function test()
 
     // cookie
     $request = $request->withCookieParams([
-        'k1'    =>    'v1',
-        'k2'    =>    'v2',
+        'k1'    => 'v1',
+        'k2'    => 'v2',
     ]);
 
     // body/post参数
@@ -43,8 +43,8 @@ function test()
 
     // GET参数
     $request = $request->withQueryParams([
-        'get1'    =>    '111',
-        'get2'    =>    '222',
+        'get1'    => '111',
+        'get2'    => '222',
     ]);
 
     // 请求方法

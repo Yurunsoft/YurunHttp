@@ -1,4 +1,5 @@
 <?php
+
 namespace Yurun\Util\YurunHttp\Test;
 
 use PHPUnit\Framework\TestCase;
@@ -7,28 +8,28 @@ use Yurun\Util\YurunHttp;
 abstract class BaseTest extends TestCase
 {
     /**
-     * 请求主机
+     * 请求主机.
      *
      * @var string
      */
     protected $host;
 
     /**
-     * WebSocket 请求主机
+     * WebSocket 请求主机.
      *
      * @var string
      */
     protected $wsHost;
 
     /**
-     * WebSocket SSL 请求主机
+     * WebSocket SSL 请求主机.
      *
      * @var string
      */
     protected $wssHost;
 
     /**
-     * Http2 请求主机
+     * Http2 请求主机.
      *
      * @var string
      */
@@ -50,14 +51,14 @@ abstract class BaseTest extends TestCase
     }
 
     /**
-     * 断言响应
+     * 断言响应.
      *
      * @param \Yurun\Util\YurunHttp\Http\Response $response
+     *
      * @return void
      */
     protected function assertResponse($response)
     {
         $this->assertEquals(0, $response->errno(), $response->error());
     }
-
 }
