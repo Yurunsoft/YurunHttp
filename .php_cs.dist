@@ -30,6 +30,7 @@ return PhpCsFixer\Config::create()
         ],
         'no_superfluous_phpdoc_tags' => false,
         'single_line_comment_style'  => false,
+        'combine_nested_dirname'     => false,
     ])
     ->setRiskyAllowed(true)
     ->setFinder(

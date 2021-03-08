@@ -123,7 +123,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated cookie values.
      *
-     * @param array $cookies Array of key/value pairs representing cookies.
+     * @param array $cookies array of key/value pairs representing cookies
      *
      * @return static
      */
@@ -183,8 +183,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated query string arguments.
      *
-     * @param array $query Array of query string arguments, typically from
-     *                     $_GET.
+     * @param array $query array of query string arguments, typically from
+     *                     $_GET
      *
      * @return static
      */
@@ -205,8 +205,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      * These values MAY be prepared from $_FILES or the message body during
      * instantiation, or MAY be injected via withUploadedFiles().
      *
-     * @return UploadedFile[] An array tree of UploadedFileInterface instances; an empty
-     *                        array MUST be returned if no data is present.
+     * @return UploadedFile[] an array tree of UploadedFileInterface instances; an empty
+     *                        array MUST be returned if no data is present
      */
     public function getUploadedFiles()
     {
@@ -220,11 +220,11 @@ class ServerRequest extends Request implements ServerRequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated body parameters.
      *
-     * @param array An array tree of UploadedFileInterface instances.
+     * @param array an array tree of UploadedFileInterface instances
      *
      * @return static
      *
-     * @throws \InvalidArgumentException if an invalid structure is provided.
+     * @throws \InvalidArgumentException if an invalid structure is provided
      */
     public function withUploadedFiles(array $uploadedFiles)
     {
@@ -321,7 +321,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return static
      *
      * @throws \InvalidArgumentException if an unsupported argument type is
-     *                                   provided.
+     *                                   provided
      */
     public function withParsedBody($data)
     {
@@ -340,7 +340,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * deserializing non-form-encoded message bodies; etc. Attributes
      * will be application and request specific, and CAN be mutable.
      *
-     * @return array Attributes derived from the request.
+     * @return array attributes derived from the request
      */
     public function getAttributes()
     {
@@ -359,8 +359,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @see getAttributes()
      *
-     * @param string $name    The attribute name.
-     * @param mixed  $default Default value to return if the attribute does not exist.
+     * @param string $name    the attribute name
+     * @param mixed  $default default value to return if the attribute does not exist
      *
      * @return mixed
      */
@@ -389,8 +389,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @see getAttributes()
      *
-     * @param string $name  The attribute name.
-     * @param mixed  $value The value of the attribute.
+     * @param string $name  the attribute name
+     * @param mixed  $value the value of the attribute
      *
      * @return static
      */
@@ -414,7 +414,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @see getAttributes()
      *
-     * @param string $name The attribute name.
+     * @param string $name the attribute name
      *
      * @return static
      */

@@ -84,10 +84,10 @@ class UploadedFile implements UploadedFileInterface
      * If the moveTo() method has been called previously, this method MUST raise
      * an exception.
      *
-     * @return StreamInterface Stream representation of the uploaded file.
+     * @return StreamInterface stream representation of the uploaded file
      *
      * @throws \RuntimeException in cases when no stream is available or can be
-     *                           created.
+     *                           created
      */
     public function getStream()
     {
@@ -127,11 +127,11 @@ class UploadedFile implements UploadedFileInterface
      * @see http://php.net/is_uploaded_file
      * @see http://php.net/move_uploaded_file
      *
-     * @param string $targetPath Path to which to move the uploaded file.
+     * @param string $targetPath path to which to move the uploaded file
      *
-     * @throws \InvalidArgumentException if the $path specified is invalid.
+     * @throws \InvalidArgumentException if the $path specified is invalid
      * @throws \RuntimeException         on any error during the move operation, or on
-     *                                   the second or subsequent call to the method.
+     *                                   the second or subsequent call to the method
      */
     public function moveTo($targetPath)
     {
@@ -164,7 +164,7 @@ class UploadedFile implements UploadedFileInterface
      * the file in the $_FILES array if available, as PHP calculates this based
      * on the actual size transmitted.
      *
-     * @return int|null The file size in bytes or null if unknown.
+     * @return int|null the file size in bytes or null if unknown
      */
     public function getSize()
     {
@@ -184,7 +184,7 @@ class UploadedFile implements UploadedFileInterface
      *
      * @see http://php.net/manual/en/features.file-upload.errors.php
      *
-     * @return int One of PHP's UPLOAD_ERR_XXX constants.
+     * @return int one of PHP's UPLOAD_ERR_XXX constants
      */
     public function getError()
     {
@@ -201,8 +201,8 @@ class UploadedFile implements UploadedFileInterface
      * Implementations SHOULD return the value stored in the "name" key of
      * the file in the $_FILES array.
      *
-     * @return string|null The filename sent by the client or null if none
-     *                     was provided.
+     * @return string|null the filename sent by the client or null if none
+     *                     was provided
      */
     public function getClientFilename()
     {
@@ -219,8 +219,8 @@ class UploadedFile implements UploadedFileInterface
      * Implementations SHOULD return the value stored in the "type" key of
      * the file in the $_FILES array.
      *
-     * @return string|null The media type sent by the client or null if none
-     *                     was provided.
+     * @return string|null the media type sent by the client or null if none
+     *                     was provided
      */
     public function getClientMediaType()
     {

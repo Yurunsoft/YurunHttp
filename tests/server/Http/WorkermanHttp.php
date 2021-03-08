@@ -46,7 +46,7 @@ class WorkermanHttp
     /**
      * Open cache.
      *
-     * @var bool.
+     * @var bool
      */
     protected static $_enableCache = true;
 

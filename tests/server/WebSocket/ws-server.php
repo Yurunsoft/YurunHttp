@@ -31,8 +31,8 @@ $server->on('close', function ($ser, $fd) use (&$userNameStore) {
 $wssServer = $server->addlistener('127.0.0.1', 8902, \SWOOLE_SOCK_TCP | \SWOOLE_SSL);
 $wssServer->set([
     'open_websocket_protocol'   => true,
-    'ssl_cert_file'             => dirname(__DIR__, 2) . '/ssl/server.crt',
-    'ssl_key_file'              => dirname(__DIR__, 2) . '/ssl/server.key',
+    'ssl_cert_file'             => dirname(dirname(__DIR__)) . '/ssl/server.crt',
+    'ssl_key_file'              => dirname(dirname(__DIR__)) . '/ssl/server.key',
 ]);
 
 $server->start();
