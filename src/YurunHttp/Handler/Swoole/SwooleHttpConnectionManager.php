@@ -14,20 +14,23 @@ class SwooleHttpConnectionManager implements IConnectionManager
     /**
      * 连接池集合.
      *
-     * @var CurlConnectionPool[]
+     * @var SwooleHttpConnectionPool[]
      */
     private $connectionPools = [];
 
     /**
-     * @var self
+     * @var static
      */
     private static $instance;
 
+    /**
+     * @return static
+     */
     public static function getInstance()
     {
         if (null === self::$instance)
         {
-            return self::$instance = new self();
+            return self::$instance = new static();
         }
 
         return self::$instance;

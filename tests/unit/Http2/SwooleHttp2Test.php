@@ -81,6 +81,7 @@ class SwooleHttp2Test extends BaseTest
 
             go(function () use ($client) {
                 $result = $client->recv();
+                $this->assertNotFalse($result);
                 $this->assertFalse($result->success);
             });
 
@@ -96,6 +97,7 @@ class SwooleHttp2Test extends BaseTest
             Coroutine::sleep(1);
 
             $response = $client->recv($streamId, 3);
+            $this->assertNotFalse($response);
             $data = $response->json(true);
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $fd = $data['fd'];
@@ -111,6 +113,7 @@ class SwooleHttp2Test extends BaseTest
                     $streamId = $client->send($request);
                     $this->assertGreaterThan(0, $streamId);
                     $response = $client->recv($streamId, 3);
+                    $this->assertNotFalse($response);
                     $data = $response->json(true);
                     $this->assertEquals($fd, isset($data['fd']) ? $data['fd'] : null);
                     $channel->push(1);
@@ -160,6 +163,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
+            /* @phpstan-ignore-next-line */
             if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG
@@ -202,6 +206,7 @@ class SwooleHttp2Test extends BaseTest
             $this->assertGreaterThan(1, isset($data['fd']) ? $data['fd'] : null);
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
+            /* @phpstan-ignore-next-line */
             if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
             {
                 // Swoole <= 4.4.12 BUG

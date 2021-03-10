@@ -56,6 +56,15 @@ class CookieItem
      */
     public $httpOnly = false;
 
+    /**
+     * @param string $name
+     * @param string $value
+     * @param int    $expires
+     * @param string $path
+     * @param string $domain
+     * @param bool   $secure
+     * @param bool   $httpOnly
+     */
     public function __construct($name, $value, $expires = 0, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
         $this->name = $name;
@@ -88,7 +97,7 @@ class CookieItem
     /**
      * 从 Set-Cookie 中解析.
      *
-     * @param array $setCookieContent
+     * @param string $setCookieContent
      *
      * @return static|null
      */

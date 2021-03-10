@@ -19,15 +19,18 @@ class CurlHttpConnectionManager implements IConnectionManager
     private $connectionPools = [];
 
     /**
-     * @var self
+     * @var static
      */
     private static $instance;
 
+    /**
+     * @return static
+     */
     public static function getInstance()
     {
         if (null === self::$instance)
         {
-            return self::$instance = new self();
+            return self::$instance = new static();
         }
 
         return self::$instance;

@@ -141,6 +141,11 @@ class Response extends Psr7Response
         return isset($this->cookiesOrigin[$name]) ? $this->cookiesOrigin[$name] : $default;
     }
 
+    /**
+     * @param string|\Psr\Http\Message\StreamInterface $body
+     * @param int                                      $statusCode
+     * @param string|null                              $reasonPhrase
+     */
     public function __construct($body = '', $statusCode = StatusCode::OK, $reasonPhrase = null)
     {
         parent::__construct($body, $statusCode, $reasonPhrase);
@@ -178,7 +183,7 @@ class Response extends Psr7Response
      */
     public function xml($assoc = false, $fromEncoding = null, $toEncoding = 'UTF-8')
     {
-        $xml = simplexml_load_string($this->body($fromEncoding, $toEncoding), null, \LIBXML_NOCDATA | \LIBXML_COMPACT);
+        $xml = simplexml_load_string($this->body($fromEncoding, $toEncoding), 'SimpleXMLElement', \LIBXML_NOCDATA | \LIBXML_COMPACT);
         if ($assoc)
         {
             $xml = (array) $xml;
@@ -264,7 +269,7 @@ class Response extends Psr7Response
      *
      * @param float $totalTime
      *
-     * @return float
+     * @return static
      */
     public function withTotalTime($totalTime)
     {
@@ -372,8 +377,7 @@ class Response extends Psr7Response
     /**
      * 设置请求体.
      *
-     * @param \Yurun\Util\YurunHttp\Http\Request
-     *  $request
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
      *
      * @return static
      */

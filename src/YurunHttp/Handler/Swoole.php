@@ -89,7 +89,7 @@ class Swoole implements IHandler
      *
      * @param \Yurun\Util\YurunHttp\Http\Request                           $request
      * @param \Swoole\Coroutine\Http\Client|\Swoole\Coroutine\Http2\Client $connection
-     * @param \Swoole\Coroutine\Http2\Request                              $http2Request
+     * @param Http2Request                                                 $http2Request
      *
      * @return void
      */
@@ -255,14 +255,15 @@ class Swoole implements IHandler
             $this->poolKey = $poolKey = ConnectionPool::getKey($uri);
             if ($isHttp2)
             {
+                /** @var \Swoole\Coroutine\Http2\Client $connection */
                 $connection = $http2ConnectionManager->getConnection($poolKey);
             }
             else
             {
+                /** @var \Swoole\Coroutine\Http\Client $connection */
                 $connection = $httpConnectionManager->getConnection($poolKey);
                 $connection->setDefer(true);
             }
-            /** @var \Swoole\Coroutine\Http\Client $connection */
             $request = $request->withAttribute(Attributes::PRIVATE_POOL_KEY, $poolKey);
             $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
             // 构建
@@ -324,10 +325,12 @@ class Swoole implements IHandler
             {
                 if ($isHttp2)
                 {
+                    // @phpstan-ignore-next-line
                     $http2ConnectionManager->release($poolKey, $connection);
                 }
                 else
                 {
+                    // @phpstan-ignore-next-line
                     $httpConnectionManager->release($poolKey, $connection);
                 }
             }
@@ -340,7 +343,7 @@ class Swoole implements IHandler
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param float|null                         $timeout
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|bool
      */
     public function recvDefer($request, $timeout = null)
     {
@@ -458,7 +461,7 @@ class Swoole implements IHandler
     /**
      * 接收请求
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function recv()
     {
@@ -470,7 +473,7 @@ class Swoole implements IHandler
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param mixed                              $connection
-     * @param \Swoole\Coroutine\Http2\Request    $http2Request
+     * @param Http2Request                       $http2Request
      *
      * @return void
      */
@@ -750,13 +753,13 @@ class Swoole implements IHandler
      */
     public function getSwooleHttpConnectionManager()
     {
-        return $this->SwooleHttpConnectionManager;
+        return $this->httpConnectionManager;
     }
 
     /**
      * Get http2 连接管理器.
      *
-     * @return \Yurun\Util\YurunHttp\Handler\Swoole\Http2ConnectionManager
+     * @return SwooleHttp2ConnectionManager
      */
     public function getHttp2ConnectionManager()
     {

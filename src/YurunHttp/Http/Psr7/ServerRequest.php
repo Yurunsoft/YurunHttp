@@ -3,6 +3,7 @@
 namespace Yurun\Util\YurunHttp\Http\Psr7;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\RequestHeader;
@@ -59,6 +60,16 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     protected $attributes = [];
 
+    /**
+     * @param string|UriInterface|null $uri
+     * @param array                    $headers
+     * @param string                   $body
+     * @param string                   $method
+     * @param string                   $version
+     * @param array                    $server
+     * @param array                    $cookies
+     * @param array                    $files
+     */
     public function __construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1', array $server = [], array $cookies = [], array $files = [])
     {
         $this->server = $server;
@@ -220,7 +231,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * immutability of the message, and MUST return an instance that has the
      * updated body parameters.
      *
-     * @param array an array tree of UploadedFileInterface instances
+     * @param array $uploadedFiles an array tree of UploadedFileInterface instances
      *
      * @return static
      *
@@ -432,7 +443,7 @@ class ServerRequest extends Request implements ServerRequestInterface
     /**
      * 设置上传的文件.
      *
-     * @param self                                           $object
+     * @param static                                         $object
      * @param \Yurun\Util\YurunHttp\Http\Psr7\UploadedFile[] $files
      *
      * @return static

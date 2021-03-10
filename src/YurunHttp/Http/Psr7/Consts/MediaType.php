@@ -55,6 +55,9 @@ abstract class MediaType
 
     const TEXT_XML = 'text/xml';
 
+    /**
+     * @var array
+     */
     private static $extMap = [
         'Type/sub-type'                                                             => 'Extension',
         'text/h323'                                                                 => '323',
@@ -191,7 +194,7 @@ abstract class MediaType
      *
      * @param string $contentType
      *
-     * @return string
+     * @return string|null
      */
     public static function getExt($contentType)
     {

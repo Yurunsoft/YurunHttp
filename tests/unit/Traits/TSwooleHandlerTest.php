@@ -6,6 +6,11 @@ use Yurun\Util\YurunHttp;
 
 trait TSwooleHandlerTest
 {
+    /**
+     * @param callable $callable
+     *
+     * @return void
+     */
     protected function call($callable)
     {
         if (!\extension_loaded('swoole'))
@@ -17,7 +22,7 @@ trait TSwooleHandlerTest
             $flags = \SWOOLE_HOOK_ALL;
             if (\defined('SWOOLE_HOOK_NATIVE_CURL'))
             {
-                $flags ^= SWOOLE_HOOK_NATIVE_CURL;
+                $flags ^= \SWOOLE_HOOK_NATIVE_CURL;
             }
         }
         else
@@ -39,10 +44,12 @@ trait TSwooleHandlerTest
             }
             $end = true;
         });
+        // @phpstan-ignore-next-line
         while (!$end)
         {
             swoole_event_dispatch();
         }
+        // @phpstan-ignore-next-line
         \Swoole\Runtime::enableCoroutine(false);
         if ($throwable)
         {

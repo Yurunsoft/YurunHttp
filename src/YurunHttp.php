@@ -74,10 +74,10 @@ abstract class YurunHttp
     /**
      * 发送请求并获取结果.
      *
-     * @param \Yurun\Util\YurunHttp\Http\Request            $request
-     * @param \Yurun\Util\YurunHttp\Handler\IHandler|string $handlerClass
+     * @param \Yurun\Util\YurunHttp\Http\Request                 $request
+     * @param \Yurun\Util\YurunHttp\Handler\IHandler|string|null $handlerClass
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public static function send($request, $handlerClass = null)
     {

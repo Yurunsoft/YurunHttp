@@ -67,6 +67,9 @@ class Uri implements UriInterface
         'ftp'   => 21,
     ];
 
+    /**
+     * @param string $uri
+     */
     public function __construct($uri = '')
     {
         $uriOption = parse_url($uri);

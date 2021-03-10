@@ -13,6 +13,9 @@ trait TCookieManager
      */
     protected $cookieManager;
 
+    /**
+     * @return void
+     */
     private function initCookieManager()
     {
         $this->cookieManager = new CookieManager();

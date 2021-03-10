@@ -25,6 +25,11 @@ class PoolConfig
      */
     protected $waitTimeout;
 
+    /**
+     * @param string $url
+     * @param int    $maxConnections
+     * @param float  $waitTimeout
+     */
     public function __construct($url, $maxConnections, $waitTimeout)
     {
         $this->url = $url;
