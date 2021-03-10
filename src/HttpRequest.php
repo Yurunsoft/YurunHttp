@@ -12,7 +12,7 @@ class HttpRequest
     /**
      * 处理器.
      *
-     * @var \Yurun\Util\YurunHttp\Handler\IHandler
+     * @var \Yurun\Util\YurunHttp\Handler\IHandler|null
      */
     private $handler;
 
@@ -82,7 +82,7 @@ class HttpRequest
     /**
      * CA根证书路径.
      *
-     * @var string
+     * @var string|null
      */
     public $caCert;
 
@@ -103,28 +103,28 @@ class HttpRequest
     /**
      * 下载限速，为0则不限制，单位：字节
      *
-     * @var int
+     * @var int|null
      */
     public $downloadSpeed;
 
     /**
      * 上传限速，为0则不限制，单位：字节
      *
-     * @var int
+     * @var int|null
      */
     public $uploadSpeed;
 
     /**
      * 用于连接中需要的用户名.
      *
-     * @var string
+     * @var string|null
      */
     public $username;
 
     /**
      * 用于连接中需要的密码
      *
-     * @var string
+     * @var string|null
      */
     public $password;
 
@@ -214,11 +214,15 @@ class HttpRequest
 
     /**
      * 代理认证方式.
+     *
+     * @var array
      */
     public static $proxyAuths = [];
 
     /**
      * 代理类型.
+     *
+     * @var array
      */
     public static $proxyType = [];
 
@@ -305,7 +309,7 @@ class HttpRequest
     /**
      * 获取处理器.
      *
-     * @return \Yurun\Util\YurunHttp\Handler\IHandler
+     * @return \Yurun\Util\YurunHttp\Handler\IHandler|null
      */
     public function getHandler()
     {
@@ -353,7 +357,7 @@ class HttpRequest
     /**
      * 设置请求主体.
      *
-     * @param mixed $requestBody 发送内容，可以是字符串、数组
+     * @param string|string|array $requestBody 发送内容，可以是字符串、数组
      *
      * @return static
      */
@@ -842,8 +846,8 @@ class HttpRequest
     /**
      * 处理请求主体.
      *
-     * @param string|array $requestBody
-     * @param string|null  $contentType 内容类型，支持null/json，为null时不处理
+     * @param string|string|array $requestBody
+     * @param string|null         $contentType 内容类型，支持null/json，为null时不处理
      *
      * @return array
      */
@@ -888,10 +892,10 @@ class HttpRequest
     /**
      * 构建请求类.
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string|null $method      请求方法，GET、POST等
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null  $method      请求方法，GET、POST等
+     * @param string|null  $contentType 内容类型，支持null/json，为null时不处理
      *
      * @return \Yurun\Util\YurunHttp\Http\Request
      */
@@ -943,12 +947,12 @@ class HttpRequest
     /**
      * 发送请求，所有请求的老祖宗.
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string|null $method      请求方法，GET、POST等
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string|null       $url         请求地址，如果为null则取url属性值
+     * @param string|array|null $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string            $method      请求方法，GET、POST等
+     * @param string|null       $contentType 内容类型，支持null/json，为null时不处理
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function send($url = null, $requestBody = null, $method = null, $contentType = null)
     {
@@ -960,12 +964,12 @@ class HttpRequest
     /**
      * 发送 Http2 请求不调用 recv().
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param array       $method      请求方法，GET、POST等
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string|null       $url         请求地址，如果为null则取url属性值
+     * @param string|array|null $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string            $method      请求方法，GET、POST等
+     * @param string|null       $contentType 内容类型，支持null/json，为null时不处理
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function sendHttp2WithoutRecv($url = null, $requestBody = null, $method = 'GET', $contentType = null)
     {
@@ -979,10 +983,10 @@ class HttpRequest
     /**
      * GET请求
      *
-     * @param string $url         请求地址，如果为null则取url属性值
-     * @param array  $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function get($url = null, $requestBody = null)
     {
@@ -1005,11 +1009,11 @@ class HttpRequest
     /**
      * POST请求
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null  $contentType 内容类型，支持null/json，为null时不处理
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function post($url = null, $requestBody = null, $contentType = null)
     {
@@ -1019,10 +1023,10 @@ class HttpRequest
     /**
      * HEAD请求
      *
-     * @param string $url         请求地址，如果为null则取url属性值
-     * @param array  $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function head($url = null, $requestBody = null)
     {
@@ -1032,11 +1036,11 @@ class HttpRequest
     /**
      * PUT请求
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null  $contentType 内容类型，支持null/json，为null时不处理
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function put($url = null, $requestBody = null, $contentType = null)
     {
@@ -1046,11 +1050,11 @@ class HttpRequest
     /**
      * PATCH请求
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null  $contentType 内容类型，支持null/json，为null时不处理
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function patch($url = null, $requestBody = null, $contentType = null)
     {
@@ -1060,11 +1064,11 @@ class HttpRequest
     /**
      * DELETE请求
      *
-     * @param string      $url         请求地址，如果为null则取url属性值
-     * @param array       $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string|null $contentType 内容类型，支持null/json，为null时不处理
+     * @param string       $url         请求地址，如果为null则取url属性值
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string|null  $contentType 内容类型，支持null/json，为null时不处理
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function delete($url = null, $requestBody = null, $contentType = null)
     {
@@ -1074,12 +1078,12 @@ class HttpRequest
     /**
      * 直接下载文件.
      *
-     * @param string $fileName    保存路径，如果以 .* 结尾，则根据 Content-Type 自动决定扩展名
-     * @param string $url         下载文件地址
-     * @param array  $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
-     * @param string $method      请求方法，GET、POST等，一般用GET
+     * @param string       $fileName    保存路径，如果以 .* 结尾，则根据 Content-Type 自动决定扩展名
+     * @param string       $url         下载文件地址
+     * @param string|array $requestBody 发送内容，可以是字符串、数组，如果为空则取content属性值
+     * @param string       $method      请求方法，GET、POST等，一般用GET
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function download($fileName, $url = null, $requestBody = null, $method = 'GET')
     {

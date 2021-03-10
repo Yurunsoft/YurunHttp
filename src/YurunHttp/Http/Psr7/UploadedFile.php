@@ -2,6 +2,7 @@
 
 namespace Yurun\Util\YurunHttp\Http\Psr7;
 
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Yurun\Util\YurunHttp\Stream\FileStream;
 
@@ -56,6 +57,13 @@ class UploadedFile implements UploadedFileInterface
      */
     protected $isMoved = false;
 
+    /**
+     * @param string $fileName
+     * @param string $mediaType
+     * @param string $tmpFileName
+     * @param int    $size
+     * @param int    $error
+     */
     public function __construct($fileName, $mediaType, $tmpFileName, $size = null, $error = 0)
     {
         $this->fileName = $fileName;
@@ -128,6 +136,8 @@ class UploadedFile implements UploadedFileInterface
      * @see http://php.net/move_uploaded_file
      *
      * @param string $targetPath path to which to move the uploaded file
+     *
+     * @return void
      *
      * @throws \InvalidArgumentException if the $path specified is invalid
      * @throws \RuntimeException         on any error during the move operation, or on

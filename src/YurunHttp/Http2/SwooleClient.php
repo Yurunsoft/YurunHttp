@@ -40,7 +40,7 @@ class SwooleClient implements IHttp2Client
     /**
      * Swoole http2 客户端.
      *
-     * @var \Swoole\Coroutine\Http2\Client
+     * @var \Swoole\Coroutine\Http2\Client|null
      */
     private $http2Client;
 
@@ -145,7 +145,8 @@ class SwooleClient implements IHttp2Client
     public function close()
     {
         $this->http2Client = null;
-        $this->handler->getHttp2ConnectionManager()->closeConnection($this->host, $this->port, $this->ssl);
+        $url = ($this->ssl ? 'https://' : 'http://') . $this->host . ':' . $this->port;
+        $this->handler->getHttp2ConnectionManager()->closeConnection($url);
         $recvChannels = &$this->recvChannels;
         foreach ($recvChannels as $channel)
         {

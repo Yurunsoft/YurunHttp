@@ -37,6 +37,9 @@ abstract class AbstractMessage implements MessageInterface
      */
     protected $body;
 
+    /**
+     * @param string|\Psr\Http\Message\StreamInterface $body
+     */
     public function __construct($body)
     {
         if ($body instanceof \Psr\Http\Message\StreamInterface)
@@ -358,9 +361,9 @@ abstract class AbstractMessage implements MessageInterface
     /**
      * 设置header.
      *
-     * @param AbstractMessage $object
-     * @param string          $name
-     * @param string          $value
+     * @param static $object
+     * @param string $name
+     * @param string $value
      *
      * @return static
      */

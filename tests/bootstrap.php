@@ -4,6 +4,12 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 define('SWOOLE_ON', extension_loaded('swoole'));
 
+/**
+ * @param string $name
+ * @param mixed  $default
+ *
+ * @return mixed
+ */
 function testEnv($name, $default = null)
 {
     $result = getenv($name);

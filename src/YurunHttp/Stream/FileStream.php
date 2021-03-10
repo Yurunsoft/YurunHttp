@@ -18,7 +18,7 @@ class FileStream implements StreamInterface
     /**
      * 流对象
      *
-     * @var resource
+     * @var resource|null
      */
     protected $stream;
 
@@ -29,6 +29,10 @@ class FileStream implements StreamInterface
      */
     protected $mode;
 
+    /**
+     * @param string|UriInterface $uri
+     * @param string              $mode
+     */
     public function __construct($uri, $mode = StreamMode::READ_WRITE)
     {
         if (\is_string($uri))
@@ -44,11 +48,12 @@ class FileStream implements StreamInterface
             $uri = $this->uri;
         }
         $this->mode = $mode;
-        $this->stream = fopen($uri, $mode);
-        if (false === $this->stream)
+        $stream = fopen($uri, $mode);
+        if (false === $stream)
         {
             throw new \RuntimeException(sprintf('Open stream %s error', (string) $uri));
         }
+        $this->stream = $stream;
     }
 
     public function __destruct()
@@ -180,6 +185,8 @@ class FileStream implements StreamInterface
      *                    offset bytes SEEK_CUR: Set position to current location plus offset
      *                    SEEK_END: Set position to end-of-stream plus offset.
      *
+     * @return void
+     *
      * @throws \RuntimeException on failure
      */
     public function seek($offset, $whence = \SEEK_SET)
@@ -198,6 +205,8 @@ class FileStream implements StreamInterface
      *
      * @see seek()
      * @see http://www.php.net/manual/en/function.fseek.php
+     *
+     * @return void
      *
      * @throws \RuntimeException on failure
      */
@@ -322,6 +331,7 @@ class FileStream implements StreamInterface
     public function getMetadata($key = null)
     {
         $result = stream_get_meta_data($this->stream);
+        /* @phpstan-ignore-next-line */
         if (!$result)
         {
             throw new \RuntimeException('stream getMetadata error');
@@ -343,7 +353,7 @@ class FileStream implements StreamInterface
     /**
      * Get Uri.
      *
-     * @return \Yurun\Util\YurunHttp\Http\Psr7\Uri
+     * @return UriInterface
      */
     public function getUri()
     {

@@ -50,11 +50,19 @@ abstract class Batch
         $result = $handler->coBatch($batchRequests, $timeout);
         foreach ($downloadAutoExt as $i)
         {
-            $response = &$result[$i];
+            if (isset($result[$i]))
+            {
+                $response = &$result[$i];
+            }
+            else
+            {
+                $response = null;
+            }
             if ($response)
             {
                 HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
             }
+            unset($response);
         }
 
         return $result;

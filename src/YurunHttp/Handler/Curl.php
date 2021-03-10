@@ -2,6 +2,7 @@
 
 namespace Yurun\Util\YurunHttp\Handler;
 
+use Psr\Http\Message\UriInterface;
 use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\ConnectionPool;
@@ -28,7 +29,7 @@ class Curl implements IHandler
     /**
      * curl 句柄.
      *
-     * @var resource
+     * @var resource|null
      */
     private $handler;
 
@@ -55,6 +56,8 @@ class Curl implements IHandler
 
     /**
      * 代理认证方式.
+     *
+     * @var array
      */
     public static $proxyAuths = [
         'basic' => \CURLAUTH_BASIC,
@@ -63,6 +66,8 @@ class Curl implements IHandler
 
     /**
      * 代理类型.
+     *
+     * @var array
      */
     public static $proxyType = [
         'http'      => \CURLPROXY_HTTP,
@@ -178,6 +183,7 @@ class Curl implements IHandler
                 }
                 $this->buildCurlHandlerEx($request, $handler, $uri, $method, $bodyContent);
                 $retry = $request->getAttribute(Attributes::RETRY, 0);
+                $result = null;
                 for ($i = 0; $i <= $retry; ++$i)
                 {
                     $receiveHeaders = [];
@@ -191,7 +197,7 @@ class Curl implements IHandler
                         break;
                     }
                 }
-                if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $result->getHeaderLine('location')))
+                if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && $result && '' !== ($location = $result->getHeaderLine('location')))
                 {
                     $maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
                     if (++$redirectCount <= $maxRedirects)
@@ -236,6 +242,8 @@ class Curl implements IHandler
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param resource                           $handler
+     * @param array|null                         $headers
+     * @param resource|null                      $saveFileFp
      *
      * @return void
      */
@@ -274,11 +282,11 @@ class Curl implements IHandler
     /**
      * 构建扩展 Curl Handler.
      *
-     * @param \Yurun\Util\YurunHttp\Http\Request       $request
-     * @param resource                                 $handler
-     * @param \Yurun\Util\YurunHttp\Http\Psr7\Uri|null $uri
-     * @param string|null                              $method
-     * @param string|null                              $body
+     * @param \Yurun\Util\YurunHttp\Http\Request $request
+     * @param resource                           $handler
+     * @param UriInterface|null                  $uri
+     * @param string|null                        $method
+     * @param string|null                        $body
      *
      * @return void
      */
@@ -331,7 +339,7 @@ class Curl implements IHandler
     /**
      * 接收请求
      *
-     * @return \Yurun\Util\YurunHttp\Http\Response
+     * @return \Yurun\Util\YurunHttp\Http\Response|null
      */
     public function recv()
     {
@@ -343,7 +351,7 @@ class Curl implements IHandler
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
      * @param resource                           $handler
-     * @param string                             $body
+     * @param string|bool                        $body
      * @param array                              $receiveHeaders
      *
      * @return \Yurun\Util\YurunHttp\Http\Response
@@ -520,7 +528,7 @@ class Curl implements IHandler
             if ('/' === $last || '\\' === $last)
             {
                 // 自动获取文件名
-                $saveFilePath .= basename($this->url);
+                $saveFilePath .= basename($request->getUri()->__toString());
             }
             $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
             curl_setopt_array($handler, [
@@ -727,6 +735,7 @@ class Curl implements IHandler
                 $handler = $curlHandlers[$k];
                 $receiveHeaders = $recvHeaders[$k];
                 $curlResult = curl_multi_getcontent($handler);
+                // @phpstan-ignore-next-line
                 $response = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
                 // 重定向处理
                 $statusCode = $response->getStatusCode();
@@ -758,6 +767,7 @@ class Curl implements IHandler
         {
             foreach ($saveFileFps as $fp)
             {
+                // @phpstan-ignore-next-line
                 if ($fp)
                 {
                     fclose($fp);

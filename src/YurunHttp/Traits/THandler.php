@@ -2,6 +2,8 @@
 
 namespace Yurun\Util\YurunHttp\Traits;
 
+use InvalidArgumentException;
+use Psr\Http\Message\UriInterface;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
 trait THandler
@@ -9,10 +11,10 @@ trait THandler
     /**
      * 处理重定向的 location.
      *
-     * @param string                              $location
-     * @param \Yurun\Util\YurunHttp\Http\Psr7\Uri $currentUri
+     * @param string       $location
+     * @param UriInterface $currentUri
      *
-     * @return \Yurun\Util\YurunHttp\Http\Psr7\Uri
+     * @return UriInterface
      */
     public function parseRedirectLocation($location, $currentUri)
     {
@@ -21,7 +23,7 @@ trait THandler
         {
             if (!isset($location[0]))
             {
-                return;
+                throw new InvalidArgumentException(sprintf('Invalid $location: %s', $location));
             }
             if ('/' === $location[0])
             {

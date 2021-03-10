@@ -35,6 +35,11 @@ abstract class BaseTest extends TestCase
      */
     protected $http2Host;
 
+    /**
+     * @param string|null $name
+     * @param array       $data
+     * @param string      $dataName
+     */
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
@@ -44,6 +49,11 @@ abstract class BaseTest extends TestCase
         $this->wssHost = testEnv('WSS_SERVER_HOST', 'wss://127.0.0.1:8902/');
     }
 
+    /**
+     * @param callable $callable
+     *
+     * @return void
+     */
     protected function call($callable)
     {
         YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Curl::class);

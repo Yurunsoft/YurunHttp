@@ -76,7 +76,7 @@ class ConnectionPool
      * @param int    $maxConnections
      * @param int    $waitTimeout
      *
-     * @return PoolConfig
+     * @return void
      */
     public static function setConfig($url, $maxConnections = 0, $waitTimeout = 30)
     {
@@ -131,7 +131,7 @@ class ConnectionPool
      *
      * @param string|UriInterface $url
      *
-     * @return void
+     * @return string
      */
     public static function getKey($url)
     {

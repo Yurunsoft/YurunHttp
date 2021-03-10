@@ -4,17 +4,12 @@ on: [push, pull_request]
 
 jobs:
   ci-only-curl:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     strategy:
       fail-fast: false
       matrix:
-        php:
-          [
-            5.5,
-            5.6,
-            7.0
-          ]
+        php: [5.5, 5.6, 7.0]
 
     env:
       PHP_DOCKER_VERSION: ${{ matrix.php }}
@@ -28,7 +23,6 @@ jobs:
 
       - name: test
         run: docker exec php composer test
-
 
   ci-curl-swoole:
     runs-on: ubuntu-latest

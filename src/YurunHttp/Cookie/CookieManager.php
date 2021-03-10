@@ -136,6 +136,7 @@ class CookieManager
      */
     public function getRequestCookies($uri)
     {
+        // @phpstan-ignore-next-line
         if (\defined('SWOOLE_VERSION') && \SWOOLE_VERSION < 4.4)
         {
             // Fix bug: https://github.com/swoole/swoole-src/pull/2644
@@ -197,7 +198,7 @@ class CookieManager
      * @param string $domain
      * @param string $path
      *
-     * @return \Yurun\Util\YurunHttp\Cookie\CookieItem
+     * @return \Yurun\Util\YurunHttp\Cookie\CookieItem|null
      */
     public function getCookieItem($name, $domain = '', $path = '/')
     {
@@ -229,8 +230,8 @@ class CookieManager
     /**
      * 检查 uri 路径和 cookie 路径.
      *
-     * @param string $uriDomain
-     * @param string $cookieDomain
+     * @param string $uriPath
+     * @param string $cookiePath
      *
      * @return bool
      */
@@ -286,17 +287,18 @@ class CookieManager
      * @param int                                     $id
      * @param \Yurun\Util\YurunHttp\Cookie\CookieItem $item
      *
-     * @return int
+     * @return void
      */
     private function updateCookie($id, $item)
     {
         if (isset($this->cookieList[$id]))
         {
             $object = $this->cookieList[$id];
-        }
-        foreach ($item as $k => $v)
-        {
-            $object->$k = $v;
+            // @phpstan-ignore-next-line
+            foreach ($item as $k => $v)
+            {
+                $object->$k = $v;
+            }
         }
     }
 

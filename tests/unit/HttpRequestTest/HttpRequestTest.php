@@ -205,6 +205,7 @@ class HttpRequestTest extends BaseTest
                 'c' => '3',
             ];
 
+            $data = null;
             for ($i = 0; $i < 2; ++$i)
             {
                 sleep(1);
@@ -412,6 +413,7 @@ class HttpRequestTest extends BaseTest
     public function test304()
     {
         $this->call(function () {
+            /* @phpstan-ignore-next-line */
             if (method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(\SWOOLE_VERSION, '4.4.17', '<'))
             {
                 $this->markTestSkipped('Swoole must >= 4.4.17');

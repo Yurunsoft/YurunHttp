@@ -21,6 +21,11 @@ class Response extends AbstractMessage implements ResponseInterface
      */
     protected $reasonPhrase;
 
+    /**
+     * @param string|\Psr\Http\Message\StreamInterface $body
+     * @param int                                      $statusCode
+     * @param string|null                              $reasonPhrase
+     */
     public function __construct($body = '', $statusCode = StatusCode::OK, $reasonPhrase = null)
     {
         parent::__construct($body);
