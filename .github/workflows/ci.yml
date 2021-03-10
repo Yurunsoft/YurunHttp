@@ -15,7 +15,7 @@ jobs:
       PHP_DOCKER_VERSION: ${{ matrix.php }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: prepare
         run: |
@@ -25,7 +25,7 @@ jobs:
         run: docker exec php composer test
 
   ci-curl-swoole:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     strategy:
       fail-fast: false
@@ -51,7 +51,7 @@ jobs:
       SWOOLE_DOCKER_VERSION: ${{ matrix.swoole }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
 
       - name: prepare
         run: |

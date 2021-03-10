@@ -1,4 +1,4 @@
-name: Static Code Analysis
+name: Coding Standards
 
 on: [push, pull_request]
 
@@ -20,7 +20,7 @@ jobs:
       - name: Prepare
         run: |
           ./.github/prepare-test.sh swoole
-          docker exec swoole composer require phpstan/phpstan --dev
+          docker exec swoole composer require friendsofphp/php-cs-fixer:^2.18 --dev
 
       - name: Test
-        run: docker exec swoole ./vendor/bin/phpstan analyse --memory-limit 1G
+        run: docker exec swoole ./vendor/bin/php-cs-fixer fix --dry-run

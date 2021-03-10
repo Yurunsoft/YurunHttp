@@ -8,8 +8,8 @@ services:
             args:
                 SWOOLE_DOCKER_VERSION: ${SWOOLE_DOCKER_VERSION}
         volumes:
-            - "${GITHUB_WORKSPACE}:/imi:rw"
-        working_dir: /imi
+            - "${GITHUB_WORKSPACE}:/yurunhttp:rw"
+        working_dir: /yurunhttp
         ulimits:
             core: -1
         privileged: true
@@ -23,8 +23,8 @@ services:
             args:
                 PHP_DOCKER_VERSION: ${PHP_DOCKER_VERSION}
         volumes:
-            - "${GITHUB_WORKSPACE}:/imi:rw"
-        working_dir: /imi
+            - "${GITHUB_WORKSPACE}:/yurunhttp:rw"
+        working_dir: /yurunhttp
         ulimits:
             core: -1
         privileged: true

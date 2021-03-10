@@ -8,8 +8,7 @@
     "require-dev": {
         "swoole/ide-helper": "^4.5",
         "phpunit/phpunit": ">=4",
-        "workerman/workerman": "^4.0",
-        "phpstan/phpstan": "^0.12.81"
+        "workerman/workerman": "^4.0"
     },
     "type": "library",
     "license": "MIT",
