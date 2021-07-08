@@ -120,6 +120,12 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             sleep($request->get('time', 0));
             $connection->send('sleep');
             break;
+        case 'empty':
+            $response = new Response(200, [
+                'Vary' => 'Accept-Encoding',
+            ]);
+            $connection->send(substr((string) $response, 0, -strlen("Content-Length: 0\r\n\r\n")) . "\r\n\r\n", true);
+            break;
         default:
             // 默认
             $connection->send('YurunHttp');
