@@ -654,4 +654,13 @@ class HttpRequestTest extends BaseTest
             $this->assertCount(1, array_unique($memorys));
         });
     }
+
+    public function testHead()
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $response = $http->head($this->host . '?a=empty');
+            $this->assertResponse($response);
+        });
+    }
 }

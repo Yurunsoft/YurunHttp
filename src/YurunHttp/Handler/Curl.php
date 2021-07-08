@@ -231,6 +231,7 @@ class Curl implements IHandler
         {
             if ($poolIsEnabled && $this->handler)
             {
+                // @phpstan-ignore-next-line
                 $httpConnectionManager->release($this->poolKey, $this->handler);
                 $this->handler = null;
             }
@@ -333,6 +334,10 @@ class Curl implements IHandler
             $requestOptions[\CURLOPT_POSTFIELDS] = $body;
         }
         $requestOptions[\CURLOPT_CUSTOMREQUEST] = $method;
+        if ('HEAD' === $method)
+        {
+            $requestOptions[\CURLOPT_NOBODY] = true;
+        }
         curl_setopt_array($handler, $requestOptions);
     }
 
