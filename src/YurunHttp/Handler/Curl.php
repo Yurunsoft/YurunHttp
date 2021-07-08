@@ -231,6 +231,7 @@ class Curl implements IHandler
         {
             if ($poolIsEnabled && $this->handler)
             {
+                // @phpstan-ignore-next-line
                 $httpConnectionManager->release($this->poolKey, $this->handler);
                 $this->handler = null;
             }
