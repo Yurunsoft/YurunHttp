@@ -600,7 +600,7 @@ class Curl implements IHandler
         $headers = [];
         foreach ($request->getHeaders() as $name => $value)
         {
-            $headers[] = $name . ':' . implode(',', $value);
+            $headers[] = $name . ': ' . implode(',', $value);
         }
 
         return $headers;
