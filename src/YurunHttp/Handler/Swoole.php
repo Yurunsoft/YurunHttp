@@ -561,12 +561,12 @@ class Swoole implements IHandler
         $result = &$this->result;
         if ($isHttp2)
         {
-            $response = $connection->recv($timeout);
+            $response = $connection->recv((float) $timeout);
             $result = $this->buildHttp2Response($request, $connection, $response);
         }
         else
         {
-            $success = $isWebSocket ? true : $connection->recv($timeout);
+            $success = $isWebSocket ? true : $connection->recv((float) $timeout);
             $result = new Response((string) $connection->body, $connection->statusCode);
             if ($success)
             {
