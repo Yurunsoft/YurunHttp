@@ -142,7 +142,7 @@ class Swoole implements IWebSocketClient
      */
     public function recv($timeout = null)
     {
-        $result = $this->handler->recv($timeout);
+        $result = $this->handler->recv((float) $timeout);
         if (!$result)
         {
             return false;

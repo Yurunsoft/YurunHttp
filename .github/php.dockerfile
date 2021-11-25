@@ -3,7 +3,7 @@ FROM php:${PHP_DOCKER_VERSION}-cli
 
 RUN apt update
 
-RUN apt install unzip
+RUN apt install -y unzip ca-certificates
 
 RUN docker-php-ext-install pcntl > /dev/null
 

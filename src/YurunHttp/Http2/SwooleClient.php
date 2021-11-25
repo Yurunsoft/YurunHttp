@@ -243,7 +243,7 @@ class SwooleClient implements IHttp2Client
         {
             $recvChannels[$streamId] = $channel = new Channel(-1 === $streamId ? $this->serverPushQueueLength : 1);
         }
-        $swooleResponse = $channel->pop($timeout);
+        $swooleResponse = $channel->pop(null === $timeout ? -1 : $timeout);
         if (-1 !== $streamId)
         {
             unset($recvChannels[$streamId]);

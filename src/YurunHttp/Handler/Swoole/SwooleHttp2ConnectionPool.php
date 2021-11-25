@@ -80,7 +80,9 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
         $maxConnections = $this->getConfig()->getMaxConnections();
         if ($this->getFree() > 0 || (0 != $maxConnections && $this->getCount() >= $maxConnections))
         {
-            return $this->channel->pop($config->getWaitTimeout());
+            $timeout = $config->getWaitTimeout();
+
+            return $this->channel->pop(null === $timeout ? -1 : $timeout);
         }
         else
         {

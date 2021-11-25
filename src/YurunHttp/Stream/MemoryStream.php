@@ -33,7 +33,7 @@ class MemoryStream implements StreamInterface
     public function __construct($content = '')
     {
         $this->content = $content;
-        $this->size = \strlen($content);
+        $this->size = \is_string($content) ? \strlen($content) : 0;
     }
 
     /**
@@ -199,7 +199,7 @@ class MemoryStream implements StreamInterface
         $content = &$this->content;
         $position = &$this->position;
         $content = substr_replace($content, $string, $position, 0);
-        $len = \strlen($string);
+        $len = \is_string($string) ? \strlen($string) : 0;
         $position += $len;
         $this->size += $len;
 
