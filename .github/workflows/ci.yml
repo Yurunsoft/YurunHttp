@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [5.5, 5.6, 7.0]
+        php: [5.5, 5.6, 7.0, 7.1]
 
     env:
       PHP_DOCKER_VERSION: ${{ matrix.php }}
@@ -32,19 +32,11 @@ jobs:
       matrix:
         swoole:
           [
-            4.6-php7.2,
-            4.6-php7.3,
-            4.6-php7.4,
-            4.6-php8.0,
-            4.5-php7.1,
-            4.5-php7.2,
-            4.5-php7.3,
-            4.5-php7.4,
-            4.5-php8.0,
-            4.4-php7.1,
-            4.4-php7.2,
-            4.4-php7.3,
-            4.4-php7.4,
+            php8.1,
+            4.8-php8.0,
+            4.8-php7.4,
+            4.8-php7.3,
+            4.8-php7.2,
           ]
 
     env:
