@@ -21,7 +21,7 @@ class PoolConfig
     /**
      * 等待超时时间.
      *
-     * @var float
+     * @var float|null
      */
     protected $waitTimeout;
 
@@ -62,7 +62,7 @@ class PoolConfig
     /**
      * 获取等待超时时间.
      *
-     * @return float
+     * @return float|null
      */
     public function getWaitTimeout()
     {
@@ -72,7 +72,7 @@ class PoolConfig
     /**
      * 设置等待超时时间.
      *
-     * @param float $waitTimeout
+     * @param float|null $waitTimeout
      *
      * @return void
      */
