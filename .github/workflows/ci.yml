@@ -32,11 +32,11 @@ jobs:
       matrix:
         swoole:
           [
-            php8.1,
-            4.8-php8.0,
-            4.8-php7.4,
-            4.8-php7.3,
             4.8-php7.2,
+            4.8-php7.3,
+            4.8-php7.4,
+            4.8-php8.0,
+            php8.1,
           ]
 
     env:
