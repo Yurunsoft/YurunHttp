@@ -23,4 +23,4 @@ jobs:
           docker exec swoole composer require friendsofphp/php-cs-fixer:^2.19 --dev
 
       - name: Test
-        run: docker exec swoole ./vendor/bin/php-cs-fixer fix --dry-run
+        run: docker exec swoole ./vendor/bin/php-cs-fixer fix --dry-run --diff
