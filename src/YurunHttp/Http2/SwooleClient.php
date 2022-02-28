@@ -409,4 +409,14 @@ class SwooleClient implements IHttp2Client
     {
         return $this->timeout;
     }
+    
+    /**
+     * 发送 ping 帧检查连接.
+     *
+     * @return bool
+     */
+    public function ping()
+    {
+        return $this->http2Client && $this->http2Client->ping();
+    }
 }

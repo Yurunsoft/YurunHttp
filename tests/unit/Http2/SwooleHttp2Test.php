@@ -78,6 +78,7 @@ class SwooleHttp2Test extends BaseTest
             $client->setTimeout(3);
 
             $this->assertTrue($client->connect());
+            $this->assertTrue($client->ping());
 
             go(function () use ($client) {
                 $result = $client->recv();

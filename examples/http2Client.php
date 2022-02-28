@@ -13,7 +13,8 @@ go(function () {
     $uri = new Uri('http://www.taobao.com/');
 
     $client = new \Yurun\Util\YurunHttp\Http2\SwooleClient($uri->getHost(), Uri::getServerPort($uri), 'https' === $uri->getScheme());
-    $client->connect();
+    $client->connect(); // 连接
+    $client->ping(); // ping
 
     // 接收服务端主动推送
     $client->setServerPushQueueLength(16); // 接收服务端推送的队列长度

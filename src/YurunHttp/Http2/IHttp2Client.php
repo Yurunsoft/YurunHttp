@@ -125,4 +125,11 @@ interface IHttp2Client
      * @return float|null
      */
     public function getTimeout();
+
+    /**
+     * 发送 ping 帧检查连接.
+     *
+     * @return bool
+     */
+    public function ping();
 }
