@@ -304,6 +304,10 @@ class SwooleClient implements IHttp2Client
                 }
                 if (!$swooleResponse)
                 {
+                    if ($this->ping())
+                    {
+                        continue;
+                    }
                     $this->close();
 
                     return;
