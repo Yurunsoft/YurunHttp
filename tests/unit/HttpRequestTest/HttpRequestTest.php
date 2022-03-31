@@ -663,4 +663,21 @@ class HttpRequestTest extends BaseTest
             $this->assertResponse($response);
         });
     }
+
+    /**
+     * @see https://github.com/Yurunsoft/YurunHttp/issues/19
+     *
+     * @return void
+     */
+    public function testBug19()
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $response = $http->head('https://www.baidu.com');
+            $this->assertResponse($response);
+            $response = $http->get('https://www.baidu.com');
+            $this->assertResponse($response);
+            $this->assertTrue('' != $response->body());
+        });
+    }
 }

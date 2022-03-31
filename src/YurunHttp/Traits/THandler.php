@@ -33,7 +33,7 @@ trait THandler
             {
                 $uri = $currentUri;
                 $path = $currentUri->getPath();
-                if('/' !== substr($path, -1, 1))
+                if ('/' !== substr($path, -1, 1))
                 {
                     $path = $path . '/';
                 }
