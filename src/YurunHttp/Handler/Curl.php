@@ -104,6 +104,7 @@ class Curl implements IHandler
         {
             if ($this->poolIsEnabled)
             {
+                curl_reset($this->handler);
                 CurlHttpConnectionManager::getInstance()->release($this->poolKey, $this->handler);
             }
             else
@@ -229,11 +230,15 @@ class Curl implements IHandler
         }
         finally
         {
-            if ($poolIsEnabled && $this->handler)
+            if ($this->handler)
             {
-                // @phpstan-ignore-next-line
-                $httpConnectionManager->release($this->poolKey, $this->handler);
-                $this->handler = null;
+                curl_reset($this->handler);
+                if ($poolIsEnabled)
+                {
+                    // @phpstan-ignore-next-line
+                    $httpConnectionManager->release($this->poolKey, $this->handler);
+                    $this->handler = null;
+                }
             }
         }
     }

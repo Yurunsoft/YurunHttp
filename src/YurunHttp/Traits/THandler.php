@@ -31,13 +31,16 @@ trait THandler
             }
             else
             {
-                $path = \dirname($currentUri);
-                if ('\\' === \DIRECTORY_SEPARATOR && false !== strpos($path, \DIRECTORY_SEPARATOR))
+                $uri = $currentUri;
+                $path = $currentUri->getPath();
+                if ('/' !== substr($path, -1, 1))
                 {
-                    $path = str_replace(\DIRECTORY_SEPARATOR, '/', $path);
+                    $path = $path . '/';
                 }
-                $uri = new Uri($path . '/' . $location);
+                $path .= $location;
+                $uri = $uri->withPath($path);
             }
+            $uri = $uri->withHost($currentUri->getHost())->withPort($currentUri->getPort());
         }
         else
         {
