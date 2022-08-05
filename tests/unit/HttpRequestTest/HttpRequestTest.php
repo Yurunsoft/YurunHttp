@@ -202,7 +202,6 @@ class HttpRequestTest extends BaseTest
 
             static $compareCookie = [
                 'a' => '1',
-                'c' => '3',
             ];
 
             $data = null;
