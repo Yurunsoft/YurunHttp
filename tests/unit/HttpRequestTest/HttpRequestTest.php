@@ -324,7 +324,7 @@ class HttpRequestTest extends BaseTest
 
             $response = $http->post($this->host . '?a=redirectCookie');
             $data = $response->json(true);
-            $this->assertEquals('1', $data['cookie']['redirectCookie'] ?? null);
+            $this->assertEquals('1', isset($data['cookie']['redirectCookie']) ? $data['cookie']['redirectCookie'] : null);
             $cookieItem = $http->getHandler()->getCookieManager()->getCookieItem('redirectCookie');
             $this->assertNotNull($cookieItem);
             $this->assertEquals('1', $cookieItem->value);
