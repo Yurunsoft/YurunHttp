@@ -433,6 +433,7 @@ class Swoole implements IHandler
         {
             $result = $result->withSavedFileName($savedFileName);
         }
+        $this->cookieManager->gc();
 
         return $result;
     }

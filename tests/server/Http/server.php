@@ -46,12 +46,12 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
                 'Yurun-Http'   => 'one suo',
             ]);
             $response->cookie('a', '1');
-            $response->cookie('b', '2', 1);
-            $response->cookie('c', '3', 0, '/');
-            $response->cookie('d', '4', 0, '/a');
-            $response->cookie('e', '5', 0, '/', 'localhost');
-            $response->cookie('f', '6', 0, '/', '', true);
-            $response->cookie('g', '7', 0, '/', '', true, true);
+            $response->cookie('b', '2', 0);
+            $response->cookie('c', '3', null, '/');
+            $response->cookie('d', '4', null, '/a');
+            $response->cookie('e', '5', null, '/', 'localhost');
+            $response->cookie('f', '6', null, '/', '', true);
+            $response->cookie('g', '7', null, '/', '', true, true);
             $connection->send($response);
             break;
         case 'redirect301':
@@ -83,6 +83,13 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             $connection->send(new Response(302, [
                 'Location' => $request->get('url', '/'),
             ], 'test'));
+            break;
+        case 'redirectCookie':
+            $response = new Response(301, [
+                'Location' => '/?a=info',
+            ]);
+            $response->cookie('redirectCookie', '1');
+            $connection->send($response);
             break;
         case 'download1':
             if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method())

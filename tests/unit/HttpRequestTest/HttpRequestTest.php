@@ -202,6 +202,7 @@ class HttpRequestTest extends BaseTest
 
             static $compareCookie = [
                 'a' => '1',
+                'c' => '3',
             ];
 
             $data = null;
@@ -225,6 +226,8 @@ class HttpRequestTest extends BaseTest
             $cookieItem = $cookieManager->getCookieItem('a');
             $this->assertNotNull($cookieItem);
             $this->assertFalse($cookieItem->httpOnly);
+
+            $this->assertNull($cookieManager->getCookieItem('b'));
 
             $cookieItem = $cookieManager->getCookieItem('g');
             $this->assertNotNull($cookieItem);
@@ -308,6 +311,23 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals([
                 'id'    => '1',
             ], isset($data['args']) ? $data['args'] : null);
+        });
+    }
+
+    /**
+     * @return void
+     */
+    public function testRedirectCookie()
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+
+            $response = $http->post($this->host . '?a=redirectCookie');
+            $data = $response->json(true);
+            $this->assertEquals('1', $data['cookie']['redirectCookie'] ?? null);
+            $cookieItem = $http->getHandler()->getCookieManager()->getCookieItem('redirectCookie');
+            $this->assertNotNull($cookieItem);
+            $this->assertEquals('1', $cookieItem->value);
         });
     }
 

@@ -219,6 +219,7 @@ class Curl implements IHandler
                                         ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                     }
                 }
+                $this->cookieManager->gc();
                 break;
             } while (true);
             // 关闭保存至文件的句柄
@@ -772,6 +773,7 @@ class Curl implements IHandler
                 }
                 $result[$k] = $response;
             }
+            $this->cookieManager->gc();
         }
         finally
         {
