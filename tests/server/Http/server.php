@@ -47,7 +47,7 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             ]);
             $response->cookie('a', '1');
             $response->cookie('b', '2', 0);
-            $response->cookie('c', '3', null, '/');
+            $response->cookie('c', '3', 3600, '/');
             $response->cookie('d', '4', null, '/a');
             $response->cookie('e', '5', null, '/', 'localhost');
             $response->cookie('f', '6', null, '/', '', true);
