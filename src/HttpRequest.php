@@ -239,11 +239,13 @@ class HttpRequest
     /**
      * 构造方法.
      *
+     * @param array $options
+     *
      * @return mixed
      */
-    public function __construct()
+    public function __construct($options = [])
     {
-        $this->open();
+        $this->open($options);
     }
 
     /**
@@ -257,11 +259,13 @@ class HttpRequest
     /**
      * 打开一个新连接，初始化所有参数。一般不需要手动调用。
      *
+     * @param array $options
+     *
      * @return void
      */
-    public function open()
+    public function open($options = [])
     {
-        $this->handler = YurunHttp::getHandler();
+        $this->handler = YurunHttp::getHandler($options);
         $this->retry = 0;
         $this->headers = $this->options = [];
         $this->url = $this->content = '';

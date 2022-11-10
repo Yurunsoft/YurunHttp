@@ -56,14 +56,25 @@ class Swoole implements IHandler
     private $poolIsEnabled = false;
 
     /**
+     * 配置选项.
+     *
+     * @var array
+     */
+    private $options = [];
+
+    /**
      * 本 Handler 默认的 User-Agent.
      *
      * @var string
      */
     private static $defaultUA;
 
-    public function __construct()
+    /**
+     * @param array $options
+     */
+    public function __construct($options = [])
     {
+        $this->options = $options;
         if (null === static::$defaultUA)
         {
             static::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Swoole/%s', YurunHttp::VERSION, \defined('SWOOLE_VERSION') ? \SWOOLE_VERSION : 'unknown');
@@ -434,6 +445,7 @@ class Swoole implements IHandler
             $result = $result->withSavedFileName($savedFileName);
         }
         $this->cookieManager->gc();
+        $this->saveCookieJar();
 
         return $result;
     }

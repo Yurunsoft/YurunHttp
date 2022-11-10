@@ -33,9 +33,16 @@ class DefaultHandlerTest extends BaseTest
 
     public function testSetDefaultHandler()
     {
+        YurunHttp::setDefaultHandler(null);
+        $this->assertNull(YurunHttp::getDefaultHandler());
+        YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Curl::class);
+        $this->assertInstanceOf(\Yurun\Util\YurunHttp\Handler\Curl::class, YurunHttp::getHandler());
+
+        YurunHttp::setDefaultHandler(null);
         $this->assertNull(YurunHttp::getDefaultHandler());
         YurunHttp::setDefaultHandler(\Exception::class);
         $this->assertEquals(\Exception::class, YurunHttp::getDefaultHandler());
-        $this->assertInstanceOf(\Exception::class, YurunHttp::getHandler());
+        $this->expectErrorMessage(sprintf('Class %s does not implement %s', \Exception::class, \Yurun\Util\YurunHttp\Handler\IHandler::class));
+        YurunHttp::getHandler();
     }
 }

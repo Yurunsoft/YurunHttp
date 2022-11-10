@@ -9,3 +9,4 @@ vendor
 tests/unit/HttpRequestTest/download*
 *.cache
 /.vscode
+/tests/unit/HttpRequestTest/cookie.json

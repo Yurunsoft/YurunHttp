@@ -6,6 +6,7 @@ use Swoole\Coroutine;
 use Yurun\Util\HttpRequest;
 use Yurun\Util\YurunHttp;
 use Yurun\Util\YurunHttp\Co\Batch;
+use Yurun\Util\YurunHttp\HandlerOptions;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
@@ -697,6 +698,31 @@ class HttpRequestTest extends BaseTest
             $response = $http->get('https://www.baidu.com');
             $this->assertResponse($response);
             $this->assertTrue('' != $response->body());
+        });
+    }
+
+    /**
+     * Cookie Jar.
+     *
+     * @return void
+     */
+    public function testCookieJar()
+    {
+        $this->call(function () {
+            $http = new HttpRequest([
+                HandlerOptions::COOKIE_JAR => __DIR__ . '/cookie.json',
+            ]);
+
+            $http->get($this->host . '?a=setCookie');
+
+            $http = new HttpRequest([
+                HandlerOptions::COOKIE_JAR => __DIR__ . '/cookie.json',
+            ]);
+            $response = $http->get($this->host . '?a=info');
+            $data = $response->json(true);
+
+            $this->assertEquals('1', isset($data['cookie']['a']) ? $data['cookie']['a'] : null);
+            $this->assertEquals('3', isset($data['cookie']['c']) ? $data['cookie']['c'] : null);
         });
     }
 }
