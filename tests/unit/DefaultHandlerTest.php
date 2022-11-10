@@ -42,7 +42,7 @@ class DefaultHandlerTest extends BaseTest
         $this->assertNull(YurunHttp::getDefaultHandler());
         YurunHttp::setDefaultHandler(\Exception::class);
         $this->assertEquals(\Exception::class, YurunHttp::getDefaultHandler());
-        $this->expectErrorMessage(sprintf('Class %s does not implement %s', \Exception::class, \Yurun\Util\YurunHttp\Handler\IHandler::class));
+        $this->expectExceptionMessage(sprintf('Class %s does not implement %s', \Exception::class, \Yurun\Util\YurunHttp\Handler\IHandler::class));
         YurunHttp::getHandler();
     }
 }
