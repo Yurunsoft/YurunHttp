@@ -9,7 +9,7 @@ class CookieManager
     /**
      * Cookie 列表.
      *
-     * @var \Yurun\Util\YurunHttp\Cookie\CookieItem[]
+     * @var CookieItem[]
      */
     protected $cookieList;
 
@@ -60,7 +60,7 @@ class CookieManager
     /**
      * 获取 Cookie 列表.
      *
-     * @return array
+     * @return CookieItem[]
      */
     public function getCookieList()
     {

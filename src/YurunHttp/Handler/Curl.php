@@ -55,6 +55,13 @@ class Curl implements IHandler
     private $poolIsEnabled = false;
 
     /**
+     * 配置选项.
+     *
+     * @var array
+     */
+    private $options = [];
+
+    /**
      * 代理认证方式.
      *
      * @var array
@@ -83,8 +90,12 @@ class Curl implements IHandler
      */
     private static $defaultUA;
 
-    public function __construct()
+    /**
+     * @param array $options
+     */
+    public function __construct($options = [])
     {
+        $this->options = $options;
         if (null === static::$defaultUA)
         {
             $version = curl_version();
@@ -224,6 +235,7 @@ class Curl implements IHandler
                     }
                 }
                 $this->cookieManager->gc();
+                $this->saveCookieJar();
                 break;
             } while (true);
             // 关闭保存至文件的句柄
@@ -772,6 +784,7 @@ class Curl implements IHandler
                 $result[$k] = $response;
             }
             $this->cookieManager->gc();
+            $this->saveCookieJar();
         }
         finally
         {
