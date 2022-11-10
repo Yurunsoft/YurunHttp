@@ -29,7 +29,7 @@ class Curl implements IHandler
     /**
      * curl 句柄.
      *
-     * @var resource|null
+     * @var resource|\CurlHandle|null
      */
     private $handler;
 
@@ -251,7 +251,7 @@ class Curl implements IHandler
      * 构建基础 Curl Handler.
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
-     * @param resource                           $handler
+     * @param resource|\CurlHandle               $handler
      * @param array|null                         $headers
      * @param resource|null                      $saveFileFp
      *
@@ -304,7 +304,7 @@ class Curl implements IHandler
      * 构建扩展 Curl Handler.
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
-     * @param resource                           $handler
+     * @param resource|\CurlHandle               $handler
      * @param UriInterface|null                  $uri
      * @param string|null                        $method
      * @param string|null                        $body
@@ -375,7 +375,7 @@ class Curl implements IHandler
      * 获取响应对象
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
-     * @param resource                           $handler
+     * @param resource|\CurlHandle               $handler
      * @param string|bool                        $body
      * @param array                              $receiveHeaders
      *
@@ -507,7 +507,7 @@ class Curl implements IHandler
      * 处理设置项.
      *
      * @param \Yurun\Util\YurunHttp\Http\Request $request
-     * @param array                              &$options
+     * @param array                              $options
      * @param array                              $headers
      * @param resource|null                      $saveFileFp
      *
