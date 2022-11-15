@@ -14,11 +14,13 @@ use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Traits\THandler;
+use Yurun\Util\YurunHttp\Traits\TLogger;
 
 class Swoole implements IHandler
 {
     use TCookieManager;
     use THandler;
+    use TLogger;
 
     /**
      * http 连接管理器.
@@ -215,13 +217,17 @@ class Swoole implements IHandler
     public function send(&$request)
     {
         $this->poolIsEnabled = ConnectionPool::isEnabled() && false !== $request->getAttribute(Attributes::CONNECTION_POOL);
+        $beginTime = microtime(true);
         $request = $this->sendDefer($request);
         if ($request->getAttribute(Attributes::PRIVATE_IS_HTTP2) && $request->getAttribute(Attributes::HTTP2_NOT_RECV))
         {
             return true;
         }
 
-        return (bool) $this->recvDefer($request);
+        $result = $this->recvDefer($request);
+        $this->result = $this->result->withTotalTime(microtime(true) - $beginTime);
+
+        return (bool) $result;
     }
 
     /**
@@ -792,6 +798,7 @@ class Swoole implements IHandler
         /** @var Swoole[] $handlers */
         $handlers = [];
         $results = [];
+        $beginTime = microtime(true);
         foreach ($requests as $i => &$request)
         {
             $results[$i] = null;
@@ -811,7 +818,7 @@ class Swoole implements IHandler
                     break;
                 }
             }
-            $results[$i] = $handlers[$i]->recvDefer($request, $recvTimeout);
+            $results[$i] = $handlers[$i]->recvDefer($request, $recvTimeout)->withTotalTime(microtime(true) - $beginTime);
         }
 
         return $results;

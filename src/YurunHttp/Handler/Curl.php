@@ -13,11 +13,13 @@ use Yurun\Util\YurunHttp\Http\Response;
 use Yurun\Util\YurunHttp\Stream\MemoryStream;
 use Yurun\Util\YurunHttp\Traits\TCookieManager;
 use Yurun\Util\YurunHttp\Traits\THandler;
+use Yurun\Util\YurunHttp\Traits\TLogger;
 
 class Curl implements IHandler
 {
     use TCookieManager;
     use THandler;
+    use TLogger;
 
     /**
      * 请求结果.
@@ -178,6 +180,7 @@ class Curl implements IHandler
             $isLocation = false;
             $statusCode = 0;
             $redirectCount = 0;
+            $beginTime = microtime(true);
             do
             {
                 // 请求方法
@@ -234,6 +237,8 @@ class Curl implements IHandler
                                         ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                     }
                 }
+                $result = $result->withTotalTime(microtime(true) - $beginTime);
+                $this->logRequest($request, $result);
                 $this->cookieManager->gc();
                 $this->saveCookieJar();
                 break;
@@ -781,6 +786,8 @@ class Curl implements IHandler
                                                     ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
                     }
                 }
+                $response = $response->withTotalTime(microtime(true) - $beginTime);
+                $this->logRequest($request, $response);
                 $result[$k] = $response;
             }
             $this->cookieManager->gc();
