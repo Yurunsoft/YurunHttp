@@ -407,13 +407,24 @@ class Swoole implements IHandler
         }
         $result = &$this->result;
         $statusCode = $result->getStatusCode();
-        // 状态码为5XX或者0才需要重试
-        if ((0 === $statusCode || (5 === (int) ($statusCode / 100))) && $retryCount < $request->getAttribute(Attributes::RETRY, 0))
+        if ($retryCount < $request->getAttribute(Attributes::RETRY, 0))
         {
-            $request = $request->withAttribute(Attributes::RETRY, ++$retryCount);
-            $deferRequest = $this->sendDefer($request);
+            if ($retryCallback = $request->getAttribute(Attributes::RETRY_CALLBACK))
+            {
+                $retry = !$retryCallback($request, $result, $retryCount);
+            }
+            else
+            {
+                // 状态码为5XX或者0才需要重试
+                $retry = (0 === $statusCode || (5 === (int) ($statusCode / 100)));
+            }
+            if ($retry)
+            {
+                $request = $request->withAttribute(Attributes::PRIVATE_RETRY_COUNT, ++$retryCount);
+                $deferRequest = $this->sendDefer($request);
 
-            return $this->recvDefer($deferRequest, $timeout);
+                return $this->recvDefer($deferRequest, $timeout);
+            }
         }
         if (!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $result->getHeaderLine('location')))
         {
