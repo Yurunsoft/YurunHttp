@@ -180,6 +180,8 @@ class Curl implements IHandler
             $isLocation = false;
             $statusCode = 0;
             $redirectCount = 0;
+            $retry = $request->getAttribute(Attributes::RETRY, 0);
+            $retryCallback = $request->getAttribute(Attributes::RETRY_CALLBACK);
             $beginTime = microtime(true);
             do
             {
@@ -201,7 +203,6 @@ class Curl implements IHandler
                     $bodyContent = false;
                 }
                 $this->buildCurlHandlerEx($request, $handler, $uri, $method, $bodyContent);
-                $retry = $request->getAttribute(Attributes::RETRY, 0);
                 $result = null;
                 for ($i = 0; $i <= $retry; ++$i)
                 {
@@ -209,11 +210,21 @@ class Curl implements IHandler
                     $curlResult = curl_exec($handler);
                     $this->result = $this->getResponse($request, $handler, $curlResult, $receiveHeaders);
                     $result = &$this->result;
-                    $statusCode = $result->getStatusCode();
-                    // 状态码为5XX或者0才需要重试
-                    if (!(0 === $statusCode || (5 === (int) ($statusCode / 100))))
+                    if ($retryCallback)
                     {
-                        break;
+                        if ($retryCallback($request, $result, $i))
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        $statusCode = $result->getStatusCode();
+                        // 状态码为5XX或者0才需要重试
+                        if (!(0 === $statusCode || (5 === (int) ($statusCode / 100))))
+                        {
+                            break;
+                        }
                     }
                 }
                 if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && $result && '' !== ($location = $result->getHeaderLine('location')))

@@ -59,6 +59,13 @@ class HttpRequest
     public $retry = 0;
 
     /**
+     * 重试回调.
+     *
+     * @var callable|null
+     */
+    public $retryCallback = null;
+
+    /**
      * 是否使用代理，默认false.
      *
      * @var bool
@@ -267,6 +274,7 @@ class HttpRequest
     {
         $this->handler = YurunHttp::getHandler($options);
         $this->retry = 0;
+        $this->retryCallback = null;
         $this->headers = $this->options = [];
         $this->url = $this->content = '';
         $this->useProxy = false;
@@ -639,13 +647,15 @@ class HttpRequest
     /**
      * 设置失败重试次数，状态码为5XX或者0才需要重试.
      *
-     * @param string $retry
+     * @param int           $retry
+     * @param callable|null $callback
      *
      * @return static
      */
-    public function retry($retry)
+    public function retry($retry, $callback = null)
     {
         $this->retry = $retry < 0 ? 0 : $retry;   //至少请求1次，即重试0次
+        $this->retryCallback = $callback;
 
         return $this;
     }
@@ -938,6 +948,8 @@ class HttpRequest
                             ->withAttribute(Attributes::UPLOAD_SPEED, $this->uploadSpeed)
                             ->withAttribute(Attributes::FOLLOW_LOCATION, $this->followLocation)
                             ->withAttribute(Attributes::CONNECTION_POOL, $this->connectionPool)
+                            ->withAttribute(Attributes::RETRY, $this->retry)
+                            ->withAttribute(Attributes::RETRY_CALLBACK, $this->retryCallback)
                             ->withProtocolVersion($this->protocolVersion)
                             ;
         foreach ($this->proxy as $name => $value)
