@@ -103,11 +103,10 @@ abstract class YurunHttp
             }
             else
             {
+                /** @var IHandler $handler */
                 $handler = new $handlerClass();
             }
         }
-        /** @var IHandler $handler */
-        $time = microtime(true);
         foreach (static::$attributes as $name => $value)
         {
             if (null === $request->getAttribute($name))
@@ -117,11 +116,6 @@ abstract class YurunHttp
         }
         $handler->send($request);
         $response = $handler->recv();
-        if (!$response)
-        {
-            return $response;
-        }
-        $response = $response->withTotalTime(microtime(true) - $time);
         if ($needClose)
         {
             $handler->close();
