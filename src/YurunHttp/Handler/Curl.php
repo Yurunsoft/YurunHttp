@@ -612,7 +612,7 @@ class Curl implements IHandler
         {
             $request = $request->withHeader('User-Agent', $request->getAttribute(Attributes::USER_AGENT, static::$defaultUA));
         }
-        if (!$request->hasHeader('Connection'))
+        if (!$request->hasHeader('Connection') && $request->getProtocolVersion() >= 1.1)
         {
             $request = $request->withHeader('Connection', 'Keep-Alive')->withHeader('Keep-Alive', '300');
         }
