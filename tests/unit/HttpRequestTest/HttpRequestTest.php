@@ -102,6 +102,15 @@ class HttpRequestTest extends BaseTest
             $data = $response->json(true);
             $this->assertEquals('POST', isset($data['method']) ? $data['method'] : null);
             $this->assertEquals($time, isset($data['post']['time']) ? $data['post']['time'] : null);
+
+            $http = new HttpRequest();
+            $time = time();
+            $params = new \stdClass();
+            $params->time = $time;
+            $this->assertResponse($response);
+            $data = $response->json(true);
+            $this->assertEquals('POST', isset($data['method']) ? $data['method'] : null);
+            $this->assertEquals($time, isset($data['post']['time']) ? $data['post']['time'] : null);
         });
     }
 
@@ -407,6 +416,14 @@ class HttpRequestTest extends BaseTest
                 'id'    => 1,
                 'name'  => 'YurunHttp',
             ];
+            $response = $http->post($this->host . '?a=body', $data, 'json');
+            $this->assertResponse($response);
+            $this->assertEquals(json_encode($data), $response->body());
+
+            $http = new HttpRequest();
+            $data = new \stdClass();
+            $data->id = 1;
+            $data->name = 'YurunHttp';
             $response = $http->post($this->host . '?a=body', $data, 'json');
             $this->assertResponse($response);
             $this->assertEquals(json_encode($data), $response->body());
