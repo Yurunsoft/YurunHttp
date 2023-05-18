@@ -4,6 +4,12 @@ __DIR__=$(cd `dirname $0`; pwd)
 
 cd $__DIR__
 
+if [[ `expr $PHP_DOCKER_VERSION \< 7` -eq 0 ]]; then
+  export PHP_DOCKER_FILE="php.dockerfile"
+else
+  export PHP_DOCKER_FILE="php-5.dockerfile"
+fi
+
 containerName=$1
 
 docker-compose up -d $containerName \

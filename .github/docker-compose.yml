@@ -19,7 +19,7 @@ services:
         container_name: "php"
         build:
             context: .
-            dockerfile: ./php.dockerfile
+            dockerfile: ${PHP_DOCKER_FILE}
             args:
                 PHP_DOCKER_VERSION: ${PHP_DOCKER_VERSION}
         volumes:
