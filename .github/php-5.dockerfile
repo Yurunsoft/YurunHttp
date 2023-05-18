@@ -8,7 +8,7 @@ RUN sed -i 's|security.debian.org|archive.debian.org|g' /etc/apt/sources.list
 
 RUN sed -i '/stretch-updates/d' /etc/apt/sources.list
 RUN sed -i '/jessie-updates/d' /etc/apt/sources.list
-RUN sed -i '/jessie/updates/d' /etc/apt/sources.list
+RUN sed -i '/jessie\/updates/d' /etc/apt/sources.list
 
 RUN apt update --allow-unauthenticated
 
