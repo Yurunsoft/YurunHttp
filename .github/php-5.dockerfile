@@ -1,6 +1,12 @@
 ARG PHP_DOCKER_VERSION
 FROM php:${PHP_DOCKER_VERSION}-cli
 
+RUN sed -i s/deb.debian.org/archive.debian.org/g /etc/apt/sources.list
+
+RUN sed -i 's|security.debian.org|archive.debian.org/debian-security/|g' /etc/apt/sources.list
+
+RUN sed -i '/stretch-updates/d' /etc/apt/sources.list
+
 RUN apt update
 
 RUN apt install -y --force-yes unzip ca-certificates
