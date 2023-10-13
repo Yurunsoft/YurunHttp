@@ -105,7 +105,8 @@ class SwooleHttp2Test extends BaseTest
 
             $count = 10;
             $channel = new Channel($count);
-            for ($i = 0; $i < $count; ++$i) {
+            for ($i = 0; $i < $count; ++$i)
+            {
                 go(function () use ($i, $client, $channel, $httpRequest, $fd) {
                     $request = $httpRequest->buildRequest($this->http2Host, [
                         'date'  => $i,
@@ -120,8 +121,10 @@ class SwooleHttp2Test extends BaseTest
                 });
             }
             $returnCount = 0;
-            do {
-                if ($channel->pop()) {
+            do
+            {
+                if ($channel->pop())
+                {
                     ++$returnCount;
                 }
             }
@@ -163,11 +166,13 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
             /* @phpstan-ignore-next-line */
-            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<')) {
+            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
+            {
                 // Swoole <= 4.4.12 BUG
                 $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', \SWOOLE_VERSION));
             }
-            else {
+            else
+            {
                 $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
             }
         });
@@ -204,11 +209,13 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
             /* @phpstan-ignore-next-line */
-            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<')) {
+            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
+            {
                 // Swoole <= 4.4.12 BUG
                 $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', \SWOOLE_VERSION));
             }
-            else {
+            else
+            {
                 $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
             }
         });

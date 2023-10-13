@@ -216,14 +216,16 @@ class HttpRequestTest extends BaseTest
             ];
 
             $data = null;
-            for ($i = 0; $i < 2; ++$i) {
+            for ($i = 0; $i < 2; ++$i)
+            {
                 sleep(1);
 
                 $response = $http->get($this->host . '?a=info');
                 $this->assertResponse($response);
                 $data = $response->json(true);
 
-                if ($compareCookie === $data['cookie']) {
+                if ($compareCookie === $data['cookie'])
+                {
                     break;
                 }
             }
@@ -253,14 +255,16 @@ class HttpRequestTest extends BaseTest
         $this->call(function () {
             $http = new HttpRequest();
 
-            foreach ([301, 302] as $statusCode) {
+            foreach ([301, 302] as $statusCode)
+            {
                 $response = $http->post($this->host . '?a=redirect' . $statusCode);
                 $this->assertResponse($response);
                 $data = $response->json(true);
                 $this->assertEquals('GET', $data['method'], $statusCode . ' method error');
             }
 
-            foreach ([307, 308] as $statusCode) {
+            foreach ([307, 308] as $statusCode)
+            {
                 $response = $http->post($this->host . '?a=redirect' . $statusCode);
                 $this->assertResponse($response);
                 $data = $response->json(true);
@@ -447,7 +451,8 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function () {
             /* @phpstan-ignore-next-line */
-            if (method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(\SWOOLE_VERSION, '4.4.17', '<')) {
+            if (method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(\SWOOLE_VERSION, '4.4.17', '<'))
+            {
                 $this->markTestSkipped('Swoole must >= 4.4.17');
             }
             $http = new HttpRequest();
@@ -479,7 +484,8 @@ class HttpRequestTest extends BaseTest
         $this->call(function () {
             $http = new HttpRequest();
             $fileName = __DIR__ . '/download.txt';
-            if (is_file($fileName)) {
+            if (is_file($fileName))
+            {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
@@ -500,7 +506,8 @@ class HttpRequestTest extends BaseTest
         $this->call(function () {
             $http = new HttpRequest();
             $fileName = __DIR__ . '/download.html';
-            if (is_file($fileName)) {
+            if (is_file($fileName))
+            {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
@@ -521,7 +528,8 @@ class HttpRequestTest extends BaseTest
         $this->call(function () {
             $http = new HttpRequest();
             $fileName = __DIR__ . '/download.html';
-            if (is_file($fileName)) {
+            if (is_file($fileName))
+            {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
@@ -558,19 +566,22 @@ class HttpRequestTest extends BaseTest
         $this->call(function () {
             $time = time();
             $fileName = __DIR__ . '/download.txt';
-            if (is_file($fileName)) {
+            if (is_file($fileName))
+            {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
             $fileName2Temp = __DIR__ . '/download2.*';
             $fileName2 = __DIR__ . '/download2.html';
-            if (is_file($fileName2)) {
+            if (is_file($fileName2))
+            {
                 unlink($fileName2);
             }
             $this->assertFalse(is_file($fileName2));
             $fileName3Temp = __DIR__ . '/download3.*';
             $fileName3 = __DIR__ . '/download3.html';
-            if (is_file($fileName3)) {
+            if (is_file($fileName3))
+            {
                 unlink($fileName3);
             }
             $this->assertFalse(is_file($fileName3));
@@ -582,39 +593,46 @@ class HttpRequestTest extends BaseTest
                 'a' => (new HttpRequest())->url($this->host . '?a=redirect&url=/?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
             ]);
 
-            foreach ($result as $i => $response) {
-                if (0 === $i) {
+            foreach ($result as $i => $response)
+            {
+                if (0 === $i)
+                {
                     $this->assertResponse($response);
                     $this->assertEquals('YurunHttp', $response->body());
                     $this->assertNotNull($response->getRequest());
                 }
-                elseif (1 === $i) {
+                elseif (1 === $i)
+                {
                     $data = $response->json(true);
                     $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
                     $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
                     $this->assertNotNull($response->getRequest());
                 }
-                elseif (2 === $i) {
+                elseif (2 === $i)
+                {
                     $this->assertTrue(is_file($fileName));
                     $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
                     $this->assertNotNull($response->getRequest());
                     $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                     $this->assertEquals('1', $response->getCookie('a'));
                 }
-                elseif (3 === $i) {
+                elseif (3 === $i)
+                {
                     $this->assertTrue(is_file($fileName2));
                     $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName2));
                     $this->assertNotNull($response->getRequest());
                     $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                     $this->assertEquals('1', $response->getCookie('a'));
                 }
-                elseif ('a' === $i) {
+                elseif ('a' === $i)
+                {
                     $this->assertTrue(is_file($fileName3));
                     $this->assertEquals('download3', file_get_contents($fileName3));
                     $this->assertNotNull($response->getRequest());
                     $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                 }
-                else {
+                else
+                {
                     throw new \RuntimeException(sprintf('Unknown %s', $i));
                 }
             }
@@ -641,7 +659,8 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function () {
             $memorys = [1, 2, 3, 4, 5];
-            for ($i = 0; $i < 5; ++$i) {
+            for ($i = 0; $i < 5; ++$i)
+            {
                 $http = new HttpRequest();
                 $http->get($this->host);
                 $memorys[$i] = memory_get_usage();
@@ -650,7 +669,8 @@ class HttpRequestTest extends BaseTest
             $this->assertCount(1, array_unique($memorys));
 
             $memorys = [1, 2, 3, 4, 5];
-            for ($i = 0; $i < 5; ++$i) {
+            for ($i = 0; $i < 5; ++$i)
+            {
                 YurunHttp::send(new Request($this->host));
                 $memorys[$i] = memory_get_usage();
             }
@@ -659,7 +679,8 @@ class HttpRequestTest extends BaseTest
 
             $memorys = [1, 2, 3, 4, 5];
             $time = time();
-            for ($i = 0; $i < 5; ++$i) {
+            for ($i = 0; $i < 5; ++$i)
+            {
                 Batch::run([
                     (new HttpRequest())->url($this->host),
                     (new HttpRequest())->url($this->host . '?a=info&time=' . $time),

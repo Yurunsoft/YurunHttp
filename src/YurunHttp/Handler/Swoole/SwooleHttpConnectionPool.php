@@ -42,7 +42,8 @@ class SwooleHttpConnectionPool extends BaseConnectionPool
         $connections = $this->connections;
         $this->connections = [];
         $this->channel = new Channel(1024);
-        foreach ($connections as $connection) {
+        foreach ($connections as $connection)
+        {
             $connection->close();
         }
     }
@@ -70,12 +71,14 @@ class SwooleHttpConnectionPool extends BaseConnectionPool
     {
         $config = $this->getConfig();
         $maxConnections = $this->getConfig()->getMaxConnections();
-        if ($this->getFree() > 0 || (0 != $maxConnections && $this->getCount() >= $maxConnections)) {
+        if ($this->getFree() > 0 || (0 != $maxConnections && $this->getCount() >= $maxConnections))
+        {
             $timeout = $config->getWaitTimeout();
 
             return $this->channel->pop(null === $timeout ? -1 : $timeout);
         }
-        else {
+        else
+        {
             return $this->connections[] = $this->createConnection();
         }
     }
@@ -89,7 +92,8 @@ class SwooleHttpConnectionPool extends BaseConnectionPool
      */
     public function release($connection)
     {
-        if (\in_array($connection, $this->connections)) {
+        if (\in_array($connection, $this->connections))
+        {
             $this->channel->push($connection);
         }
     }

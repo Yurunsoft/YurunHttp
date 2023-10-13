@@ -124,7 +124,8 @@ class Swoole implements IWebSocketClient
     {
         $handler = $this->handler;
         $result = $handler->push($data);
-        if (!$result) {
+        if (!$result)
+        {
             $errCode = $handler->errCode;
             throw new WebSocketException(sprintf('Send Failed, error: %s, errorCode: %s', swoole_strerror($errCode), $errCode), $errCode);
         }
@@ -142,7 +143,8 @@ class Swoole implements IWebSocketClient
     public function recv($timeout = null)
     {
         $result = $this->handler->recv((float) $timeout);
-        if (!$result) {
+        if (!$result)
+        {
             return false;
         }
 

@@ -19,7 +19,8 @@ go(function () {
     // 接收服务端主动推送
     $client->setServerPushQueueLength(16); // 接收服务端推送的队列长度
     go(function () use ($client) {
-        do {
+        do
+        {
             $response = $client->recv();
             var_dump($response->body());
         }
@@ -31,7 +32,8 @@ go(function () {
 
     $count = 10;
     $channel = new Channel($count);
-    for ($i = 0; $i < $count; ++$i) {
+    for ($i = 0; $i < $count; ++$i)
+    {
         go(function () use ($i, $client, $channel, $httpRequest, $uri) {
             $request = $httpRequest->header('aaa', 'bbb')->buildRequest($uri, [
                 'date'  => $i,
@@ -45,8 +47,10 @@ go(function () {
         });
     }
     $returnCount = 0;
-    do {
-        if ($channel->pop()) {
+    do
+    {
+        if ($channel->pop())
+        {
             ++$returnCount;
         }
     }

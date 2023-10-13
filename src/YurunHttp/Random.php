@@ -45,7 +45,8 @@ abstract class Random
         $length = mt_rand($min, $max);
         $charLength = mb_strlen($chars);
         $result = '';
-        for ($i = 0; $i < $length; ++$i) {
+        for ($i = 0; $i < $length; ++$i)
+        {
             $result .= mb_substr($chars, mt_rand(1, $charLength) - 1, 1);
         }
 

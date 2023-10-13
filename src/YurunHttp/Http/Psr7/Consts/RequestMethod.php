@@ -7,19 +7,19 @@ namespace Yurun\Util\YurunHttp\Http\Psr7\Consts;
  */
 abstract class RequestMethod
 {
-    public const GET = 'GET';
+    const GET = 'GET';
 
-    public const POST = 'POST';
+    const POST = 'POST';
 
-    public const HEAD = 'HEAD';
+    const HEAD = 'HEAD';
 
-    public const PUT = 'PUT';
+    const PUT = 'PUT';
 
-    public const PATCH = 'PATCH';
+    const PATCH = 'PATCH';
 
-    public const DELETE = 'DELETE';
+    const DELETE = 'DELETE';
 
-    public const OPTIONS = 'OPTIONS';
+    const OPTIONS = 'OPTIONS';
 
-    public const TRACE = 'TRACE';
+    const TRACE = 'TRACE';
 }

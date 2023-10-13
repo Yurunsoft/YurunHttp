@@ -50,7 +50,8 @@ class CookieManager
         $this->autoIncrementId = 1;
         $this->cookieList = [];
         $this->relationMap = [];
-        foreach ($cookieList as $item) {
+        foreach ($cookieList as $item)
+        {
             $item = CookieItem::newInstance($item);
             $this->insertCookie($item);
         }
@@ -76,10 +77,12 @@ class CookieManager
     public function addSetCookie($setCookie)
     {
         $item = CookieItem::fromSetCookie($setCookie);
-        if (($id = $this->findCookie($item)) > 0) {
+        if (($id = $this->findCookie($item)) > 0)
+        {
             $this->updateCookie($id, $item);
         }
-        else {
+        else
+        {
             $this->insertCookie($item);
         }
 
@@ -102,10 +105,12 @@ class CookieManager
     public function setCookie($name, $value, $expires = 0, $path = '/', $domain = '', $secure = false, $httpOnly = false)
     {
         $item = new CookieItem($name, $value, $expires, $path, $domain, $secure, $httpOnly);
-        if (($id = $this->findCookie($item)) > 0) {
+        if (($id = $this->findCookie($item)) > 0)
+        {
             $this->updateCookie($id, $item);
         }
-        else {
+        else
+        {
             $this->insertCookie($item);
         }
 
@@ -132,24 +137,32 @@ class CookieManager
     public function getRequestCookies($uri)
     {
         // @phpstan-ignore-next-line
-        if (\defined('SWOOLE_VERSION') && \SWOOLE_VERSION < 4.4) {
+        if (\defined('SWOOLE_VERSION') && \SWOOLE_VERSION < 4.4)
+        {
             // Fix bug: https://github.com/swoole/swoole-src/pull/2644
             $result = json_decode('[]', true);
         }
-        else {
+        else
+        {
             $result = [];
         }
         $uriDomain = Uri::getDomain($uri);
         $uriPath = $uri->getPath();
         $cookieList = &$this->cookieList;
         $time = time();
-        foreach ($this->relationMap as $relationDomain => $list1) {
-            if ('' === $relationDomain || $this->checkDomain($uriDomain, $relationDomain)) {
-                foreach ($list1 as $path => $idList) {
-                    if ($this->checkPath($uriPath, $path)) {
-                        foreach ($idList as $id) {
+        foreach ($this->relationMap as $relationDomain => $list1)
+        {
+            if ('' === $relationDomain || $this->checkDomain($uriDomain, $relationDomain))
+            {
+                foreach ($list1 as $path => $idList)
+                {
+                    if ($this->checkPath($uriPath, $path))
+                    {
+                        foreach ($idList as $id)
+                        {
                             $cookieItem = $cookieList[$id];
-                            if ((0 === $cookieItem->expires || $cookieItem->expires > $time) && (!$cookieItem->secure || 'https' === $uri->getScheme() || 'wss' === $uri->getScheme())) {
+                            if ((0 === $cookieItem->expires || $cookieItem->expires > $time) && (!$cookieItem->secure || 'https' === $uri->getScheme() || 'wss' === $uri->getScheme()))
+                            {
                                 $result[$cookieItem->name] = $cookieItem->value;
                             }
                         }
@@ -171,7 +184,8 @@ class CookieManager
     public function getRequestCookieString($uri)
     {
         $content = '';
-        foreach ($this->getRequestCookies($uri) as $name => $value) {
+        foreach ($this->getRequestCookies($uri) as $name => $value)
+        {
             $content .= "{$name}={$value}; ";
         }
 
@@ -189,7 +203,8 @@ class CookieManager
      */
     public function getCookieItem($name, $domain = '', $path = '/')
     {
-        if (isset($this->relationMap[$domain][$path][$name])) {
+        if (isset($this->relationMap[$domain][$path][$name]))
+        {
             $id = $this->relationMap[$domain][$path][$name];
 
             return $this->cookieList[$id];
@@ -205,12 +220,16 @@ class CookieManager
      */
     public function gc()
     {
-        if ($this->cookieList) {
+        if ($this->cookieList)
+        {
             $time = time();
-            foreach ($this->cookieList as $id => $item) {
-                if ($item->expires > 0 && $time >= $item->expires) {
+            foreach ($this->cookieList as $id => $item)
+            {
+                if ($item->expires > 0 && $time >= $item->expires)
+                {
                     unset($this->cookieList[$id]);
-                    if (isset($this->relationMap[$item->domain][$item->path][$item->name]) && $id === $this->relationMap[$item->domain][$item->path][$item->name]) {
+                    if (isset($this->relationMap[$item->domain][$item->path][$item->name]) && $id === $this->relationMap[$item->domain][$item->path][$item->name])
+                    {
                         unset($this->relationMap[$item->domain][$item->path][$item->name]);
                     }
                 }
@@ -245,35 +264,44 @@ class CookieManager
     {
         $uriPath = rtrim($uriPath, '/');
         $cookiePath = rtrim($cookiePath, '/');
-        if ($uriPath === $cookiePath) {
+        if ($uriPath === $cookiePath)
+        {
             return true;
         }
         $uriPathDSCount = substr_count($uriPath, '/');
         $cookiePathDSCount = substr_count($cookiePath, '/');
-        if ('' === $uriPath) {
+        if ('' === $uriPath)
+        {
             $uriPath = '/';
         }
-        if ('' === $cookiePath) {
+        if ('' === $cookiePath)
+        {
             $cookiePath = '/';
         }
-        if ($uriPathDSCount > $cookiePathDSCount) {
-            if (version_compare(\PHP_VERSION, '7.0', '>=')) {
+        if ($uriPathDSCount > $cookiePathDSCount)
+        {
+            if (version_compare(\PHP_VERSION, '7.0', '>='))
+            {
                 $path = \dirname($uriPath, $uriPathDSCount - $cookiePathDSCount);
             }
-            else {
+            else
+            {
                 $count = $uriPathDSCount - $cookiePathDSCount;
                 $path = $uriPath;
-                while ($count--) {
+                while ($count--)
+                {
                     $path = \dirname($path);
                 }
             }
-            if ('\\' === \DIRECTORY_SEPARATOR && str_contains($path, \DIRECTORY_SEPARATOR)) {
+            if ('\\' === \DIRECTORY_SEPARATOR && str_contains($path, \DIRECTORY_SEPARATOR))
+            {
                 $path = str_replace(\DIRECTORY_SEPARATOR, '/', $path);
             }
 
             return $path === $cookiePath;
         }
-        else {
+        else
+        {
             return false;
         }
     }
@@ -288,10 +316,12 @@ class CookieManager
      */
     private function updateCookie($id, $item)
     {
-        if (isset($this->cookieList[$id])) {
+        if (isset($this->cookieList[$id]))
+        {
             $object = $this->cookieList[$id];
             // @phpstan-ignore-next-line
-            foreach ($item as $k => $v) {
+            foreach ($item as $k => $v)
+            {
                 $object->$k = $v;
             }
         }
@@ -322,10 +352,12 @@ class CookieManager
      */
     private function findCookie($item)
     {
-        if (isset($this->relationMap[$item->domain][$item->path][$item->name])) {
+        if (isset($this->relationMap[$item->domain][$item->path][$item->name]))
+        {
             return $this->relationMap[$item->domain][$item->path][$item->name];
         }
-        else {
+        else
+        {
             return null;
         }
     }

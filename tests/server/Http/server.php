@@ -19,10 +19,12 @@ $http_worker->count = 4;
 // Emitted when data received
 $http_worker->onMessage = function (TcpConnection $connection, Request $request) {
     // var_dump($request->method(), $request->get('a'));
-    switch ($request->get('a')) {
+    switch ($request->get('a'))
+    {
         case 'info':
             $files = $request->file();
-            foreach ($files as &$file) {
+            foreach ($files as &$file)
+            {
                 $file['hash'] = md5(file_get_contents($file['tmp_name']));
             }
             $connection->send(new Response(200, [
@@ -90,7 +92,8 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             $connection->send($response);
             break;
         case 'download1':
-            if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method()) {
+            if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method())
+            {
                 $response = new Response(200, [
                     'Content-Type' => 'text/html; charset=UTF-8',
                 ], 'YurunHttp Hello World');
@@ -99,7 +102,8 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             }
             break;
         case 'download2':
-            if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method()) {
+            if ('nb' === $request->post('yurunhttp') && 'POST' === $request->method())
+            {
                 $connection->send('<h1>YurunHttp Hello World</h1>');
             }
             break;

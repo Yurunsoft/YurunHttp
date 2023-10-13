@@ -7,53 +7,53 @@ namespace Yurun\Util\YurunHttp\Http\Psr7\Consts;
  */
 abstract class MediaType
 {
-    public const ALL = '*/*';
+    const ALL = '*/*';
 
-    public const APPLICATION_ATOM_XML = 'application/atom+xml';
+    const APPLICATION_ATOM_XML = 'application/atom+xml';
 
-    public const APPLICATION_FORM_URLENCODED = 'application/x-www-form-urlencoded';
+    const APPLICATION_FORM_URLENCODED = 'application/x-www-form-urlencoded';
 
-    public const APPLICATION_JSON = 'application/json';
+    const APPLICATION_JSON = 'application/json';
 
-    public const APPLICATION_JSON_UTF8 = 'application/json;charset=UTF-8';
+    const APPLICATION_JSON_UTF8 = 'application/json;charset=UTF-8';
 
-    public const APPLICATION_OCTET_STREAM = 'application/octet-stream';
+    const APPLICATION_OCTET_STREAM = 'application/octet-stream';
 
-    public const APPLICATION_PDF = 'application/pdf';
+    const APPLICATION_PDF = 'application/pdf';
 
-    public const APPLICATION_PROBLEM_JSON = 'application/problem+json';
+    const APPLICATION_PROBLEM_JSON = 'application/problem+json';
 
-    public const APPLICATION_PROBLEM_XML = 'application/problem+xml';
+    const APPLICATION_PROBLEM_XML = 'application/problem+xml';
 
-    public const APPLICATION_RSS_XML = 'application/rss+xml';
+    const APPLICATION_RSS_XML = 'application/rss+xml';
 
-    public const APPLICATION_STREAM_JSON = 'application/stream+json';
+    const APPLICATION_STREAM_JSON = 'application/stream+json';
 
-    public const APPLICATION_XHTML_XML = 'application/xhtml+xml';
+    const APPLICATION_XHTML_XML = 'application/xhtml+xml';
 
-    public const APPLICATION_XML = 'application/xml';
+    const APPLICATION_XML = 'application/xml';
 
-    public const IMAGE_JPEG = 'image/jpeg';
+    const IMAGE_JPEG = 'image/jpeg';
 
-    public const IMAGE_APNG = 'image/apng';
+    const IMAGE_APNG = 'image/apng';
 
-    public const IMAGE_PNG = 'image/png';
+    const IMAGE_PNG = 'image/png';
 
-    public const IMAGE_GIF = 'image/gif';
+    const IMAGE_GIF = 'image/gif';
 
-    public const IMAGE_WEBP = 'image/webp';
+    const IMAGE_WEBP = 'image/webp';
 
-    public const MULTIPART_FORM_DATA = 'multipart/form-data';
+    const MULTIPART_FORM_DATA = 'multipart/form-data';
 
-    public const TEXT_EVENT_STREAM = 'text/event-stream';
+    const TEXT_EVENT_STREAM = 'text/event-stream';
 
-    public const TEXT_HTML = 'text/html';
+    const TEXT_HTML = 'text/html';
 
-    public const TEXT_MARKDOWN = 'text/markdown';
+    const TEXT_MARKDOWN = 'text/markdown';
 
-    public const TEXT_PLAIN = 'text/plain';
+    const TEXT_PLAIN = 'text/plain';
 
-    public const TEXT_XML = 'text/xml';
+    const TEXT_XML = 'text/xml';
 
     /**
      * @var array
@@ -199,10 +199,12 @@ abstract class MediaType
     public static function getExt($contentType)
     {
         list($firstContentType) = explode(';', $contentType, 2);
-        if (isset(self::$extMap[$firstContentType])) {
+        if (isset(self::$extMap[$firstContentType]))
+        {
             return self::$extMap[$firstContentType];
         }
-        else {
+        else
+        {
             return null;
         }
     }

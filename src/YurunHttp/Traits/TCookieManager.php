@@ -28,7 +28,8 @@ trait TCookieManager
     private function initCookieManager()
     {
         $this->cookieJar = $cookieJar = new CookieJar($this->cookieManager = new CookieManager());
-        if (isset($this->options[HandlerOptions::COOKIE_JAR]) && \is_string($this->options[HandlerOptions::COOKIE_JAR])) {
+        if (isset($this->options[HandlerOptions::COOKIE_JAR]) && \is_string($this->options[HandlerOptions::COOKIE_JAR]))
+        {
             $cookieJar->load($this->options[HandlerOptions::COOKIE_JAR]);
         }
     }
@@ -60,7 +61,8 @@ trait TCookieManager
      */
     protected function saveCookieJar()
     {
-        if (isset($this->options[HandlerOptions::COOKIE_JAR]) && \is_string($this->options[HandlerOptions::COOKIE_JAR])) {
+        if (isset($this->options[HandlerOptions::COOKIE_JAR]) && \is_string($this->options[HandlerOptions::COOKIE_JAR]))
+        {
             $this->cookieJar->save($this->options[HandlerOptions::COOKIE_JAR]);
         }
     }

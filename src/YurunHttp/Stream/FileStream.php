@@ -35,18 +35,22 @@ class FileStream implements StreamInterface
      */
     public function __construct($uri, $mode = StreamMode::READ_WRITE)
     {
-        if (\is_string($uri)) {
+        if (\is_string($uri))
+        {
             $this->uri = $uri = new Uri($uri);
         }
-        elseif ($uri instanceof UriInterface) {
+        elseif ($uri instanceof UriInterface)
+        {
             $this->uri = $uri;
         }
-        else {
+        else
+        {
             $uri = $this->uri;
         }
         $this->mode = $mode;
         $stream = fopen($uri, $mode);
-        if (false === $stream) {
+        if (false === $stream)
+        {
             throw new \RuntimeException(sprintf('Open stream %s error', (string) $uri));
         }
         $this->stream = $stream;
@@ -54,7 +58,8 @@ class FileStream implements StreamInterface
 
     public function __destruct()
     {
-        if ($this->stream) {
+        if ($this->stream)
+        {
             $this->close();
         }
     }
@@ -76,12 +81,14 @@ class FileStream implements StreamInterface
      */
     public function __toString(): string
     {
-        try {
+        try
+        {
             $this->rewind();
 
             return stream_get_contents($this->stream);
         }
-        catch (\Throwable $ex) {
+        catch (\Throwable $ex)
+        {
             return '';
         }
     }
@@ -120,7 +127,8 @@ class FileStream implements StreamInterface
     public function getSize(): ?int
     {
         $stat = fstat($this->stream);
-        if (false === $stat) {
+        if (false === $stat)
+        {
             throw new \RuntimeException('get stream size error');
         }
 
@@ -137,7 +145,8 @@ class FileStream implements StreamInterface
     public function tell(): int
     {
         $result = ftell($this->stream);
-        if (false === $result) {
+        if (false === $result)
+        {
             throw new \RuntimeException('stream tell error');
         }
 
@@ -182,7 +191,8 @@ class FileStream implements StreamInterface
      */
     public function seek($offset, $whence = \SEEK_SET): void
     {
-        if (-1 === fseek($this->stream, $offset, $whence)) {
+        if (-1 === fseek($this->stream, $offset, $whence))
+        {
             throw new \RuntimeException('seek stream error');
         }
     }
@@ -202,7 +212,8 @@ class FileStream implements StreamInterface
      */
     public function rewind(): void
     {
-        if (!rewind($this->stream)) {
+        if (!rewind($this->stream))
+        {
             throw new \RuntimeException('rewind stream failed');
         }
     }
@@ -237,7 +248,8 @@ class FileStream implements StreamInterface
     public function write($string): int
     {
         $result = fwrite($this->stream, $string);
-        if (false === $result) {
+        if (false === $result)
+        {
             throw new \RuntimeException('write stream failed');
         }
 
@@ -275,7 +287,8 @@ class FileStream implements StreamInterface
     public function read($length): string
     {
         $result = fread($this->stream, $length);
-        if (false === $result) {
+        if (false === $result)
+        {
             throw new \RuntimeException('read stream error');
         }
 
@@ -293,7 +306,8 @@ class FileStream implements StreamInterface
     public function getContents(): string
     {
         $result = stream_get_contents($this->stream);
-        if (false === $result) {
+        if (false === $result)
+        {
             throw new \RuntimeException('stream getContents error');
         }
 
@@ -318,16 +332,20 @@ class FileStream implements StreamInterface
     {
         $result = stream_get_meta_data($this->stream);
         /* @phpstan-ignore-next-line */
-        if (!$result) {
+        if (!$result)
+        {
             throw new \RuntimeException('stream getMetadata error');
         }
-        if (null === $key) {
+        if (null === $key)
+        {
             return $result;
         }
-        elseif (isset($result[$key])) {
+        elseif (isset($result[$key]))
+        {
             return $result[$key];
         }
-        else {
+        else
+        {
             return null;
         }
     }

@@ -16,14 +16,17 @@ abstract class FormDataBuilder
     public static function build($body, $files, &$boundary)
     {
         $result = '';
-        if (!\is_array($body)) {
+        if (!\is_array($body))
+        {
             parse_str($body, $body);
         }
         $boundary = Random::letter(8, 16);
-        foreach ($body as $k => $v) {
+        foreach ($body as $k => $v)
+        {
             $result .= sprintf("--%s\r\nContent-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n", $boundary, $k, $v);
         }
-        foreach ($files as $name => $file) {
+        foreach ($files as $name => $file)
+        {
             $result .= sprintf("--%s\r\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\nContent-Type: %s\r\n\r\n", $boundary, $name, basename($file->getClientFilename()), $file->getClientMediaType()) . $file->getStream()->getContents() . "\r\n";
         }
         $result .= sprintf("--%s--\r\n", $boundary);

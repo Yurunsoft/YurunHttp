@@ -70,7 +70,8 @@ class Swoole implements IHandler
     public function __construct($options = [])
     {
         $this->options = $options;
-        if (null === self::$defaultUA) {
+        if (null === self::$defaultUA)
+        {
             self::$defaultUA = sprintf('Mozilla/5.0 YurunHttp/%s Swoole/%s', YurunHttp::VERSION, \defined('SWOOLE_VERSION') ? \SWOOLE_VERSION : 'unknown');
         }
         $this->initCookieManager();
@@ -100,18 +101,22 @@ class Swoole implements IHandler
      */
     public function buildRequest($request, $connection, &$http2Request)
     {
-        if ($isHttp2 = '2.0' === $request->getProtocolVersion()) {
+        if ($isHttp2 = '2.0' === $request->getProtocolVersion())
+        {
             $http2Request = new Http2Request();
         }
-        else {
+        else
+        {
             $http2Request = null;
         }
         $uri = $request->getUri();
         // method
-        if ($isHttp2) {
+        if ($isHttp2)
+        {
             $http2Request->method = $request->getMethod();
         }
-        else {
+        else
+        {
             $connection->setMethod($request->getMethod());
         }
         // cookie
@@ -119,23 +124,29 @@ class Swoole implements IHandler
         // body
         $hasFile = false;
         $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
-        if ($redirectCount <= 0) {
+        if ($redirectCount <= 0)
+        {
             $files = $request->getUploadedFiles();
             $body = (string) $request->getBody();
-            if (!empty($files)) {
-                if ($isHttp2) {
+            if (!empty($files))
+            {
+                if ($isHttp2)
+                {
                     throw new \RuntimeException('Http2 swoole handler does not support upload file');
                 }
                 $hasFile = true;
-                foreach ($files as $name => $file) {
+                foreach ($files as $name => $file)
+                {
                     $connection->addFile($file->getTempFileName(), $name, $file->getClientMediaType(), basename($file->getClientFilename()));
                 }
                 parse_str($body, $body);
             }
-            if ($isHttp2) {
+            if ($isHttp2)
+            {
                 $http2Request->data = $body;
             }
-            else {
+            else
+            {
                 $connection->setData($body);
             }
         }
@@ -145,37 +156,46 @@ class Swoole implements IHandler
         $this->parseNetwork($request);
         // 设置客户端参数
         $settings = $request->getAttribute(Attributes::OPTIONS, []);
-        if ($settings) {
+        if ($settings)
+        {
             $connection->set($settings);
         }
         // headers
-        if (!$request->hasHeader('Host')) {
+        if (!$request->hasHeader('Host'))
+        {
             $request = $request->withHeader('Host', Uri::getDomain($uri));
         }
-        if (!$hasFile && !$request->hasHeader('Content-Type')) {
+        if (!$hasFile && !$request->hasHeader('Content-Type'))
+        {
             $request = $request->withHeader('Content-Type', MediaType::APPLICATION_FORM_URLENCODED);
         }
-        if (!$request->hasHeader('User-Agent')) {
+        if (!$request->hasHeader('User-Agent'))
+        {
             $request = $request->withHeader('User-Agent', $request->getAttribute(Attributes::USER_AGENT, self::$defaultUA));
         }
         $headers = [];
-        foreach ($request->getHeaders() as $name => $value) {
+        foreach ($request->getHeaders() as $name => $value)
+        {
             $headers[$name] = implode(',', $value);
         }
-        if ($isHttp2) {
+        if ($isHttp2)
+        {
             $http2Request->headers = $headers;
             $http2Request->pipeline = $request->getAttribute(Attributes::HTTP2_PIPELINE, false);
             $path = $uri->getPath();
-            if ('' === $path) {
+            if ('' === $path)
+            {
                 $path = '/';
             }
             $query = $uri->getQuery();
-            if ('' !== $query) {
+            if ('' !== $query)
+            {
                 $path .= '?' . $query;
             }
             $http2Request->path = $path;
         }
-        else {
+        else
+        {
             $connection->setHeaders($headers);
         }
     }
@@ -192,7 +212,8 @@ class Swoole implements IHandler
         $this->poolIsEnabled = ConnectionPool::isEnabled() && false !== $request->getAttribute(Attributes::CONNECTION_POOL);
         $beginTime = microtime(true);
         $request = $this->sendDefer($request);
-        if ($request->getAttribute(Attributes::PRIVATE_IS_HTTP2) && $request->getAttribute(Attributes::HTTP2_NOT_RECV)) {
+        if ($request->getAttribute(Attributes::PRIVATE_IS_HTTP2) && $request->getAttribute(Attributes::HTTP2_NOT_RECV))
+        {
             return true;
         }
 
@@ -212,33 +233,43 @@ class Swoole implements IHandler
     public function sendDefer($request)
     {
         $isHttp2 = '2.0' === $request->getProtocolVersion();
-        if ($poolIsEnabled = $this->poolIsEnabled) {
-            if ($isHttp2) {
+        if ($poolIsEnabled = $this->poolIsEnabled)
+        {
+            if ($isHttp2)
+            {
                 $http2ConnectionManager = SwooleHttp2ConnectionManager::getInstance();
             }
-            else {
+            else
+            {
                 $httpConnectionManager = SwooleHttpConnectionManager::getInstance();
             }
         }
-        else {
-            if ($isHttp2) {
+        else
+        {
+            if ($isHttp2)
+            {
                 $http2ConnectionManager = $this->http2ConnectionManager;
             }
-            else {
+            else
+            {
                 $httpConnectionManager = $this->httpConnectionManager;
             }
         }
-        if ([] !== ($queryParams = $request->getQueryParams())) {
+        if ([] !== ($queryParams = $request->getQueryParams()))
+        {
             $request = $request->withUri($request->getUri()->withQuery(http_build_query($queryParams, '', '&')));
         }
         $uri = $request->getUri();
-        try {
+        try
+        {
             $poolKey = ConnectionPool::getKey($uri);
-            if ($isHttp2) {
+            if ($isHttp2)
+            {
                 /** @var \Swoole\Coroutine\Http2\Client $connection */
                 $connection = $http2ConnectionManager->getConnection($poolKey);
             }
-            else {
+            else
+            {
                 /** @var \Swoole\Coroutine\Http\Client $connection */
                 $connection = $httpConnectionManager->getConnection($poolKey);
                 $connection->setDefer(true);
@@ -249,32 +280,42 @@ class Swoole implements IHandler
             $this->buildRequest($request, $connection, $http2Request);
             // 发送
             $path = $uri->getPath();
-            if ('' === $path) {
+            if ('' === $path)
+            {
                 $path = '/';
             }
             $query = $uri->getQuery();
-            if ('' !== $query) {
+            if ('' !== $query)
+            {
                 $path .= '?' . $query;
             }
-            if ($isWebSocket) {
-                if ($isHttp2) {
+            if ($isWebSocket)
+            {
+                if ($isHttp2)
+                {
                     throw new \RuntimeException('Http2 swoole handler does not support websocket');
                 }
-                if (!$connection->upgrade($path)) {
+                if (!$connection->upgrade($path))
+                {
                     throw new WebSocketException(sprintf('WebSocket connect faled, statusCode: %s, error: %s, errorCode: %s', $connection->statusCode, swoole_strerror($connection->errCode), $connection->errCode), $connection->errCode);
                 }
             }
-            elseif (null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH))) {
-                if ($isHttp2) {
+            elseif (null === ($saveFilePath = $request->getAttribute(Attributes::SAVE_FILE_PATH)))
+            {
+                if ($isHttp2)
+                {
                     $result = $connection->send($http2Request);
                     $request = $request->withAttribute(Attributes::PRIVATE_HTTP2_STREAM_ID, $result);
                 }
-                else {
+                else
+                {
                     $connection->execute($path);
                 }
             }
-            else {
-                if ($isHttp2) {
+            else
+            {
+                if ($isHttp2)
+                {
                     throw new \RuntimeException('Http2 swoole handler does not support download file');
                 }
                 $connection->download($path, $saveFilePath);
@@ -284,16 +325,21 @@ class Swoole implements IHandler
                         ->withAttribute(Attributes::PRIVATE_IS_WEBSOCKET, $isHttp2)
                         ->withAttribute(Attributes::PRIVATE_CONNECTION, $connection);
         }
-        catch (\Throwable $th) {
+        catch (\Throwable $th)
+        {
             throw $th;
         }
-        finally {
-            if ($poolIsEnabled && isset($connection) && isset($th)) {
-                if ($isHttp2) {
+        finally
+        {
+            if ($poolIsEnabled && isset($connection) && isset($th))
+            {
+                if ($isHttp2)
+                {
                     // @phpstan-ignore-next-line
                     $http2ConnectionManager->release($poolKey, $connection);
                 }
-                else {
+                else
+                {
                     // @phpstan-ignore-next-line
                     $httpConnectionManager->release($poolKey, $connection);
                 }
@@ -318,25 +364,34 @@ class Swoole implements IHandler
         $redirectCount = $request->getAttribute(Attributes::PRIVATE_REDIRECT_COUNT, 0);
         $isHttp2 = '2.0' === $request->getProtocolVersion();
         $isWebSocket = $request->getAttribute(Attributes::PRIVATE_WEBSOCKET, false);
-        try {
+        try
+        {
             $this->getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout);
         }
-        finally {
-            if (!$isWebSocket) {
-                if ($isHttp2) {
-                    if ($this->poolIsEnabled) {
+        finally
+        {
+            if (!$isWebSocket)
+            {
+                if ($isHttp2)
+                {
+                    if ($this->poolIsEnabled)
+                    {
                         $http2ConnectionManager = SwooleHttp2ConnectionManager::getInstance();
                     }
-                    else {
+                    else
+                    {
                         $http2ConnectionManager = $this->http2ConnectionManager;
                     }
                     $http2ConnectionManager->release($poolKey, $connection);
                 }
-                else {
-                    if ($this->poolIsEnabled) {
+                else
+                {
+                    if ($this->poolIsEnabled)
+                    {
                         $httpConnectionManager = SwooleHttpConnectionManager::getInstance();
                     }
-                    else {
+                    else
+                    {
                         $httpConnectionManager = $this->httpConnectionManager;
                     }
                     $httpConnectionManager->release($poolKey, $connection);
@@ -345,29 +400,37 @@ class Swoole implements IHandler
         }
         $result = &$this->result;
         $statusCode = $result->getStatusCode();
-        if ($retryCount < $request->getAttribute(Attributes::RETRY, 0)) {
-            if ($retryCallback = $request->getAttribute(Attributes::RETRY_CALLBACK)) {
+        if ($retryCount < $request->getAttribute(Attributes::RETRY, 0))
+        {
+            if ($retryCallback = $request->getAttribute(Attributes::RETRY_CALLBACK))
+            {
                 $retry = !$retryCallback($request, $result, $retryCount);
             }
-            else {
+            else
+            {
                 // 状态码为5XX或者0才需要重试
                 $retry = (0 === $statusCode || (5 === (int) ($statusCode / 100)));
             }
-            if ($retry) {
+            if ($retry)
+            {
                 $request = $request->withAttribute(Attributes::PRIVATE_RETRY_COUNT, ++$retryCount);
                 $deferRequest = $this->sendDefer($request);
 
                 return $this->recvDefer($deferRequest, $timeout);
             }
         }
-        if (!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $result->getHeaderLine('location'))) {
-            if (++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10))) {
+        if (!$isWebSocket && $statusCode >= 300 && $statusCode < 400 && $request->getAttribute(Attributes::FOLLOW_LOCATION, true) && '' !== ($location = $result->getHeaderLine('location')))
+        {
+            if (++$redirectCount <= ($maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10)))
+            {
                 // 自己实现重定向
                 $uri = $this->parseRedirectLocation($location, $request->getUri());
-                if (\in_array($statusCode, [301, 302, 303])) {
+                if (\in_array($statusCode, [301, 302, 303]))
+                {
                     $method = 'GET';
                 }
-                else {
+                else
+                {
                     $method = $request->getMethod();
                 }
                 $request = $request->withMethod($method)
@@ -377,7 +440,8 @@ class Swoole implements IHandler
 
                 return $this->recvDefer($deferRequest, $timeout);
             }
-            else {
+            else
+            {
                 $result = $result->withErrno(-1)
                                  ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
 
@@ -386,7 +450,8 @@ class Swoole implements IHandler
         }
         // 下载文件名
         $savedFileName = $request->getAttribute(Attributes::SAVE_FILE_PATH);
-        if (null !== $savedFileName) {
+        if (null !== $savedFileName)
+        {
             $result = $result->withSavedFileName($savedFileName);
         }
         $this->cookieManager->gc();
@@ -405,7 +470,8 @@ class Swoole implements IHandler
      */
     public function websocket(&$request, $websocketClient = null)
     {
-        if (!$websocketClient) {
+        if (!$websocketClient)
+        {
             $websocketClient = new \Yurun\Util\YurunHttp\WebSocket\Swoole();
         }
         $request = $request->withAttribute(Attributes::PRIVATE_WEBSOCKET, true);
@@ -438,14 +504,17 @@ class Swoole implements IHandler
     {
         $cookieParams = $request->getCookieParams();
         $cookieManager = $this->cookieManager;
-        foreach ($cookieParams as $name => $value) {
+        foreach ($cookieParams as $name => $value)
+        {
             $cookieManager->setCookie($name, $value);
         }
         $cookies = $cookieManager->getRequestCookies($request->getUri());
-        if ($http2Request) {
+        if ($http2Request)
+        {
             $http2Request->cookies = $cookies;
         }
-        else {
+        else
+        {
             $connection->setCookies($cookies);
         }
     }
@@ -463,29 +532,35 @@ class Swoole implements IHandler
     {
         $success = false !== $response;
         $result = new Response($response->data ?? '', $success ? $response->statusCode : 0);
-        if ($success) {
+        if ($success)
+        {
             // streamId
             $result = $result->withStreamId($response->streamId);
 
             // headers
-            if ($response->headers) {
-                foreach ($response->headers as $name => $value) {
+            if ($response->headers)
+            {
+                foreach ($response->headers as $name => $value)
+                {
                     $result = $result->withHeader($name, $value);
                 }
             }
 
             // cookies
             $cookies = [];
-            if (isset($response->set_cookie_headers)) {
+            if (isset($response->set_cookie_headers))
+            {
                 $cookieManager = $this->cookieManager;
-                foreach ($response->set_cookie_headers as $value) {
+                foreach ($response->set_cookie_headers as $value)
+                {
                     $cookieItem = $cookieManager->addSetCookie($value);
                     $cookies[$cookieItem->name] = (array) $cookieItem;
                 }
             }
             $result = $result->withCookieOriginParams($cookies);
         }
-        if ($connection) {
+        if ($connection)
+        {
             $result = $result->withError(swoole_strerror($connection->errCode))
                              ->withErrno($connection->errCode);
         }
@@ -507,25 +582,32 @@ class Swoole implements IHandler
     private function getResponse($request, $connection, $isWebSocket, $isHttp2, $timeout = null)
     {
         $result = &$this->result;
-        if ($isHttp2) {
+        if ($isHttp2)
+        {
             $response = $connection->recv((float) $timeout);
             $result = $this->buildHttp2Response($request, $connection, $response);
         }
-        else {
+        else
+        {
             $success = $isWebSocket ? true : $connection->recv((float) $timeout);
             $result = new Response((string) $connection->body, $connection->statusCode);
-            if ($success) {
+            if ($success)
+            {
                 // headers
-                if ($connection->headers) {
-                    foreach ($connection->headers as $name => $value) {
+                if ($connection->headers)
+                {
+                    foreach ($connection->headers as $name => $value)
+                    {
                         $result = $result->withHeader($name, $value);
                     }
                 }
 
                 // cookies
                 $cookies = [];
-                if (isset($connection->set_cookie_headers)) {
-                    foreach ($connection->set_cookie_headers as $value) {
+                if (isset($connection->set_cookie_headers))
+                {
+                    foreach ($connection->set_cookie_headers as $value)
+                    {
                         $cookieItem = $this->cookieManager->addSetCookie($value);
                         $cookies[$cookieItem->name] = (array) $cookieItem;
                     }
@@ -550,29 +632,36 @@ class Swoole implements IHandler
     private function parseSSL(&$request)
     {
         $settings = $request->getAttribute(Attributes::OPTIONS, []);
-        if ($request->getAttribute(Attributes::IS_VERIFY_CA, false)) {
+        if ($request->getAttribute(Attributes::IS_VERIFY_CA, false))
+        {
             $settings['ssl_verify_peer'] = true;
             $caCert = $request->getAttribute(Attributes::CA_CERT);
-            if (null !== $caCert) {
+            if (null !== $caCert)
+            {
                 $settings['ssl_cafile'] = $caCert;
             }
         }
-        else {
+        else
+        {
             $settings['ssl_verify_peer'] = false;
         }
         $certPath = $request->getAttribute(Attributes::CERT_PATH, '');
-        if ('' !== $certPath) {
+        if ('' !== $certPath)
+        {
             $settings['ssl_cert_file'] = $certPath;
         }
         $password = $request->getAttribute(Attributes::CERT_PASSWORD, '');
-        if ('' === $password) {
+        if ('' === $password)
+        {
             $password = $request->getAttribute(Attributes::KEY_PASSWORD, '');
         }
-        if ('' !== $password) {
+        if ('' !== $password)
+        {
             $settings['ssl_passphrase'] = $password;
         }
         $keyPath = $request->getAttribute(Attributes::KEY_PATH, '');
-        if ('' !== $keyPath) {
+        if ('' !== $keyPath)
+        {
             $settings['ssl_key_file'] = $keyPath;
         }
         $request = $request->withAttribute(Attributes::OPTIONS, $settings);
@@ -588,30 +677,36 @@ class Swoole implements IHandler
     private function parseProxy(&$request)
     {
         $settings = $request->getAttribute(Attributes::OPTIONS, []);
-        if ($request->getAttribute(Attributes::USE_PROXY, false)) {
+        if ($request->getAttribute(Attributes::USE_PROXY, false))
+        {
             $type = $request->getAttribute(Attributes::PROXY_TYPE);
-            switch ($type) {
+            switch ($type)
+            {
                 case 'http':
                     $settings['http_proxy_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
                     $port = $request->getAttribute(Attributes::PROXY_PORT);
-                    if (null !== $port) {
+                    if (null !== $port)
+                    {
                         $settings['http_proxy_port'] = $port;
                     }
                     $settings['http_proxy_user'] = $request->getAttribute(Attributes::PROXY_USERNAME);
                     $password = $request->getAttribute(Attributes::PROXY_PASSWORD);
-                    if (null !== $password) {
+                    if (null !== $password)
+                    {
                         $settings['http_proxy_password'] = $password;
                     }
                     break;
                 case 'socks5':
                     $settings['socks5_host'] = $request->getAttribute(Attributes::PROXY_SERVER);
                     $port = $request->getAttribute(Attributes::PROXY_PORT);
-                    if (null !== $port) {
+                    if (null !== $port)
+                    {
                         $settings['socks5_port'] = $port;
                     }
                     $settings['socks5_username'] = $request->getAttribute(Attributes::PROXY_USERNAME);
                     $password = $request->getAttribute(Attributes::PROXY_PASSWORD);
-                    if (null !== $password) {
+                    if (null !== $password)
+                    {
                         $settings['socks5_password'] = $password;
                     }
                     break;
@@ -632,25 +727,31 @@ class Swoole implements IHandler
         $settings = $request->getAttribute(Attributes::OPTIONS, []);
         // 用户名密码认证处理
         $username = $request->getAttribute(Attributes::USERNAME);
-        if (null === $username) {
+        if (null === $username)
+        {
             $uri = $request->getUri();
             $userInfo = $uri->getUserInfo();
-            if ($userInfo) {
+            if ($userInfo)
+            {
                 $authorization = 'Basic ' . base64_encode($userInfo);
             }
-            else {
+            else
+            {
                 $authorization = null;
             }
         }
-        else {
+        else
+        {
             $authorization = 'Basic ' . base64_encode($username . ':' . $request->getAttribute(Attributes::PASSWORD, ''));
         }
-        if ($authorization) {
+        if ($authorization)
+        {
             $request = $request->withHeader('Authorization', $authorization);
         }
         // 超时
         $settings['timeout'] = $request->getAttribute(Attributes::TIMEOUT, 30000) / 1000;
-        if ($settings['timeout'] < 0) {
+        if ($settings['timeout'] < 0)
+        {
             $settings['timeout'] = -1;
         }
         // 长连接
@@ -702,7 +803,8 @@ class Swoole implements IHandler
         $handlers = [];
         $results = [];
         $beginTime = microtime(true);
-        foreach ($requests as $i => &$request) {
+        foreach ($requests as $i => &$request)
+        {
             $results[$i] = null;
             $handlers[$i] = $handler = new self();
             $request = $handler->sendDefer($request);
@@ -710,10 +812,13 @@ class Swoole implements IHandler
         unset($request);
         $beginTime = microtime(true);
         $recvTimeout = null;
-        foreach ($requests as $i => $request) {
-            if (null !== $timeout) {
+        foreach ($requests as $i => $request)
+        {
+            if (null !== $timeout)
+            {
                 $recvTimeout = $timeout - (microtime(true) - $beginTime);
-                if ($recvTimeout <= 0) {
+                if ($recvTimeout <= 0)
+                {
                     break;
                 }
             }
@@ -725,10 +830,12 @@ class Swoole implements IHandler
 
     public function getHttpConnectionManager(): SwooleHttpConnectionManager
     {
-        if (ConnectionPool::isEnabled()) {
+        if (ConnectionPool::isEnabled())
+        {
             return SwooleHttpConnectionManager::getInstance();
         }
-        else {
+        else
+        {
             return $this->httpConnectionManager;
         }
     }

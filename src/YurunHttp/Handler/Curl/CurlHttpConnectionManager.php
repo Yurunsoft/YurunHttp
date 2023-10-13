@@ -28,7 +28,8 @@ class CurlHttpConnectionManager implements IConnectionManager
      */
     public static function getInstance()
     {
-        if (null === self::$instance) {
+        if (null === self::$instance)
+        {
             return self::$instance = new static();
         }
 
@@ -54,12 +55,15 @@ class CurlHttpConnectionManager implements IConnectionManager
      */
     public function getConnectionPool($url)
     {
-        if (isset($this->connectionPools[$url])) {
+        if (isset($this->connectionPools[$url]))
+        {
             return $this->connectionPools[$url];
         }
-        else {
+        else
+        {
             $config = ConnectionPool::getConfig($url);
-            if (null === $config) {
+            if (null === $config)
+            {
                 ConnectionPool::setConfig($url);
             }
             $config = ConnectionPool::getConfig($url);
@@ -131,7 +135,8 @@ class CurlHttpConnectionManager implements IConnectionManager
     {
         $connectionPools = $this->connectionPools;
         $this->connectionPools = [];
-        foreach ($connectionPools as $connectionPool) {
+        foreach ($connectionPools as $connectionPool)
+        {
             $connectionPool->close();
         }
     }

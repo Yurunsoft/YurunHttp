@@ -8,7 +8,8 @@ use Yurun\Util\YurunHttp\Handler\Curl\CurlHttpConnectionManager;
 
 function dumpPoolInfo()
 {
-    foreach (CurlHttpConnectionManager::getInstance()->getConnectionPools() as $pool) {
+    foreach (CurlHttpConnectionManager::getInstance()->getConnectionPools() as $pool)
+    {
         var_dump($pool->getConfig()->getUrl() . ': Count=' . $pool->getCount() . ', Free=' . $pool->getFree() . ', Used=' . $pool->getUsed());
     }
 }

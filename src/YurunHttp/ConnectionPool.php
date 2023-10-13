@@ -80,23 +80,28 @@ class ConnectionPool
      */
     public static function setConfig($url, $maxConnections = 0, $waitTimeout = 30)
     {
-        if (isset(self::$connectionPoolConfigs[$url])) {
+        if (isset(self::$connectionPoolConfigs[$url]))
+        {
             $config = self::$connectionPoolConfigs[$url];
             $config->setMaxConnections($maxConnections);
             $config->setWaitTimeout($waitTimeout);
         }
-        else {
+        else
+        {
             self::$connectionPoolConfigs[$url] = $config = new PoolConfig($url, $maxConnections, $waitTimeout);
         }
-        foreach (self::$connectionManagers as $class) {
+        foreach (self::$connectionManagers as $class)
+        {
             /** @var IConnectionManager $connectionManager */
             $connectionManager = $class::getInstance();
             $connectionManagerConfig = $connectionManager->getConfig($url);
-            if ($connectionManagerConfig) {
+            if ($connectionManagerConfig)
+            {
                 $connectionManagerConfig->setMaxConnections($maxConnections);
                 $connectionManagerConfig->setWaitTimeout($waitTimeout);
             }
-            else {
+            else
+            {
                 $connectionManager->setConfig($url, $maxConnections, $waitTimeout);
             }
         }
@@ -111,10 +116,12 @@ class ConnectionPool
      */
     public static function getConfig($url)
     {
-        if (isset(self::$connectionPoolConfigs[$url])) {
+        if (isset(self::$connectionPoolConfigs[$url]))
+        {
             return self::$connectionPoolConfigs[$url];
         }
-        else {
+        else
+        {
             return null;
         }
     }
@@ -128,10 +135,12 @@ class ConnectionPool
      */
     public static function getKey($url)
     {
-        if ($url instanceof UriInterface) {
+        if ($url instanceof UriInterface)
+        {
             return $url->getScheme() . '://' . Uri::getDomain($url);
         }
-        else {
+        else
+        {
             return $url;
         }
     }

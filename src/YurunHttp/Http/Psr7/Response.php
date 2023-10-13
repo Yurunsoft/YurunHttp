@@ -73,10 +73,12 @@ class Response extends AbstractMessage implements ResponseInterface
     {
         $self = clone $this;
         $self->statusCode = $code;
-        if ('' === $reasonPhrase) {
+        if ('' === $reasonPhrase)
+        {
             $self->reasonPhrase = StatusCode::getReasonPhrase($code);
         }
-        else {
+        else
+        {
             $self->reasonPhrase = $reasonPhrase;
         }
 

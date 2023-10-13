@@ -73,14 +73,16 @@ class Uri implements UriInterface
     public function __construct($uri = '')
     {
         $uriOption = parse_url($uri);
-        if (false === $uriOption) {
+        if (false === $uriOption)
+        {
             throw new \InvalidArgumentException(sprintf('uri %s parse error', $uri));
         }
         $this->scheme = isset($uriOption['scheme']) ? $uriOption['scheme'] : '';
         $this->host = isset($uriOption['host']) ? $uriOption['host'] : '';
         $this->port = isset($uriOption['port']) ? $uriOption['port'] : null;
         $this->userInfo = isset($uriOption['user']) ? $uriOption['user'] : '';
-        if (isset($uriOption['pass'])) {
+        if (isset($uriOption['pass']))
+        {
             $this->userInfo .= ':' . $uriOption['pass'];
         }
         $this->path = isset($uriOption['path']) ? $uriOption['path'] : '';
@@ -105,11 +107,13 @@ class Uri implements UriInterface
     {
         $uri = '';
         // 协议
-        if ('' !== $scheme) {
+        if ('' !== $scheme)
+        {
             $uri = $scheme . '://';
         }
         // 用户信息
-        if ('' !== $userInfo) {
+        if ('' !== $userInfo)
+        {
             $uri .= $userInfo . '@';
         }
         // 主机+端口
@@ -152,7 +156,8 @@ class Uri implements UriInterface
     public static function getServerPort(UriInterface $uri)
     {
         $port = $uri->getPort();
-        if (!$port) {
+        if (!$port)
+        {
             $scheme = $uri->getScheme();
             $port = isset(static::$schemePorts[$scheme]) ? static::$schemePorts[$scheme] : null;
         }
@@ -171,7 +176,8 @@ class Uri implements UriInterface
     public static function getDomain(UriInterface $uri)
     {
         $result = $uri->getHost();
-        if (null !== ($port = $uri->getPort())) {
+        if (null !== ($port = $uri->getPort()))
+        {
             $result .= ':' . $port;
         }
 
@@ -220,10 +226,12 @@ class Uri implements UriInterface
     public function getAuthority(): string
     {
         $result = $this->host;
-        if ('' !== $this->userInfo) {
+        if ('' !== $this->userInfo)
+        {
             $result = $this->userInfo . '@' . $result;
         }
-        if (null !== $this->port) {
+        if (null !== $this->port)
+        {
             $result .= ':' . $this->port;
         }
 
@@ -385,7 +393,8 @@ class Uri implements UriInterface
      */
     public function withScheme($scheme): UriInterface
     {
-        if (!\is_string($scheme)) {
+        if (!\is_string($scheme))
+        {
             throw new \InvalidArgumentException('invalid or unsupported schemes');
         }
         $self = clone $this;
@@ -413,7 +422,8 @@ class Uri implements UriInterface
     {
         $self = clone $this;
         $self->userInfo = $user;
-        if (null !== $password) {
+        if (null !== $password)
+        {
             $self->userInfo .= ':' . $password;
         }
 

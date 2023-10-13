@@ -24,7 +24,7 @@ abstract class YurunHttp
     /**
      * 版本号.
      */
-    public const VERSION = '4.3';
+    const VERSION = '4.3';
 
     /**
      * 设置默认处理器类.
@@ -57,17 +57,21 @@ abstract class YurunHttp
      */
     public static function getHandler($options = [])
     {
-        if (self::$defaultHandler) {
+        if (self::$defaultHandler)
+        {
             $class = self::$defaultHandler;
             // @phpstan-ignore-next-line
-            if (!is_subclass_of($class, IHandler::class)) {
+            if (!is_subclass_of($class, IHandler::class))
+            {
                 throw new \RuntimeException(sprintf('Class %s does not implement %s', $class, IHandler::class));
             }
         }
-        elseif (\defined('SWOOLE_VERSION') && Coroutine::getuid() > -1) {
+        elseif (\defined('SWOOLE_VERSION') && Coroutine::getuid() > -1)
+        {
             $class = \Yurun\Util\YurunHttp\Handler\Swoole::class;
         }
-        else {
+        else
+        {
             $class = \Yurun\Util\YurunHttp\Handler\Curl::class;
         }
 
@@ -85,28 +89,35 @@ abstract class YurunHttp
      */
     public static function send($request, $handlerClass = null, $options = [])
     {
-        if ($handlerClass instanceof IHandler) {
+        if ($handlerClass instanceof IHandler)
+        {
             $handler = $handlerClass;
             $needClose = false;
         }
-        else {
+        else
+        {
             $needClose = true;
-            if (null === $handlerClass) {
+            if (null === $handlerClass)
+            {
                 $handler = static::getHandler($options);
             }
-            else {
+            else
+            {
                 /** @var IHandler $handler */
                 $handler = new $handlerClass();
             }
         }
-        foreach (self::$attributes as $name => $value) {
-            if (null === $request->getAttribute($name)) {
+        foreach (self::$attributes as $name => $value)
+        {
+            if (null === $request->getAttribute($name))
+            {
                 $request = $request->withAttribute($name, $value);
             }
         }
         $handler->send($request);
         $response = $handler->recv();
-        if ($needClose) {
+        if ($needClose)
+        {
             $handler->close();
         }
 
@@ -124,17 +135,22 @@ abstract class YurunHttp
      */
     public static function websocket($request, $handlerClass = null, $options = [])
     {
-        if ($handlerClass instanceof IHandler) {
+        if ($handlerClass instanceof IHandler)
+        {
             $handler = $handlerClass;
         }
-        elseif (null === $handlerClass) {
+        elseif (null === $handlerClass)
+        {
             $handler = static::getHandler($options);
         }
-        else {
+        else
+        {
             $handler = new $handlerClass();
         }
-        foreach (self::$attributes as $name => $value) {
-            if (null === $request->getAttribute($name)) {
+        foreach (self::$attributes as $name => $value)
+        {
+            if (null === $request->getAttribute($name))
+            {
                 $request = $request->withAttribute($name, $value);
             }
         }
@@ -162,10 +178,12 @@ abstract class YurunHttp
      */
     public static function getAttribute($name, $default = null)
     {
-        if (\array_key_exists($name, self::$attributes)) {
+        if (\array_key_exists($name, self::$attributes))
+        {
             return self::$attributes[$name];
         }
-        else {
+        else
+        {
             return $default;
         }
     }

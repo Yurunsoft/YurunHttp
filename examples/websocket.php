@@ -12,7 +12,8 @@ go(function () {
     $http = new HttpRequest();
     $http->header('Origin', 'http://coolaf.com');
     $client = $http->websocket($url);
-    if (!$client->isConnected()) {
+    if (!$client->isConnected())
+    {
         throw new \RuntimeException('Connect failed');
     }
     $time = time() . '';

@@ -8,7 +8,8 @@ $http->set([
     'worker_num'            => 1,
 ]);
 $http->on('request', function (Swoole\Http\Request $request, Swoole\Http\Response $response) {
-    switch ($request->server['path_info']) {
+    switch ($request->server['path_info'])
+    {
         case '/':
             $response->header('trailer', 'yurun');
             $response->trailer('yurun', 'niubi');

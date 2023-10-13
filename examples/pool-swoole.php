@@ -9,7 +9,8 @@ use Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionManager;
 
 function dumpPoolInfo()
 {
-    foreach (SwooleHttpConnectionManager::getInstance()->getConnectionPools() as $pool) {
+    foreach (SwooleHttpConnectionManager::getInstance()->getConnectionPools() as $pool)
+    {
         var_dump($pool->getConfig()->getUrl() . ': Count=' . $pool->getCount() . ', Free=' . $pool->getFree() . ', Used=' . $pool->getUsed());
     }
 }
@@ -29,7 +30,8 @@ Co\run(function () {
     });
 
     $wg = new \Swoole\Coroutine\WaitGroup();
-    for ($i = 0; $i < 10; ++$i) {
+    for ($i = 0; $i < 10; ++$i)
+    {
         $wg->add();
         go(function () use ($wg) {
             $http = new HttpRequest();

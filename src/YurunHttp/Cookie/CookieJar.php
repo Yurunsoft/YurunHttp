@@ -24,7 +24,8 @@ class CookieJar
      */
     public function load($fileName)
     {
-        if (is_file($fileName)) {
+        if (is_file($fileName))
+        {
             $data = json_decode(file_get_contents($fileName), true);
             $this->cookieManager->setCookieList($data);
         }
@@ -38,7 +39,8 @@ class CookieJar
     public function save($fileName)
     {
         $data = [];
-        foreach ($this->cookieManager->getCookieList() as $cookieItem) {
+        foreach ($this->cookieManager->getCookieList() as $cookieItem)
+        {
             $data[] = (array) $cookieItem;
         }
         file_put_contents($fileName, json_encode($data, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_UNICODE));

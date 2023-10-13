@@ -69,10 +69,12 @@ class UploadedFile implements UploadedFileInterface
         $this->fileName = $fileName;
         $this->mediaType = $mediaType;
         $this->tmpFileName = $tmpFileName;
-        if (null === $size) {
+        if (null === $size)
+        {
             $this->size = filesize($tmpFileName);
         }
-        else {
+        else
+        {
             $this->size = $size;
         }
         $this->error = $error;
@@ -97,7 +99,8 @@ class UploadedFile implements UploadedFileInterface
      */
     public function getStream(): StreamInterface
     {
-        if (null === $this->stream) {
+        if (null === $this->stream)
+        {
             $this->stream = new FileStream($this->tmpFileName);
         }
 
@@ -142,19 +145,24 @@ class UploadedFile implements UploadedFileInterface
      */
     public function moveTo($targetPath): void
     {
-        if (!\is_string($targetPath)) {
+        if (!\is_string($targetPath))
+        {
             throw new \InvalidArgumentException('targetPath specified is invalid');
         }
-        if ($this->isMoved) {
+        if ($this->isMoved)
+        {
             throw new \RuntimeException('file can not be moved');
         }
-        if (is_uploaded_file($this->tmpFileName)) {
+        if (is_uploaded_file($this->tmpFileName))
+        {
             $this->isMoved = move_uploaded_file($this->tmpFileName, $targetPath);
         }
-        else {
+        else
+        {
             $this->isMoved = rename($this->tmpFileName, $targetPath);
         }
-        if (!$this->isMoved) {
+        if (!$this->isMoved)
+        {
             throw new \RuntimeException(sprintf('file %s move to %s fail', $this->tmpFileName, $targetPath));
         }
     }

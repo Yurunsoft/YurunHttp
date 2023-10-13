@@ -139,9 +139,11 @@ class MemoryStream implements StreamInterface
      */
     public function seek(int $offset, int $whence = \SEEK_SET): void
     {
-        switch ($whence) {
+        switch ($whence)
+        {
             case \SEEK_SET:
-                if ($offset < 0) {
+                if ($offset < 0)
+                {
                     throw new \RuntimeException('offset failure');
                 }
                 $this->position = $offset;
@@ -246,12 +248,14 @@ class MemoryStream implements StreamInterface
     public function getContents(): string
     {
         $position = &$this->position;
-        if (0 === $position) {
+        if (0 === $position)
+        {
             $position = $this->size;
 
             return $this->content;
         }
-        else {
+        else
+        {
             return $this->read($this->size - $position);
         }
     }

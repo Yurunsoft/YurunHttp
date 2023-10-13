@@ -60,7 +60,8 @@ class WebSocketTest extends BaseTest
     {
         $this->call(function () {
             $memorys = [1, 2, 3, 4, 5];
-            for ($i = 0; $i < 5; ++$i) {
+            for ($i = 0; $i < 5; ++$i)
+            {
                 $http = new HttpRequest();
                 $client = $http->websocket($this->wsHost);
                 $client->close();

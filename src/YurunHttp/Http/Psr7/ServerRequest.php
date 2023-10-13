@@ -260,21 +260,24 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getParsedBody()
     {
         $parsedBody = &$this->parsedBody;
-        if (null === $parsedBody) {
+        if (null === $parsedBody)
+        {
             $body = $this->body;
             $contentType = strtolower($this->getHeaderLine(RequestHeader::CONTENT_TYPE));
             // post
             if ('POST' === $this->method && \in_array($contentType, [
                 MediaType::APPLICATION_FORM_URLENCODED,
                 MediaType::MULTIPART_FORM_DATA,
-            ])) {
+            ]))
+            {
                 $parsedBody = $this->post;
             }
             // json
             elseif (\in_array($contentType, [
                 MediaType::APPLICATION_JSON,
                 MediaType::APPLICATION_JSON_UTF8,
-            ])) {
+            ]))
+            {
                 $parsedBody = json_decode($body, true);
             }
             // xml
@@ -284,12 +287,14 @@ class ServerRequest extends Request implements ServerRequestInterface
                 MediaType::APPLICATION_RSS_XML,
                 MediaType::APPLICATION_XHTML_XML,
                 MediaType::APPLICATION_XML,
-            ])) {
+            ]))
+            {
                 $parsedBody = new \DOMDocument();
                 $parsedBody->loadXML($body);
             }
             // 其它
-            else {
+            else
+            {
                 $parsedBody = (object) (string) $body;
             }
         }
@@ -371,10 +376,12 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getAttribute($name, $default = null)
     {
         $attributes = $this->attributes;
-        if (\array_key_exists($name, $attributes)) {
+        if (\array_key_exists($name, $attributes))
+        {
             return $attributes[$name];
         }
-        else {
+        else
+        {
             return YurunHttp::getAttribute($name, $default);
         }
     }
@@ -423,7 +430,8 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function withoutAttribute($name): ServerRequestInterface
     {
         $self = clone $this;
-        if (\array_key_exists($name, $self->attributes)) {
+        if (\array_key_exists($name, $self->attributes))
+        {
             unset($self->attributes[$name]);
         }
 
@@ -441,11 +449,14 @@ class ServerRequest extends Request implements ServerRequestInterface
     protected function setUploadedFiles(self $object, array $files)
     {
         $object->files = [];
-        foreach ($files as $name => $file) {
-            if ($file instanceof UploadedFile) {
+        foreach ($files as $name => $file)
+        {
+            if ($file instanceof UploadedFile)
+            {
                 $object->files[$name] = $file;
             }
-            else {
+            else
+            {
                 $object->files[$name] = new UploadedFile($file['name'], $file['type'], $file['tmp_name'], $file['size'], $file['error']);
             }
         }
