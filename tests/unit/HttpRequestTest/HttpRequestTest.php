@@ -94,7 +94,7 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function () {
             $http = new HttpRequest();
-            $time = time();
+            $time = (string) time();
             $response = $http->post($this->host . '?a=info', [
                 'time'  => $time,
             ]);
@@ -104,7 +104,7 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals($time, isset($data['post']['time']) ? $data['post']['time'] : null);
 
             $http = new HttpRequest();
-            $time = time();
+            $time = (string) time();
             $params = new \stdClass();
             $params->time = $time;
             $this->assertResponse($response);
@@ -710,9 +710,9 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function () {
             $http = new HttpRequest();
-            $response = $http->head('https://www.baidu.com');
+            $response = $http->head('https://www.bing.com');
             $this->assertResponse($response);
-            $response = $http->get('https://www.baidu.com');
+            $response = $http->get('https://www.bing.com');
             $this->assertResponse($response);
             $this->assertTrue('' != $response->body());
         });
