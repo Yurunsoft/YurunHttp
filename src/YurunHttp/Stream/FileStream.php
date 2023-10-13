@@ -79,7 +79,7 @@ class FileStream implements StreamInterface
      *
      * @return string
      */
-    public function __toString()
+    public function __toString() :string
     {
         try
         {
