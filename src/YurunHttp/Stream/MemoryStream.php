@@ -51,7 +51,7 @@ class MemoryStream implements StreamInterface
      *
      * @return string
      */
-    public function __toString() :string
+    public function __toString(): string
     {
         return $this->content;
     }

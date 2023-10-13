@@ -138,7 +138,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withCookieParams(array $cookies): self
+    public function withCookieParams(array $cookies): ServerRequestInterface
     {
         $self = clone $this;
         $self->cookies = $cookies;
