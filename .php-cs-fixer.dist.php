@@ -105,6 +105,7 @@ return (new PhpCsFixer\Config())
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->exclude(__DIR__ . '/vendor')
+            ->in(__DIR__ . '/.github')
             ->in(__DIR__ . '/src')
             ->in(__DIR__ . '/examples')
             ->in(__DIR__ . '/tests')

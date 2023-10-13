@@ -228,7 +228,7 @@ class MemoryStream implements StreamInterface
      *
      * @throws \RuntimeException if an error occurs
      */
-    public function read(int $length): string
+    public function read($length): string
     {
         $position = &$this->position;
         $result = substr($this->content, $position, $length);
@@ -274,7 +274,7 @@ class MemoryStream implements StreamInterface
      *                          provided. Returns a specific key value if a key is provided and the
      *                          value is found, or null if the key is not found.
      */
-    public function getMetadata(string $key = null)
+    public function getMetadata($key = null)
     {
         return null;
     }
