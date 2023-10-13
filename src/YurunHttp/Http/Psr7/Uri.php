@@ -583,7 +583,7 @@ class Uri implements UriInterface
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return static::makeUriString($this->host, $this->path, $this->query, $this->port, $this->scheme, $this->fragment, $this->userInfo);
     }

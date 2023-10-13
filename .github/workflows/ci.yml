@@ -24,6 +24,16 @@ jobs:
       - name: test
         run: docker exec php composer test
 
+      - name: Print logs
+        if: failure()
+        run: |
+          echo "Http"
+          cat tests/server/Http/log.log
+          echo "Http2"
+          cat tests/server/Http2/log.log
+          echo "WebSocket"
+          cat tests/server/WebSocket/log.log
+
   ci-curl-swoole:
     runs-on: ubuntu-20.04
 
@@ -57,3 +67,13 @@ jobs:
 
       - name: test
         run: docker exec swoole composer test
+
+      - name: Print logs
+        if: failure()
+        run: |
+          echo "Http"
+          cat tests/server/Http/log.log
+          echo "Http2"
+          cat tests/server/Http2/log.log
+          echo "WebSocket"
+          cat tests/server/WebSocket/log.log

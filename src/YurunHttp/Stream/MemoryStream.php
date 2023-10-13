@@ -137,7 +137,7 @@ class MemoryStream implements StreamInterface
      *
      * @throws \RuntimeException on failure
      */
-    public function seek(int $offset, int $whence = \SEEK_SET): void
+    public function seek($offset, $whence = \SEEK_SET): void
     {
         switch ($whence)
         {
