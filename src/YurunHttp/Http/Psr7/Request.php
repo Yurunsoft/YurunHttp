@@ -41,12 +41,10 @@ class Request extends AbstractMessage implements RequestInterface
     public function __construct($uri = null, array $headers = [], $body = '', $method = RequestMethod::GET, $version = '1.1')
     {
         parent::__construct($body);
-        if (!$uri instanceof UriInterface)
-        {
+        if (!$uri instanceof UriInterface) {
             $this->uri = new Uri($uri);
         }
-        elseif (null !== $uri)
-        {
+        elseif (null !== $uri) {
             $this->uri = $uri;
         }
         $this->setHeaders($headers);
@@ -70,7 +68,7 @@ class Request extends AbstractMessage implements RequestInterface
      *
      * @return string
      */
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         return null === $this->requestTarget ? (string) $this->uri : $this->requestTarget;
     }
@@ -94,7 +92,7 @@ class Request extends AbstractMessage implements RequestInterface
      *
      * @return static
      */
-    public function withRequestTarget($requestTarget)
+    public function withRequestTarget($requestTarget): RequestInterface
     {
         $self = clone $this;
         $self->requestTarget = $requestTarget;
@@ -107,7 +105,7 @@ class Request extends AbstractMessage implements RequestInterface
      *
      * @return string returns the request method
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
@@ -129,7 +127,7 @@ class Request extends AbstractMessage implements RequestInterface
      *
      * @throws \InvalidArgumentException for invalid HTTP methods
      */
-    public function withMethod($method)
+    public function withMethod($method): RequestInterface
     {
         $self = clone $this;
         $self->method = $method;
@@ -147,7 +145,7 @@ class Request extends AbstractMessage implements RequestInterface
      * @return UriInterface returns a UriInterface instance
      *                      representing the URI of the request
      */
-    public function getUri()
+    public function getUri(): UriInterface
     {
         return $this->uri;
     }
@@ -184,12 +182,11 @@ class Request extends AbstractMessage implements RequestInterface
      *
      * @return static
      */
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false): RequestInterface
     {
         $self = clone $this;
         $self->uri = $uri;
-        if (!$preserveHost)
-        {
+        if (!$preserveHost) {
             $self->headers = [];
             $self->headerNames = [];
         }

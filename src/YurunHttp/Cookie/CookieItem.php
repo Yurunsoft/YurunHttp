@@ -86,8 +86,7 @@ class CookieItem
     public static function newInstance($data)
     {
         $object = new static('', '');
-        foreach ($data as $k => $v)
-        {
+        foreach ($data as $k => $v) {
             $object->$k = $v;
         }
 
@@ -103,32 +102,25 @@ class CookieItem
      */
     public static function fromSetCookie($setCookieContent)
     {
-        if (preg_match_all('/;?\s*((?P<name>[^=;]+)=(?P<value>[^;]+)|((?P<name2>[^=;]+)))/', $setCookieContent, $matches) > 0)
-        {
+        if (preg_match_all('/;?\s*((?P<name>[^=;]+)=(?P<value>[^;]+)|((?P<name2>[^=;]+)))/', $setCookieContent, $matches) > 0) {
             $name = $matches['name'][0];
             $value = $matches['value'][0];
             unset($matches['name'][0], $matches['value'][0]);
             $data = array_combine(array_map('strtolower', $matches['name']), $matches['value']);
-            if (isset($data['']))
-            {
+            if (isset($data[''])) {
                 unset($data['']);
             }
-            if (isset($data['max-age']))
-            {
+            if (isset($data['max-age'])) {
                 $expires = time() + $data['max-age'];
             }
-            elseif (isset($data['expires']))
-            {
+            elseif (isset($data['expires'])) {
                 $expires = strtotime($data['expires']);
             }
-            else
-            {
+            else {
                 $expires = null;
             }
-            foreach ($matches['name2'] as $boolItemName)
-            {
-                if ('' !== $boolItemName)
-                {
+            foreach ($matches['name2'] as $boolItemName) {
+                if ('' !== $boolItemName) {
                     $data[strtolower($boolItemName)] = true;
                 }
             }
@@ -136,8 +128,7 @@ class CookieItem
 
             return $object;
         }
-        else
-        {
+        else {
             return null;
         }
     }

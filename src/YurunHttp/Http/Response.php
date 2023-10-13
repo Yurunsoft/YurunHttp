@@ -110,8 +110,7 @@ class Response extends Psr7Response
         $self = clone $this;
         $self->cookiesOrigin = $cookiesOrigin;
         $self->cookies = [];
-        foreach ($cookiesOrigin as $name => $value)
-        {
+        foreach ($cookiesOrigin as $name => $value) {
             $self->cookies[$name] = $value['value'];
         }
 
@@ -162,12 +161,10 @@ class Response extends Psr7Response
      */
     public function body($fromEncoding = null, $toEncoding = 'UTF-8')
     {
-        if (null === $fromEncoding)
-        {
+        if (null === $fromEncoding) {
             return (string) $this->getBody();
         }
-        else
-        {
+        else {
             return mb_convert_encoding((string) $this->getBody(), $toEncoding, $fromEncoding);
         }
     }
@@ -184,8 +181,7 @@ class Response extends Psr7Response
     public function xml($assoc = false, $fromEncoding = null, $toEncoding = 'UTF-8')
     {
         $xml = simplexml_load_string($this->body($fromEncoding, $toEncoding), 'SimpleXMLElement', \LIBXML_NOCDATA | \LIBXML_COMPACT);
-        if ($assoc)
-        {
+        if ($assoc) {
             $xml = (array) $xml;
         }
 
@@ -218,14 +214,11 @@ class Response extends Psr7Response
     public function jsonp($assoc = false, $fromEncoding = null, $toEncoding = 'UTF-8')
     {
         $jsonp = trim($this->body($fromEncoding, $toEncoding));
-        if (isset($jsonp[0]) && '[' !== $jsonp[0] && '{' !== $jsonp[0])
-        {
+        if (isset($jsonp[0]) && '[' !== $jsonp[0] && '{' !== $jsonp[0]) {
             $begin = strpos($jsonp, '(');
-            if (false !== $begin)
-            {
+            if (false !== $begin) {
                 $end = strrpos($jsonp, ')');
-                if (false !== $end)
-                {
+                if (false !== $end) {
                     $jsonp = substr($jsonp, $begin + 1, $end - $begin - 1);
                 }
             }

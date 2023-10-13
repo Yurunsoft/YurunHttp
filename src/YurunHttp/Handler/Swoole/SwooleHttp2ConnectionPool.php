@@ -42,8 +42,7 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
         $connections = $this->connections;
         $this->connections = [];
         $this->channel = new Channel(1024);
-        foreach ($connections as $connection)
-        {
+        foreach ($connections as $connection) {
             $connection->close();
         }
     }
@@ -59,12 +58,10 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
         $uri = new Uri($config->getUrl());
         $scheme = $uri->getScheme();
         $client = new Client($uri->getHost(), Uri::getServerPort($uri), 'https' === $scheme || 'wss' === $scheme);
-        if ($client->connect())
-        {
+        if ($client->connect()) {
             return $client;
         }
-        else
-        {
+        else {
             throw new \RuntimeException(sprintf('Http2 connect failed! errCode: %s, errMsg:%s', $client->errCode, swoole_strerror($client->errCode)));
         }
     }
@@ -78,14 +75,12 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
     {
         $config = $this->getConfig();
         $maxConnections = $this->getConfig()->getMaxConnections();
-        if ($this->getFree() > 0 || (0 != $maxConnections && $this->getCount() >= $maxConnections))
-        {
+        if ($this->getFree() > 0 || (0 != $maxConnections && $this->getCount() >= $maxConnections)) {
             $timeout = $config->getWaitTimeout();
 
             return $this->channel->pop(null === $timeout ? -1 : $timeout);
         }
-        else
-        {
+        else {
             return $this->connections[] = $this->createConnection();
         }
     }
@@ -99,18 +94,14 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
      */
     public function release($connection)
     {
-        if ($connection->connected)
-        {
-            if (\in_array($connection, $this->connections))
-            {
+        if ($connection->connected) {
+            if (\in_array($connection, $this->connections)) {
                 $this->channel->push($connection);
             }
         }
-        else
-        {
+        else {
             $index = array_search($connection, $this->connections);
-            if (false !== $index)
-            {
+            if (false !== $index) {
                 unset($this->connections[$index]);
             }
         }

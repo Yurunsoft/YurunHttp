@@ -41,7 +41,7 @@ class Response extends AbstractMessage implements ResponseInterface
      *
      * @return int status code
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->statusCode;
     }
@@ -69,16 +69,14 @@ class Response extends AbstractMessage implements ResponseInterface
      *
      * @throws \InvalidArgumentException for invalid status code arguments
      */
-    public function withStatus($code, $reasonPhrase = '')
+    public function withStatus($code, $reasonPhrase = ''): ResponseInterface
     {
         $self = clone $this;
         $self->statusCode = $code;
-        if ('' === $reasonPhrase)
-        {
+        if ('' === $reasonPhrase) {
             $self->reasonPhrase = StatusCode::getReasonPhrase($code);
         }
-        else
-        {
+        else {
             $self->reasonPhrase = $reasonPhrase;
         }
 
@@ -99,7 +97,7 @@ class Response extends AbstractMessage implements ResponseInterface
      *
      * @return string reason phrase; must return an empty string if none present
      */
-    public function getReasonPhrase()
+    public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;
     }

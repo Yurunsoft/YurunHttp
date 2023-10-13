@@ -43,7 +43,7 @@ abstract class BaseTest extends TestCase
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        $this->host = testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8899/');
+        $this->host = testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8898/');
         $this->wsHost = testEnv('WS_SERVER_HOST', 'ws://127.0.0.1:8900/');
         $this->http2Host = testEnv('HTTP2_SERVER_HOST', 'http://127.0.0.1:8901/');
         $this->wssHost = testEnv('WSS_SERVER_HOST', 'wss://127.0.0.1:8902/');

@@ -9,8 +9,7 @@ $server->on('open', function (Swoole\WebSocket\Server $server, $request) {
 
 $server->on('message', function (Swoole\WebSocket\Server $server, $frame) use (&$userNameStore) {
     $data = json_decode($frame->data, true);
-    switch ($data['action'])
-    {
+    switch ($data['action']) {
         case 'login':
             $userNameStore[$frame->fd] = $data['username'];
             $server->push($frame->fd, json_encode(['success' => true]));
@@ -22,8 +21,7 @@ $server->on('message', function (Swoole\WebSocket\Server $server, $frame) use (&
 });
 
 $server->on('close', function ($ser, $fd) use (&$userNameStore) {
-    if (isset($userNameStore[$fd]))
-    {
+    if (isset($userNameStore[$fd])) {
         unset($userNameStore[$fd]);
     }
 });

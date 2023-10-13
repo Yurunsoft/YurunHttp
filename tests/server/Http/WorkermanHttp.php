@@ -59,8 +59,7 @@ class WorkermanHttp
      */
     public static function sessionName($name = null)
     {
-        if (null !== $name && '' !== $name)
-        {
+        if (null !== $name && '' !== $name) {
             static::$_sessionName = (string) $name;
         }
 
@@ -76,8 +75,7 @@ class WorkermanHttp
      */
     public static function requestClass($class_name = null)
     {
-        if ($class_name)
-        {
+        if ($class_name) {
             static::$_requestClass = $class_name;
         }
 
@@ -107,16 +105,13 @@ class WorkermanHttp
     public static function input($recv_buffer, TcpConnection $connection)
     {
         static $input = [];
-        if (!isset($recv_buffer[512]) && isset($input[$recv_buffer]))
-        {
+        if (!isset($recv_buffer[512]) && isset($input[$recv_buffer])) {
             return $input[$recv_buffer];
         }
         $crlf_pos = strpos($recv_buffer, "\r\n\r\n");
-        if (false === $crlf_pos)
-        {
+        if (false === $crlf_pos) {
             // Judge whether the package length exceeds the limit.
-            if ($recv_len = strlen($recv_buffer) >= 16384)
-            {
+            if ($recv_len = strlen($recv_buffer) >= 16384) {
                 $connection->close("HTTP/1.1 413 Request Entity Too Large\r\n\r\n");
 
                 return 0;
@@ -128,43 +123,34 @@ class WorkermanHttp
         $head_len = $crlf_pos + 4;
         $method = strstr($recv_buffer, ' ', true);
 
-        if ('GET' === $method || 'OPTIONS' === $method || 'HEAD' === $method || 'DELETE' === $method)
-        {
-            if (!isset($recv_buffer[512]))
-            {
+        if ('GET' === $method || 'OPTIONS' === $method || 'HEAD' === $method || 'DELETE' === $method) {
+            if (!isset($recv_buffer[512])) {
                 $input[$recv_buffer] = $head_len;
-                if (count($input) > 512)
-                {
+                if (count($input) > 512) {
                     unset($input[key($input)]);
                 }
             }
         }
-        elseif ('POST' !== $method && 'PUT' !== $method)
-        {
+        elseif ('POST' !== $method && 'PUT' !== $method) {
             $connection->close("HTTP/1.1 400 Bad Request\r\n\r\n", true);
 
             return 0;
         }
 
         $header = substr($recv_buffer, 0, $crlf_pos);
-        if ($pos = strpos($header, "\r\nContent-Length: "))
-        {
+        if ($pos = strpos($header, "\r\nContent-Length: ")) {
             $length = $head_len + (int) substr($header, $pos + 18, 10);
         }
-        elseif (preg_match("/\r\ncontent-length: ?(\d+)/i", $header, $match))
-        {
-            $length = $head_len + $match[1];
+        elseif (preg_match("/\r\ncontent-length: ?(\d+)/i", $header, $match)) {
+            $length = $head_len + (int) $match[1];
         }
-        else
-        {
+        else {
             $length = $head_len;
         }
 
-        if (!isset($recv_buffer[512]))
-        {
+        if (!isset($recv_buffer[512])) {
             $input[$recv_buffer] = $length;
-            if (count($input) > 512)
-            {
+            if (count($input) > 512) {
                 unset($input[key($input)]);
             }
         }
@@ -184,8 +170,7 @@ class WorkermanHttp
     {
         static $requests = [];
         $cacheable = static::$_enableCache && !isset($recv_buffer[512]);
-        if (true === $cacheable && isset($requests[$recv_buffer]))
-        {
+        if (true === $cacheable && isset($requests[$recv_buffer])) {
             $request = $requests[$recv_buffer];
             $request->connection = $connection;
             $connection->__request = $request;
@@ -196,11 +181,9 @@ class WorkermanHttp
         $request = new static::$_requestClass($recv_buffer);
         $request->connection = $connection;
         $connection->__request = $request;
-        if (true === $cacheable)
-        {
+        if (true === $cacheable) {
             $requests[$recv_buffer] = $request;
-            if (count($requests) > 512)
-            {
+            if (count($requests) > 512) {
                 unset($requests[key($requests)]);
             }
         }
@@ -218,28 +201,21 @@ class WorkermanHttp
      */
     public static function encode($response, TcpConnection $connection)
     {
-        if (isset($connection->__request))
-        {
+        if (isset($connection->__request)) {
             $connection->__request->session = null;
             $connection->__request->connection = null;
             $connection->__request = null;
         }
-        if (is_scalar($response) || null === $response)
-        {
+        if (is_scalar($response) || null === $response) {
             $ext_header = '';
-            if (isset($connection->__header))
-            {
-                foreach ($connection->__header as $name => $value)
-                {
-                    if (is_array($value))
-                    {
-                        foreach ($value as $item)
-                        {
+            if (isset($connection->__header)) {
+                foreach ($connection->__header as $name => $value) {
+                    if (is_array($value)) {
+                        foreach ($value as $item) {
                             $ext_header = "$name: $item\r\n";
                         }
                     }
-                    else
-                    {
+                    else {
                         $ext_header = "$name: $value\r\n";
                     }
                 }
@@ -250,14 +226,13 @@ class WorkermanHttp
             return "HTTP/1.1 200 OK\r\nServer: workerman\r\n{$ext_header}Connection: keep-alive\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: $body_len\r\n\r\n$response";
         }
 
-        if (isset($connection->__header))
-        {
+        if (isset($connection->__header)) {
             $response->withHeaders($connection->__header);
             unset($connection->__header);
         }
 
-        if (isset($response->file))
-        {
+        // @phpstan-ignore-next-line
+        if (isset($response->file)) {
             $file = $response->file['file'];
             $offset = $response->file['offset'];
             $length = $response->file['length'];
@@ -267,20 +242,17 @@ class WorkermanHttp
                 'Content-Length' => $body_len,
                 'Accept-Ranges'  => 'bytes',
             ]);
-            if ($offset || $length)
-            {
+            if ($offset || $length) {
                 $offset_end = $offset + $body_len - 1;
                 $response->header('Content-Range', "bytes $offset-$offset_end/$file_size");
             }
-            if ($body_len < 2 * 1024 * 1024)
-            {
+            if ($body_len < 2 * 1024 * 1024) {
                 $connection->send((string) $response . file_get_contents($file, false, null, $offset, $body_len), true);
 
                 return '';
             }
             $handler = fopen($file, 'r');
-            if (false === $handler)
-            {
+            if (false === $handler) {
                 $connection->close(new Response(403, [], '403 Forbidden'));
 
                 return '';
@@ -308,24 +280,20 @@ class WorkermanHttp
     {
         /* @phpstan-ignore-next-line */
         $connection->bufferFull = false;
-        if (0 !== $offset)
-        {
+        if (0 !== $offset) {
             fseek($handler, $offset);
         }
         $offset_end = $offset + $length;
         // Read file content from disk piece by piece and send to client.
         $do_write = function () use ($connection, $handler, $length, $offset_end) {
             // Send buffer not full.
-            while (false === $connection->bufferFull)
-            {
+            while (false === $connection->bufferFull) {
                 // Read from disk.
                 $size = 1024 * 1024;
-                if (0 !== $length)
-                {
+                if (0 !== $length) {
                     $tell = ftell($handler);
                     $remain_size = $offset_end - $tell;
-                    if ($remain_size <= 0)
-                    {
+                    if ($remain_size <= 0) {
                         fclose($handler);
                         /* @phpstan-ignore-next-line */
                         $connection->onBufferDrain = null;
@@ -337,8 +305,7 @@ class WorkermanHttp
 
                 $buffer = fread($handler, $size);
                 // Read eof.
-                if ('' === $buffer || false === $buffer)
-                {
+                if ('' === $buffer || false === $buffer) {
                     fclose($handler);
                     /* @phpstan-ignore-next-line */
                     $connection->onBufferDrain = null;
@@ -369,18 +336,14 @@ class WorkermanHttp
      */
     public static function uploadTmpDir($dir = null)
     {
-        if (null !== $dir)
-        {
+        if (null !== $dir) {
             static::$_uploadTmpDir = $dir;
         }
-        if ('' === static::$_uploadTmpDir)
-        {
-            if ($upload_tmp_dir = ini_get('upload_tmp_dir'))
-            {
+        if ('' === static::$_uploadTmpDir) {
+            if ($upload_tmp_dir = ini_get('upload_tmp_dir')) {
                 static::$_uploadTmpDir = $upload_tmp_dir;
             }
-            elseif ($upload_tmp_dir = sys_get_temp_dir())
-            {
+            elseif ($upload_tmp_dir = sys_get_temp_dir()) {
                 static::$_uploadTmpDir = $upload_tmp_dir;
             }
         }

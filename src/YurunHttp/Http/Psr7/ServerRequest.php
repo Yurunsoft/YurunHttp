@@ -87,7 +87,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-    public function getServerParams()
+    public function getServerParams(): array
     {
         return $this->server;
     }
@@ -100,7 +100,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return string
      */
-    public function getServerParam($name, $default = null)
+    public function getServerParam($name, $default = null): string
     {
         return isset($this->server[$name]) ? $this->server[$name] : $default;
     }
@@ -115,7 +115,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
         return $this->cookies;
     }
@@ -138,7 +138,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withCookieParams(array $cookies)
+    public function withCookieParams(array $cookies): self
     {
         $self = clone $this;
         $self->cookies = $cookies;
@@ -151,10 +151,8 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @param string $name
      * @param mixed  $default
-     *
-     * @return mixed
      */
-    public function getCookie($name, $default = null)
+    public function getCookie(string $name, $default = null): string
     {
         return isset($this->cookies[$name]) ? $this->cookies[$name] : $default;
     }
@@ -171,7 +169,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array
      */
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->get;
     }
@@ -199,7 +197,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withQueryParams(array $query)
+    public function withQueryParams(array $query): ServerRequestInterface
     {
         $self = clone $this;
         $self->get = $query;
@@ -219,7 +217,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @return UploadedFile[] an array tree of UploadedFileInterface instances; an empty
      *                        array MUST be returned if no data is present
      */
-    public function getUploadedFiles()
+    public function getUploadedFiles(): array
     {
         return $this->files;
     }
@@ -237,7 +235,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @throws \InvalidArgumentException if an invalid structure is provided
      */
-    public function withUploadedFiles(array $uploadedFiles)
+    public function withUploadedFiles(array $uploadedFiles): ServerRequestInterface
     {
         $self = clone $this;
 
@@ -262,24 +260,21 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getParsedBody()
     {
         $parsedBody = &$this->parsedBody;
-        if (null === $parsedBody)
-        {
+        if (null === $parsedBody) {
             $body = $this->body;
             $contentType = strtolower($this->getHeaderLine(RequestHeader::CONTENT_TYPE));
             // post
             if ('POST' === $this->method && \in_array($contentType, [
                 MediaType::APPLICATION_FORM_URLENCODED,
                 MediaType::MULTIPART_FORM_DATA,
-            ]))
-            {
+            ])) {
                 $parsedBody = $this->post;
             }
             // json
             elseif (\in_array($contentType, [
                 MediaType::APPLICATION_JSON,
                 MediaType::APPLICATION_JSON_UTF8,
-            ]))
-            {
+            ])) {
                 $parsedBody = json_decode($body, true);
             }
             // xml
@@ -289,14 +284,12 @@ class ServerRequest extends Request implements ServerRequestInterface
                 MediaType::APPLICATION_RSS_XML,
                 MediaType::APPLICATION_XHTML_XML,
                 MediaType::APPLICATION_XML,
-            ]))
-            {
+            ])) {
                 $parsedBody = new \DOMDocument();
                 $parsedBody->loadXML($body);
             }
             // 其它
-            else
-            {
+            else {
                 $parsedBody = (object) (string) $body;
             }
         }
@@ -334,7 +327,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      * @throws \InvalidArgumentException if an unsupported argument type is
      *                                   provided
      */
-    public function withParsedBody($data)
+    public function withParsedBody($data): ServerRequestInterface
     {
         $self = clone $this;
         $self->parsedBody = $data;
@@ -353,7 +346,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return array attributes derived from the request
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
@@ -378,12 +371,10 @@ class ServerRequest extends Request implements ServerRequestInterface
     public function getAttribute($name, $default = null)
     {
         $attributes = $this->attributes;
-        if (\array_key_exists($name, $attributes))
-        {
+        if (\array_key_exists($name, $attributes)) {
             return $attributes[$name];
         }
-        else
-        {
+        else {
             return YurunHttp::getAttribute($name, $default);
         }
     }
@@ -405,7 +396,7 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withAttribute($name, $value)
+    public function withAttribute($name, $value): ServerRequestInterface
     {
         $self = clone $this;
         $self->attributes[$name] = $value;
@@ -429,11 +420,10 @@ class ServerRequest extends Request implements ServerRequestInterface
      *
      * @return static
      */
-    public function withoutAttribute($name)
+    public function withoutAttribute($name): ServerRequestInterface
     {
         $self = clone $this;
-        if (\array_key_exists($name, $self->attributes))
-        {
+        if (\array_key_exists($name, $self->attributes)) {
             unset($self->attributes[$name]);
         }
 
@@ -451,14 +441,11 @@ class ServerRequest extends Request implements ServerRequestInterface
     protected function setUploadedFiles(self $object, array $files)
     {
         $object->files = [];
-        foreach ($files as $name => $file)
-        {
-            if ($file instanceof UploadedFile)
-            {
+        foreach ($files as $name => $file) {
+            if ($file instanceof UploadedFile) {
                 $object->files[$name] = $file;
             }
-            else
-            {
+            else {
                 $object->files[$name] = new UploadedFile($file['name'], $file['type'], $file['tmp_name'], $file['size'], $file['error']);
             }
         }

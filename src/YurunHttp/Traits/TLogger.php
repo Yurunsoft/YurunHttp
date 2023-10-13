@@ -24,16 +24,13 @@ trait TLogger
     protected function logRequest($request, $response)
     {
         $logger = $this->getLogger();
-        if (!$logger)
-        {
+        if (!$logger) {
             return;
         }
-        if (isset($this->options[HandlerOptions::REQUEST_LOG_FORMAT]))
-        {
+        if (isset($this->options[HandlerOptions::REQUEST_LOG_FORMAT])) {
             $requestLogFormat = $this->options[HandlerOptions::REQUEST_LOG_FORMAT];
         }
-        else
-        {
+        else {
             $requestLogFormat = <<<'STR'
 Request: [{method}] {url}
 Response: statusCode: [{status_code}], contentLength: {content_length}, errno: {errno}, error: {error}, useTime: {time}
@@ -41,8 +38,7 @@ STR;
         }
 
         $message = preg_replace_callback('/\{([^\}]+)\}/', function ($matches) use ($request, $response) {
-            switch ($matches[1])
-            {
+            switch ($matches[1]) {
                 case 'method':
                     return $request->getMethod();
                 case 'url':
@@ -51,8 +47,7 @@ STR;
                     return $request->getBody()->__toString();
                 case 'request_headers':
                     $headers = [];
-                    foreach ($request->getHeaders() as $name => $value)
-                    {
+                    foreach ($request->getHeaders() as $name => $value) {
                         $headers[] = $name . ': ' . implode(',', $value);
                     }
 
@@ -67,8 +62,7 @@ STR;
                     return $response->getError();
                 case 'response_headers':
                     $headers = [];
-                    foreach ($response->getHeaders() as $name => $value)
-                    {
+                    foreach ($response->getHeaders() as $name => $value) {
                         $headers[] = $name . ': ' . implode(',', $value);
                     }
 

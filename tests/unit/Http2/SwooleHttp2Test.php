@@ -14,7 +14,7 @@ class SwooleHttp2Test extends BaseTest
 {
     use TSwooleHandlerTest;
 
-    public function testHttp2()
+    public function testHttp2(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -43,7 +43,7 @@ class SwooleHttp2Test extends BaseTest
         });
     }
 
-    public function testHttp2ByUrl()
+    public function testHttp2ByUrl(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -70,7 +70,7 @@ class SwooleHttp2Test extends BaseTest
         });
     }
 
-    public function testMuiltCo()
+    public function testMuiltCo(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);
@@ -105,8 +105,7 @@ class SwooleHttp2Test extends BaseTest
 
             $count = 10;
             $channel = new Channel($count);
-            for ($i = 0; $i < $count; ++$i)
-            {
+            for ($i = 0; $i < $count; ++$i) {
                 go(function () use ($i, $client, $channel, $httpRequest, $fd) {
                     $request = $httpRequest->buildRequest($this->http2Host, [
                         'date'  => $i,
@@ -121,19 +120,18 @@ class SwooleHttp2Test extends BaseTest
                 });
             }
             $returnCount = 0;
-            do
-            {
-                if ($channel->pop())
-                {
+            do {
+                if ($channel->pop()) {
                     ++$returnCount;
                 }
-            } while ($returnCount < $count);
+            }
+            while ($returnCount < $count);
 
             $client->close();
         });
     }
 
-    public function testPipeline1()
+    public function testPipeline1(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);
@@ -165,19 +163,17 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
             /* @phpstan-ignore-next-line */
-            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
-            {
+            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<')) {
                 // Swoole <= 4.4.12 BUG
                 $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', \SWOOLE_VERSION));
             }
-            else
-            {
+            else {
                 $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
             }
         });
     }
 
-    public function testPipeline2()
+    public function testPipeline2(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);
@@ -208,13 +204,11 @@ class SwooleHttp2Test extends BaseTest
             $this->assertEquals('yurun', $response->getHeaderLine('trailer'));
             $client->close();
             /* @phpstan-ignore-next-line */
-            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<'))
-            {
+            if (version_compare(\SWOOLE_VERSION, '4.4.13', '<')) {
                 // Swoole <= 4.4.12 BUG
                 $this->markTestSkipped(sprintf('Swoole version %s < 4.4.13', \SWOOLE_VERSION));
             }
-            else
-            {
+            else {
                 $this->assertEquals('niubi', $response->getHeaderLine('yurun'));
             }
         });
@@ -225,7 +219,7 @@ class SwooleHttp2Test extends BaseTest
      *
      * @return void
      */
-    public function testHttp2ResponseGetRequest()
+    public function testHttp2ResponseGetRequest(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -251,7 +245,7 @@ class SwooleHttp2Test extends BaseTest
      *
      * @return void
      */
-    public function testHttp2ResponseGetRequest2()
+    public function testHttp2ResponseGetRequest2(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);

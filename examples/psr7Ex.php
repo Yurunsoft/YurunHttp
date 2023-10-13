@@ -77,7 +77,7 @@ function test()
                         ->withAttribute(Attributes::DOWNLOAD_SPEED, 30000)
                         // 上传限速，单位：字节，仅Curl有效
                         ->withAttribute(Attributes::UPLOAD_SPEED, 30000)
-                        ;
+    ;
     $response = YurunHttp::send($request);
     var_dump($response);
 }

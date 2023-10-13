@@ -24,16 +24,14 @@ trait TConnectionPoolConfigs
      */
     public function setConfig($url, $maxConnections = 0, $waitTimeout = 30)
     {
-        if (isset($this->connectionPoolConfigs[$url]))
-        {
+        if (isset($this->connectionPoolConfigs[$url])) {
             $config = $this->connectionPoolConfigs[$url];
             $config->setMaxConnections($maxConnections);
             $config->setWaitTimeout($waitTimeout);
 
             return $config;
         }
-        else
-        {
+        else {
             return $this->connectionPoolConfigs[$url] = new PoolConfig($url, $maxConnections, $waitTimeout);
         }
     }
@@ -47,12 +45,10 @@ trait TConnectionPoolConfigs
      */
     public function getConfig($url)
     {
-        if (isset($this->connectionPoolConfigs[$url]))
-        {
+        if (isset($this->connectionPoolConfigs[$url])) {
             return $this->connectionPoolConfigs[$url];
         }
-        else
-        {
+        else {
             return null;
         }
     }

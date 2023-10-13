@@ -20,7 +20,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testHelloWorld()
+    public function testHelloWorld(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -35,7 +35,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testJson()
+    public function testJson(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -51,7 +51,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testGetParams()
+    public function testGetParams(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -69,7 +69,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testGetParams2()
+    public function testGetParams2(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -90,7 +90,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testPostParams()
+    public function testPostParams(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -119,7 +119,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testPutRequest()
+    public function testPutRequest(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -135,7 +135,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCookieParams()
+    public function testCookieParams(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -158,7 +158,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testRequestHeaders()
+    public function testRequestHeaders(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -188,7 +188,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testResponseHeaders()
+    public function testResponseHeaders(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -203,7 +203,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCookieManager()
+    public function testCookieManager(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -216,16 +216,14 @@ class HttpRequestTest extends BaseTest
             ];
 
             $data = null;
-            for ($i = 0; $i < 2; ++$i)
-            {
+            for ($i = 0; $i < 2; ++$i) {
                 sleep(1);
 
                 $response = $http->get($this->host . '?a=info');
                 $this->assertResponse($response);
                 $data = $response->json(true);
 
-                if ($compareCookie === $data['cookie'])
-                {
+                if ($compareCookie === $data['cookie']) {
                     break;
                 }
             }
@@ -250,21 +248,19 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testAutoRedirect()
+    public function testAutoRedirect(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
 
-            foreach ([301, 302] as $statusCode)
-            {
+            foreach ([301, 302] as $statusCode) {
                 $response = $http->post($this->host . '?a=redirect' . $statusCode);
                 $this->assertResponse($response);
                 $data = $response->json(true);
                 $this->assertEquals('GET', $data['method'], $statusCode . ' method error');
             }
 
-            foreach ([307, 308] as $statusCode)
-            {
+            foreach ([307, 308] as $statusCode) {
                 $response = $http->post($this->host . '?a=redirect' . $statusCode);
                 $this->assertResponse($response);
                 $data = $response->json(true);
@@ -278,7 +274,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDisableAutoRedirect()
+    public function testDisableAutoRedirect(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -295,7 +291,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testLimitMaxRedirects()
+    public function testLimitMaxRedirects(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -311,7 +307,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testRedirectOther()
+    public function testRedirectOther(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -327,7 +323,7 @@ class HttpRequestTest extends BaseTest
     /**
      * @return void
      */
-    public function testRedirectCookie()
+    public function testRedirectCookie(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -346,7 +342,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testUploadSingle()
+    public function testUploadSingle(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -372,7 +368,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testUploadMulti()
+    public function testUploadMulti(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -408,7 +404,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testBody()
+    public function testBody(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -435,7 +431,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testResponseGetRequest()
+    public function testResponseGetRequest(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -447,12 +443,11 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function test304()
+    public function test304(): void
     {
         $this->call(function () {
             /* @phpstan-ignore-next-line */
-            if (method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(\SWOOLE_VERSION, '4.4.17', '<'))
-            {
+            if (method_exists(Coroutine::class, 'getuid') && Coroutine::getuid() > 0 && version_compare(\SWOOLE_VERSION, '4.4.17', '<')) {
                 $this->markTestSkipped('Swoole must >= 4.4.17');
             }
             $http = new HttpRequest();
@@ -463,7 +458,7 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testUriWithAuth()
+    public function testUriWithAuth(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -479,13 +474,12 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDownload()
+    public function testDownload(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
             $fileName = __DIR__ . '/download.txt';
-            if (is_file($fileName))
-            {
+            if (is_file($fileName)) {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
@@ -501,13 +495,12 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDownloadAutoExt()
+    public function testDownloadAutoExt(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
             $fileName = __DIR__ . '/download.html';
-            if (is_file($fileName))
-            {
+            if (is_file($fileName)) {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
@@ -523,13 +516,12 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDownloadWithRedirect()
+    public function testDownloadWithRedirect(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
             $fileName = __DIR__ . '/download.html';
-            if (is_file($fileName))
-            {
+            if (is_file($fileName)) {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
@@ -545,7 +537,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCustomHost()
+    public function testCustomHost(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -561,27 +553,24 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCoBatch()
+    public function testCoBatch(): void
     {
         $this->call(function () {
             $time = time();
             $fileName = __DIR__ . '/download.txt';
-            if (is_file($fileName))
-            {
+            if (is_file($fileName)) {
                 unlink($fileName);
             }
             $this->assertFalse(is_file($fileName));
             $fileName2Temp = __DIR__ . '/download2.*';
             $fileName2 = __DIR__ . '/download2.html';
-            if (is_file($fileName2))
-            {
+            if (is_file($fileName2)) {
                 unlink($fileName2);
             }
             $this->assertFalse(is_file($fileName2));
             $fileName3Temp = __DIR__ . '/download3.*';
             $fileName3 = __DIR__ . '/download3.html';
-            if (is_file($fileName3))
-            {
+            if (is_file($fileName3)) {
                 unlink($fileName3);
             }
             $this->assertFalse(is_file($fileName3));
@@ -593,46 +582,39 @@ class HttpRequestTest extends BaseTest
                 'a' => (new HttpRequest())->url($this->host . '?a=redirect&url=/?a=download3')->requestBody('yurunhttp=nb')->saveFile($fileName3Temp),
             ]);
 
-            foreach ($result as $i => $response)
-            {
-                if (0 === $i)
-                {
+            foreach ($result as $i => $response) {
+                if (0 === $i) {
                     $this->assertResponse($response);
                     $this->assertEquals('YurunHttp', $response->body());
                     $this->assertNotNull($response->getRequest());
                 }
-                elseif (1 === $i)
-                {
+                elseif (1 === $i) {
                     $data = $response->json(true);
                     $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
                     $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
                     $this->assertNotNull($response->getRequest());
                 }
-                elseif (2 === $i)
-                {
+                elseif (2 === $i) {
                     $this->assertTrue(is_file($fileName));
                     $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName));
                     $this->assertNotNull($response->getRequest());
                     $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                     $this->assertEquals('1', $response->getCookie('a'));
                 }
-                elseif (3 === $i)
-                {
+                elseif (3 === $i) {
                     $this->assertTrue(is_file($fileName2));
                     $this->assertEquals('YurunHttp Hello World', file_get_contents($fileName2));
                     $this->assertNotNull($response->getRequest());
                     $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                     $this->assertEquals('1', $response->getCookie('a'));
                 }
-                elseif ('a' === $i)
-                {
+                elseif ('a' === $i) {
                     $this->assertTrue(is_file($fileName3));
                     $this->assertEquals('download3', file_get_contents($fileName3));
                     $this->assertNotNull($response->getRequest());
                     $this->assertEquals('text/html; charset=UTF-8', $response->getHeaderLine('Content-Type'));
                 }
-                else
-                {
+                else {
                     throw new \RuntimeException(sprintf('Unknown %s', $i));
                 }
             }
@@ -644,7 +626,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCoBatchTimeout()
+    public function testCoBatchTimeout(): void
     {
         $this->call(function () {
             $result = Batch::run([
@@ -655,12 +637,11 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testMemoryLeak()
+    public function testMemoryLeak(): void
     {
         $this->call(function () {
             $memorys = [1, 2, 3, 4, 5];
-            for ($i = 0; $i < 5; ++$i)
-            {
+            for ($i = 0; $i < 5; ++$i) {
                 $http = new HttpRequest();
                 $http->get($this->host);
                 $memorys[$i] = memory_get_usage();
@@ -669,8 +650,7 @@ class HttpRequestTest extends BaseTest
             $this->assertCount(1, array_unique($memorys));
 
             $memorys = [1, 2, 3, 4, 5];
-            for ($i = 0; $i < 5; ++$i)
-            {
+            for ($i = 0; $i < 5; ++$i) {
                 YurunHttp::send(new Request($this->host));
                 $memorys[$i] = memory_get_usage();
             }
@@ -679,8 +659,7 @@ class HttpRequestTest extends BaseTest
 
             $memorys = [1, 2, 3, 4, 5];
             $time = time();
-            for ($i = 0; $i < 5; ++$i)
-            {
+            for ($i = 0; $i < 5; ++$i) {
                 Batch::run([
                     (new HttpRequest())->url($this->host),
                     (new HttpRequest())->url($this->host . '?a=info&time=' . $time),
@@ -692,7 +671,7 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testHead()
+    public function testHead(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -706,7 +685,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testBug19()
+    public function testBug19(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -723,7 +702,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCookieJar()
+    public function testCookieJar(): void
     {
         $this->call(function () {
             $http = new HttpRequest([

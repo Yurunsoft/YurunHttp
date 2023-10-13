@@ -22,45 +22,35 @@ abstract class Batch
     {
         $batchRequests = [];
         $downloadAutoExt = [];
-        foreach ($requests as $i => $request)
-        {
-            if ($request instanceof HttpRequest)
-            {
+        foreach ($requests as $i => $request) {
+            if ($request instanceof HttpRequest) {
                 $savePath = $request->getSavePath();
-                if (null !== $savePath && HttpRequest::checkDownloadIsAutoExt($savePath, $savePath))
-                {
+                if (null !== $savePath && HttpRequest::checkDownloadIsAutoExt($savePath, $savePath)) {
                     $request->saveFileOption['filePath'] = $savePath;
                     $downloadAutoExt[] = $i;
                 }
                 $batchRequests[$i] = $request->buildRequest();
             }
-            elseif (!$request instanceof \Yurun\Util\YurunHttp\Http\Request)
-            {
+            elseif (!$request instanceof \Yurun\Util\YurunHttp\Http\Request) {
                 throw new \InvalidArgumentException('Request must be instance of \Yurun\Util\YurunHttp\Http\Request or \Yurun\Util\HttpRequest');
             }
         }
-        if (null === $handlerClass)
-        {
+        if (null === $handlerClass) {
             $handler = YurunHttp::getHandler($options);
         }
-        else
-        {
+        else {
             $handler = new $handlerClass();
         }
         /** @var \Yurun\Util\YurunHttp\Handler\IHandler $handler */
         $result = $handler->coBatch($batchRequests, $timeout);
-        foreach ($downloadAutoExt as $i)
-        {
-            if (isset($result[$i]))
-            {
+        foreach ($downloadAutoExt as $i) {
+            if (isset($result[$i])) {
                 $response = &$result[$i];
             }
-            else
-            {
+            else {
                 $response = null;
             }
-            if ($response)
-            {
+            if ($response) {
                 HttpRequest::parseDownloadAutoExt($response, $response->getRequest()->getAttribute(Attributes::SAVE_FILE_PATH));
             }
             unset($response);

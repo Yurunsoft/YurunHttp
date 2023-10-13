@@ -10,7 +10,7 @@ class WebSocketTest extends BaseTest
 {
     use TSwooleHandlerTest;
 
-    public function testWebSocket()
+    public function testWebSocket(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -33,7 +33,7 @@ class WebSocketTest extends BaseTest
         });
     }
 
-    public function testWSS()
+    public function testWSS(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -56,12 +56,11 @@ class WebSocketTest extends BaseTest
         });
     }
 
-    public function testMemoryLeak()
+    public function testMemoryLeak(): void
     {
         $this->call(function () {
             $memorys = [1, 2, 3, 4, 5];
-            for ($i = 0; $i < 5; ++$i)
-            {
+            for ($i = 0; $i < 5; ++$i) {
                 $http = new HttpRequest();
                 $client = $http->websocket($this->wsHost);
                 $client->close();

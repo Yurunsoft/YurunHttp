@@ -9,14 +9,13 @@ use Yurun\Util\YurunHttp\Test\BaseTest;
 
 class CurlPoolTest extends BaseTest
 {
-    public function test()
+    public function test(): void
     {
         $this->call(function () {
             // 启用连接池
             ConnectionPool::enable();
 
-            try
-            {
+            try {
                 // 为这个地址设置限制连接池连接数量3个
                 // 一定不要有 / 及后续参数等
                 $url = rtrim($this->host, '/');
@@ -44,8 +43,7 @@ class CurlPoolTest extends BaseTest
                 $this->assertEquals(1, $pool->getFree());
                 $this->assertEquals(0, $pool->getUsed());
             }
-            finally
-            {
+            finally {
                 ConnectionPool::disable();
             }
         });

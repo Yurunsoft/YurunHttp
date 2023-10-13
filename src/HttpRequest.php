@@ -63,7 +63,7 @@ class HttpRequest
      *
      * @var callable|null
      */
-    public $retryCallback = null;
+    public $retryCallback;
 
     /**
      * 是否使用代理，默认false.
@@ -175,7 +175,7 @@ class HttpRequest
      *
      * @var string
      */
-    public $certPassword = null;
+    public $certPassword;
 
     /**
      * certType规定的私钥的加密类型，支持的密钥类型为"PEM"(默认值)、"DER"和"ENG".
@@ -196,7 +196,7 @@ class HttpRequest
      *
      * @var string
      */
-    public $keyPassword = null;
+    public $keyPassword;
 
     /**
      * 请求方法.
@@ -217,7 +217,7 @@ class HttpRequest
      *
      * @var bool|null
      */
-    public $connectionPool = null;
+    public $connectionPool;
 
     /**
      * 代理认证方式.
@@ -236,12 +236,12 @@ class HttpRequest
     /**
      * 自动扩展名标志.
      */
-    const AUTO_EXT_FLAG = '.*';
+    public const AUTO_EXT_FLAG = '.*';
 
     /**
      * 自动扩展名用的临时文件名.
      */
-    const AUTO_EXT_TEMP_EXT = '.tmp';
+    public const AUTO_EXT_TEMP_EXT = '.tmp';
 
     /**
      * 构造方法.
@@ -300,8 +300,7 @@ class HttpRequest
      */
     public function close()
     {
-        if ($this->handler)
-        {
+        if ($this->handler) {
             $handler = $this->handler;
             $this->handler = null;
             $handler->close();
@@ -390,8 +389,7 @@ class HttpRequest
     public function options($options)
     {
         $thisOptions = &$this->options;
-        foreach ($options as $key => $value)
-        {
+        foreach ($options as $key => $value) {
             $thisOptions[$key] = $value;
         }
 
@@ -453,8 +451,7 @@ class HttpRequest
     public function rawHeaders($headers)
     {
         $thisHeaders = &$this->headers;
-        foreach ($headers as $header)
-        {
+        foreach ($headers as $header) {
             $list = explode(':', $header, 2);
             $thisHeaders[trim($list[0])] = trim($list[1]);
         }
@@ -654,7 +651,7 @@ class HttpRequest
      */
     public function retry($retry, $callback = null)
     {
-        $this->retry = $retry < 0 ? 0 : $retry;   //至少请求1次，即重试0次
+        $this->retry = $retry < 0 ? 0 : $retry;   // 至少请求1次，即重试0次
         $this->retryCallback = $callback;
 
         return $this;
@@ -709,12 +706,10 @@ class HttpRequest
      */
     public function timeout($timeout = null, $connectTimeout = null)
     {
-        if (null !== $timeout)
-        {
+        if (null !== $timeout) {
             $this->timeout = $timeout;
         }
-        if (null !== $connectTimeout)
-        {
+        if (null !== $connectTimeout) {
             $this->connectTimeout = $connectTimeout;
         }
 
@@ -793,12 +788,10 @@ class HttpRequest
     public function sslCert($path, $type = null, $password = null)
     {
         $this->certPath = $path;
-        if (null !== $type)
-        {
+        if (null !== $type) {
             $this->certType = $type;
         }
-        if (null !== $password)
-        {
+        if (null !== $password) {
             $this->certPassword = $password;
         }
 
@@ -817,12 +810,10 @@ class HttpRequest
     public function sslKey($path, $type = null, $password = null)
     {
         $this->keyPath = $path;
-        if (null !== $type)
-        {
+        if (null !== $type) {
             $this->keyType = $type;
         }
-        if (null !== $password)
-        {
+        if (null !== $password) {
             $this->keyPassword = $password;
         }
 
@@ -868,35 +859,28 @@ class HttpRequest
     protected function parseRequestBody($requestBody, $contentType)
     {
         $body = $files = [];
-        if (\is_string($requestBody))
-        {
+        if (\is_string($requestBody)) {
             $body = $requestBody;
         }
-        elseif (\is_array($requestBody) || \is_object($requestBody))
-        {
-            switch ($contentType)
-            {
+        elseif (\is_array($requestBody) || \is_object($requestBody)) {
+            switch ($contentType) {
                 case 'json':
                     $body = json_encode($requestBody);
                     $this->header('Content-Type', MediaType::APPLICATION_JSON);
                     break;
                 default:
-                    foreach ($requestBody as $k => $v)
-                    {
-                        if ($v instanceof UploadedFile)
-                        {
+                    foreach ($requestBody as $k => $v) {
+                        if ($v instanceof UploadedFile) {
                             $files[$k] = $v;
                         }
-                        else
-                        {
+                        else {
                             $body[$k] = $v;
                         }
                     }
                     $body = http_build_query($body, '', '&');
             }
         }
-        else
-        {
+        else {
             throw new \InvalidArgumentException('$requestBody only can be string or array');
         }
 
@@ -915,12 +899,10 @@ class HttpRequest
      */
     public function buildRequest($url = null, $requestBody = null, $method = null, $contentType = null)
     {
-        if (null === $url)
-        {
+        if (null === $url) {
             $url = $this->url;
         }
-        if (null === $method)
-        {
+        if (null === $method) {
             $method = $this->method;
         }
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
@@ -951,9 +933,8 @@ class HttpRequest
                             ->withAttribute(Attributes::RETRY, $this->retry)
                             ->withAttribute(Attributes::RETRY_CALLBACK, $this->retryCallback)
                             ->withProtocolVersion($this->protocolVersion)
-                            ;
-        foreach ($this->proxy as $name => $value)
-        {
+        ;
+        foreach ($this->proxy as $name => $value) {
             $request = $request->withAttribute('proxy.' . $name, $value);
         }
 
@@ -1006,14 +987,11 @@ class HttpRequest
      */
     public function get($url = null, $requestBody = null)
     {
-        if (!empty($requestBody))
-        {
-            if (strpos($url, '?'))
-            {
+        if (!empty($requestBody)) {
+            if (strpos($url, '?')) {
                 $url .= '&';
             }
-            else
-            {
+            else {
                 $url .= '?';
             }
             $url .= http_build_query($requestBody, '', '&');
@@ -1105,8 +1083,7 @@ class HttpRequest
     {
         $isAutoExt = self::checkDownloadIsAutoExt($fileName, $fileName);
         $result = $this->saveFile($fileName)->send($url, $requestBody, $method);
-        if ($isAutoExt)
-        {
+        if ($isAutoExt) {
             self::parseDownloadAutoExt($result, $fileName);
         }
         $this->saveFileOption = [];
@@ -1139,8 +1116,7 @@ class HttpRequest
     public static function checkDownloadIsAutoExt($fileName, &$tempFileName)
     {
         $flagLength = \strlen(self::AUTO_EXT_FLAG);
-        if (self::AUTO_EXT_FLAG !== substr($fileName, -$flagLength))
-        {
+        if (self::AUTO_EXT_FLAG !== substr($fileName, -$flagLength)) {
             return false;
         }
         $tempFileName = substr($fileName, 0, -$flagLength) . self::AUTO_EXT_TEMP_EXT;
@@ -1159,8 +1135,7 @@ class HttpRequest
     public static function parseDownloadAutoExt(&$response, $tempFileName)
     {
         $ext = MediaType::getExt($response->getHeaderLine('Content-Type'));
-        if (null === $ext)
-        {
+        if (null === $ext) {
             $ext = 'file';
         }
         $savedFileName = substr($tempFileName, 0, -\strlen(self::AUTO_EXT_TEMP_EXT)) . '.' . $ext;
@@ -1169,8 +1144,7 @@ class HttpRequest
     }
 }
 
-if (\extension_loaded('curl'))
-{
+if (\extension_loaded('curl')) {
     // 代理认证方式
     HttpRequest::$proxyAuths = [
         'basic' => \CURLAUTH_BASIC,

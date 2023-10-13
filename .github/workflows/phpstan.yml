@@ -20,7 +20,7 @@ jobs:
       - name: Prepare
         run: |
           ./.github/prepare-test.sh swoole
-          docker exec swoole composer require phpstan/phpstan:^0.12.91 --dev
+          docker exec swoole composer require phpstan/phpstan:~1.10.0 --dev
 
       - name: Test
         run: docker exec swoole ./vendor/bin/phpstan analyse --memory-limit 1G

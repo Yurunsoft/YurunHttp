@@ -2,7 +2,6 @@
 
 namespace Yurun\Util\YurunHttp\Traits;
 
-use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 
@@ -19,31 +18,25 @@ trait THandler
     public function parseRedirectLocation($location, $currentUri)
     {
         $locationUri = new Uri($location);
-        if ('' === $locationUri->getHost())
-        {
-            if (!isset($location[0]))
-            {
-                throw new InvalidArgumentException(sprintf('Invalid $location: %s', $location));
+        if ('' === $locationUri->getHost()) {
+            if (!isset($location[0])) {
+                throw new \InvalidArgumentException(sprintf('Invalid $location: %s', $location));
             }
-            if ('/' === $location[0])
-            {
+            if ('/' === $location[0]) {
                 $uri = $currentUri->withQuery('')->withPath($location);
             }
-            else
-            {
+            else {
                 $uri = $currentUri;
                 $path = $currentUri->getPath();
-                if ('/' !== substr($path, -1, 1))
-                {
-                    $path = $path . '/';
+                if ('/' !== substr($path, -1, 1)) {
+                    $path .= '/';
                 }
                 $path .= $location;
                 $uri = $uri->withPath($path);
             }
             $uri = $uri->withHost($currentUri->getHost())->withPort($currentUri->getPort());
         }
-        else
-        {
+        else {
             $uri = $locationUri;
         }
 
@@ -59,10 +52,8 @@ trait THandler
      */
     protected function checkRequests($requests)
     {
-        foreach ($requests as $request)
-        {
-            if (!$request instanceof \Yurun\Util\YurunHttp\Http\Request)
-            {
+        foreach ($requests as $request) {
+            if (!$request instanceof \Yurun\Util\YurunHttp\Http\Request) {
                 throw new \InvalidArgumentException('Request must be instance of \Yurun\Util\YurunHttp\Http\Request');
             }
         }

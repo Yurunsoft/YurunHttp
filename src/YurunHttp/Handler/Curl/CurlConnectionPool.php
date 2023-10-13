@@ -39,8 +39,7 @@ class CurlConnectionPool extends BaseConnectionPool
         $connections = $this->connections;
         $this->connections = [];
         $this->queue = new \SplQueue();
-        foreach ($connections as $connection)
-        {
+        foreach ($connections as $connection) {
             curl_close($connection);
         }
     }
@@ -62,19 +61,15 @@ class CurlConnectionPool extends BaseConnectionPool
      */
     public function getConnection()
     {
-        if ($this->getFree() > 0)
-        {
+        if ($this->getFree() > 0) {
             return $this->queue->dequeue();
         }
-        else
-        {
+        else {
             $maxConnections = $this->getConfig()->getMaxConnections();
-            if (0 != $maxConnections && $this->getCount() >= $maxConnections)
-            {
+            if (0 != $maxConnections && $this->getCount() >= $maxConnections) {
                 return false;
             }
-            else
-            {
+            else {
                 return $this->connections[] = $this->createConnection();
             }
         }
@@ -89,8 +84,7 @@ class CurlConnectionPool extends BaseConnectionPool
      */
     public function release($connection)
     {
-        if (\in_array($connection, $this->connections))
-        {
+        if (\in_array($connection, $this->connections)) {
             $this->queue->enqueue($connection);
         }
     }

@@ -69,12 +69,10 @@ class UploadedFile implements UploadedFileInterface
         $this->fileName = $fileName;
         $this->mediaType = $mediaType;
         $this->tmpFileName = $tmpFileName;
-        if (null === $size)
-        {
+        if (null === $size) {
             $this->size = filesize($tmpFileName);
         }
-        else
-        {
+        else {
             $this->size = $size;
         }
         $this->error = $error;
@@ -97,10 +95,9 @@ class UploadedFile implements UploadedFileInterface
      * @throws \RuntimeException in cases when no stream is available or can be
      *                           created
      */
-    public function getStream()
+    public function getStream(): StreamInterface
     {
-        if (null === $this->stream)
-        {
+        if (null === $this->stream) {
             $this->stream = new FileStream($this->tmpFileName);
         }
 
@@ -143,26 +140,21 @@ class UploadedFile implements UploadedFileInterface
      * @throws \RuntimeException         on any error during the move operation, or on
      *                                   the second or subsequent call to the method
      */
-    public function moveTo($targetPath)
+    public function moveTo($targetPath): void
     {
-        if (!\is_string($targetPath))
-        {
+        if (!\is_string($targetPath)) {
             throw new \InvalidArgumentException('targetPath specified is invalid');
         }
-        if ($this->isMoved)
-        {
+        if ($this->isMoved) {
             throw new \RuntimeException('file can not be moved');
         }
-        if (is_uploaded_file($this->tmpFileName))
-        {
+        if (is_uploaded_file($this->tmpFileName)) {
             $this->isMoved = move_uploaded_file($this->tmpFileName, $targetPath);
         }
-        else
-        {
+        else {
             $this->isMoved = rename($this->tmpFileName, $targetPath);
         }
-        if (!$this->isMoved)
-        {
+        if (!$this->isMoved) {
             throw new \RuntimeException(sprintf('file %s move to %s fail', $this->tmpFileName, $targetPath));
         }
     }
@@ -176,7 +168,7 @@ class UploadedFile implements UploadedFileInterface
      *
      * @return int|null the file size in bytes or null if unknown
      */
-    public function getSize()
+    public function getSize(): ?int
     {
         return $this->size;
     }
@@ -196,7 +188,7 @@ class UploadedFile implements UploadedFileInterface
      *
      * @return int one of PHP's UPLOAD_ERR_XXX constants
      */
-    public function getError()
+    public function getError(): int
     {
         return $this->error;
     }
@@ -214,7 +206,7 @@ class UploadedFile implements UploadedFileInterface
      * @return string|null the filename sent by the client or null if none
      *                     was provided
      */
-    public function getClientFilename()
+    public function getClientFilename(): ?string
     {
         return $this->fileName;
     }
@@ -232,7 +224,7 @@ class UploadedFile implements UploadedFileInterface
      * @return string|null the media type sent by the client or null if none
      *                     was provided
      */
-    public function getClientMediaType()
+    public function getClientMediaType(): ?string
     {
         return $this->mediaType;
     }
@@ -242,7 +234,7 @@ class UploadedFile implements UploadedFileInterface
      *
      * @return string
      */
-    public function getTempFileName()
+    public function getTempFileName(): string
     {
         return $this->tmpFileName;
     }
