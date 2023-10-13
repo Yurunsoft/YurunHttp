@@ -678,7 +678,7 @@ class Curl implements IHandler
         }
         else
         {
-            $userPwd = '';
+            $userPwd = null;
         }
         // 连接超时
         $options[\CURLOPT_CONNECTTIMEOUT_MS] = $request->getAttribute(Attributes::CONNECT_TIMEOUT, 30000);
@@ -688,8 +688,11 @@ class Curl implements IHandler
         $options[\CURLOPT_MAX_RECV_SPEED_LARGE] = $request->getAttribute(Attributes::DOWNLOAD_SPEED);
         // 上传限速
         $options[\CURLOPT_MAX_SEND_SPEED_LARGE] = $request->getAttribute(Attributes::UPLOAD_SPEED);
-        // 连接中用到的用户名和密码
-        $options[\CURLOPT_USERPWD] = $userPwd;
+        if (null !== $userPwd)
+        {
+            // 连接中用到的用户名和密码
+            $options[\CURLOPT_USERPWD] = $userPwd;
+        }
     }
 
     /**
