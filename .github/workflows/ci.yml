@@ -26,13 +26,7 @@ jobs:
 
       - name: Print logs
         if: failure()
-        run: |
-          echo "Http"
-          cat tests/server/Http/log.log
-          echo "Http2"
-          cat tests/server/Http2/log.log
-          echo "WebSocket"
-          cat tests/server/WebSocket/log.log
+        run: php .github/print-logs.php
 
   ci-curl-swoole:
     runs-on: ubuntu-20.04
@@ -70,10 +64,4 @@ jobs:
 
       - name: Print logs
         if: failure()
-        run: |
-          echo "Http"
-          cat tests/server/Http/log.log
-          echo "Http2"
-          cat tests/server/Http2/log.log
-          echo "WebSocket"
-          cat tests/server/WebSocket/log.log
+        run: php .github/print-logs.php
