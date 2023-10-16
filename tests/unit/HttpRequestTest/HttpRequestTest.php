@@ -710,9 +710,9 @@ class HttpRequestTest extends BaseTest
     {
         $this->call(function () {
             $http = new HttpRequest();
-            $response = $http->head('https://www.bing.com');
+            $response = $http->head('https://www.baidu.com');
             $this->assertResponse($response);
-            $response = $http->get('https://www.bing.com');
+            $response = $http->get('https://www.baidu.com');
             $this->assertResponse($response);
             $this->assertTrue('' != $response->body());
         });

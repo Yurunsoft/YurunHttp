@@ -295,10 +295,10 @@ class Curl implements IHandler
             $options[\CURLOPT_RETURNTRANSFER] = true;
         }
         // 保存cookie
-        if (!isset($options[\CURLOPT_COOKIEJAR]))
-        {
-            $options[\CURLOPT_COOKIEJAR] = 'php://memory';
-        }
+        // if (!isset($options[\CURLOPT_COOKIEJAR]))
+        // {
+        //     $options[\CURLOPT_COOKIEJAR] = 'php://memory';
+        // }
         // 允许复用连接
         if (!isset($options[\CURLOPT_FORBID_REUSE]))
         {
@@ -324,7 +324,6 @@ class Curl implements IHandler
         $this->parseSSL($request, $options);
         $this->parseProxy($request, $options);
         $this->parseHeaders($request, $options);
-        $this->parseCookies($request, $options);
         $this->parseNetwork($request, $options);
         curl_setopt_array($handler, $options);
     }
@@ -387,6 +386,7 @@ class Curl implements IHandler
         {
             $requestOptions[\CURLOPT_NOBODY] = true;
         }
+        $this->parseCookies($request, $requestOptions);
         curl_setopt_array($handler, $requestOptions);
     }
 
@@ -649,9 +649,11 @@ class Curl implements IHandler
     private function parseCookies(&$request, &$options)
     {
         $cookieManager = $this->cookieManager;
+        $cookie = [];
         foreach ($request->getCookieParams() as $name => $value)
         {
             $cookieManager->setCookie($name, $value);
+            $cookie[] = $name . '=' . $value;
         }
         $cookie = $cookieManager->getRequestCookieString($request->getUri());
         if ('' !== $cookie)
