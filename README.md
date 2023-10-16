@@ -1,7 +1,7 @@
 # YurunHttp
 
 [![Latest Version](https://poser.pugx.org/yurunsoft/yurun-http/v/stable)](https://packagist.org/packages/yurunsoft/yurun-http)
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Yurunsoft/YurunHttp/ci/v5)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Yurunsoft/YurunHttp/ci.yml?branch=v5)
 [![Php Version](https://img.shields.io/badge/php-%3E=5.5-brightgreen.svg)](https://secure.php.net/)
 [![IMI Doc](https://img.shields.io/badge/docs-passing-green.svg)](http://doc.yurunsoft.com/YurunHttp)
 [![IMI License](https://img.shields.io/github/license/Yurunsoft/YurunHttp.svg)](https://github.com/Yurunsoft/YurunHttp/blob/master/LICENSE)
