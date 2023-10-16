@@ -294,11 +294,6 @@ class Curl implements IHandler
         {
             $options[\CURLOPT_RETURNTRANSFER] = true;
         }
-        // 保存cookie
-        // if (!isset($options[\CURLOPT_COOKIEJAR]))
-        // {
-        //     $options[\CURLOPT_COOKIEJAR] = 'php://memory';
-        // }
         // 允许复用连接
         if (!isset($options[\CURLOPT_FORBID_REUSE]))
         {
@@ -649,11 +644,9 @@ class Curl implements IHandler
     private function parseCookies(&$request, &$options)
     {
         $cookieManager = $this->cookieManager;
-        $cookie = [];
         foreach ($request->getCookieParams() as $name => $value)
         {
             $cookieManager->setCookie($name, $value);
-            $cookie[] = $name . '=' . $value;
         }
         $cookie = $cookieManager->getRequestCookieString($request->getUri());
         if ('' !== $cookie)
