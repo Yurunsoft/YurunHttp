@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swoole: [4.6-php7.4]
+        swoole: [5.0-php8.2]
 
     env:
       SWOOLE_DOCKER_VERSION: ${{ matrix.swoole }}
@@ -20,7 +20,7 @@ jobs:
       - name: Prepare
         run: |
           ./.github/prepare-test.sh swoole
-          docker exec swoole composer require friendsofphp/php-cs-fixer:^2.19 --dev
+          docker exec swoole composer require php-cs-fixer/shim:~3.35.0 --dev
 
       - name: Test
         run: docker exec swoole ./vendor/bin/php-cs-fixer fix --dry-run --diff

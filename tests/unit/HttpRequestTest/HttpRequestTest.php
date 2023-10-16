@@ -20,7 +20,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testHelloWorld()
+    public function testHelloWorld(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -35,7 +35,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testJson()
+    public function testJson(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -51,7 +51,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testGetParams()
+    public function testGetParams(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -69,7 +69,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testGetParams2()
+    public function testGetParams2(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -90,11 +90,11 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testPostParams()
+    public function testPostParams(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
-            $time = time();
+            $time = (string) time();
             $response = $http->post($this->host . '?a=info', [
                 'time'  => $time,
             ]);
@@ -104,7 +104,7 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals($time, isset($data['post']['time']) ? $data['post']['time'] : null);
 
             $http = new HttpRequest();
-            $time = time();
+            $time = (string) time();
             $params = new \stdClass();
             $params->time = $time;
             $this->assertResponse($response);
@@ -119,7 +119,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testPutRequest()
+    public function testPutRequest(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -135,7 +135,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCookieParams()
+    public function testCookieParams(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -158,7 +158,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testRequestHeaders()
+    public function testRequestHeaders(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -188,7 +188,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testResponseHeaders()
+    public function testResponseHeaders(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -203,7 +203,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCookieManager()
+    public function testCookieManager(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -250,7 +250,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testAutoRedirect()
+    public function testAutoRedirect(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -278,7 +278,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDisableAutoRedirect()
+    public function testDisableAutoRedirect(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -295,7 +295,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testLimitMaxRedirects()
+    public function testLimitMaxRedirects(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -311,7 +311,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testRedirectOther()
+    public function testRedirectOther(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -327,7 +327,7 @@ class HttpRequestTest extends BaseTest
     /**
      * @return void
      */
-    public function testRedirectCookie()
+    public function testRedirectCookie(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -346,7 +346,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testUploadSingle()
+    public function testUploadSingle(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -372,7 +372,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testUploadMulti()
+    public function testUploadMulti(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -408,7 +408,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testBody()
+    public function testBody(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -435,7 +435,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testResponseGetRequest()
+    public function testResponseGetRequest(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -447,7 +447,7 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function test304()
+    public function test304(): void
     {
         $this->call(function () {
             /* @phpstan-ignore-next-line */
@@ -463,7 +463,7 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testUriWithAuth()
+    public function testUriWithAuth(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -479,7 +479,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDownload()
+    public function testDownload(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -501,7 +501,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDownloadAutoExt()
+    public function testDownloadAutoExt(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -523,7 +523,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testDownloadWithRedirect()
+    public function testDownloadWithRedirect(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -545,7 +545,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCustomHost()
+    public function testCustomHost(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -561,7 +561,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCoBatch()
+    public function testCoBatch(): void
     {
         $this->call(function () {
             $time = time();
@@ -644,7 +644,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCoBatchTimeout()
+    public function testCoBatchTimeout(): void
     {
         $this->call(function () {
             $result = Batch::run([
@@ -655,7 +655,7 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testMemoryLeak()
+    public function testMemoryLeak(): void
     {
         $this->call(function () {
             $memorys = [1, 2, 3, 4, 5];
@@ -692,7 +692,7 @@ class HttpRequestTest extends BaseTest
         });
     }
 
-    public function testHead()
+    public function testHead(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -706,7 +706,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testBug19()
+    public function testBug19(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -723,7 +723,7 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
-    public function testCookieJar()
+    public function testCookieJar(): void
     {
         $this->call(function () {
             $http = new HttpRequest([

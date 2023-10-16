@@ -9,7 +9,7 @@ require_once dirname(dirname(dirname(__DIR__))) . '/vendor/autoload.php';
 require_once __DIR__ . '/WorkermanHttp.php';
 
 // #### http worker ####
-$http_worker = new Worker('tcp://0.0.0.0:8899');
+$http_worker = new Worker('tcp://0.0.0.0:8898');
 
 $http_worker->protocol = WorkermanHttp::class;
 

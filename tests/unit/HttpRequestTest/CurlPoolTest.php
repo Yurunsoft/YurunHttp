@@ -9,7 +9,7 @@ use Yurun\Util\YurunHttp\Test\BaseTest;
 
 class CurlPoolTest extends BaseTest
 {
-    public function test()
+    public function test(): void
     {
         $this->call(function () {
             // 启用连接池

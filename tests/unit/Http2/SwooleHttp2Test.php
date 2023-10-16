@@ -14,7 +14,7 @@ class SwooleHttp2Test extends BaseTest
 {
     use TSwooleHandlerTest;
 
-    public function testHttp2()
+    public function testHttp2(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -43,7 +43,7 @@ class SwooleHttp2Test extends BaseTest
         });
     }
 
-    public function testHttp2ByUrl()
+    public function testHttp2ByUrl(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -70,7 +70,7 @@ class SwooleHttp2Test extends BaseTest
         });
     }
 
-    public function testMuiltCo()
+    public function testMuiltCo(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);
@@ -127,13 +127,14 @@ class SwooleHttp2Test extends BaseTest
                 {
                     ++$returnCount;
                 }
-            } while ($returnCount < $count);
+            }
+            while ($returnCount < $count);
 
             $client->close();
         });
     }
 
-    public function testPipeline1()
+    public function testPipeline1(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);
@@ -177,7 +178,7 @@ class SwooleHttp2Test extends BaseTest
         });
     }
 
-    public function testPipeline2()
+    public function testPipeline2(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);
@@ -225,7 +226,7 @@ class SwooleHttp2Test extends BaseTest
      *
      * @return void
      */
-    public function testHttp2ResponseGetRequest()
+    public function testHttp2ResponseGetRequest(): void
     {
         $this->call(function () {
             $http = new HttpRequest();
@@ -251,7 +252,7 @@ class SwooleHttp2Test extends BaseTest
      *
      * @return void
      */
-    public function testHttp2ResponseGetRequest2()
+    public function testHttp2ResponseGetRequest2(): void
     {
         $this->call(function () {
             $uri = new Uri($this->http2Host);

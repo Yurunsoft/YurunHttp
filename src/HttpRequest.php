@@ -63,7 +63,7 @@ class HttpRequest
      *
      * @var callable|null
      */
-    public $retryCallback = null;
+    public $retryCallback;
 
     /**
      * 是否使用代理，默认false.
@@ -175,7 +175,7 @@ class HttpRequest
      *
      * @var string
      */
-    public $certPassword = null;
+    public $certPassword;
 
     /**
      * certType规定的私钥的加密类型，支持的密钥类型为"PEM"(默认值)、"DER"和"ENG".
@@ -196,7 +196,7 @@ class HttpRequest
      *
      * @var string
      */
-    public $keyPassword = null;
+    public $keyPassword;
 
     /**
      * 请求方法.
@@ -217,7 +217,7 @@ class HttpRequest
      *
      * @var bool|null
      */
-    public $connectionPool = null;
+    public $connectionPool;
 
     /**
      * 代理认证方式.
@@ -654,7 +654,7 @@ class HttpRequest
      */
     public function retry($retry, $callback = null)
     {
-        $this->retry = $retry < 0 ? 0 : $retry;   //至少请求1次，即重试0次
+        $this->retry = $retry < 0 ? 0 : $retry;   // 至少请求1次，即重试0次
         $this->retryCallback = $callback;
 
         return $this;
@@ -951,7 +951,7 @@ class HttpRequest
                             ->withAttribute(Attributes::RETRY, $this->retry)
                             ->withAttribute(Attributes::RETRY_CALLBACK, $this->retryCallback)
                             ->withProtocolVersion($this->protocolVersion)
-                            ;
+        ;
         foreach ($this->proxy as $name => $value)
         {
             $request = $request->withAttribute('proxy.' . $name, $value);

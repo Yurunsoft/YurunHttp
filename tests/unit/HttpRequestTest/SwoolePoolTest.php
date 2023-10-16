@@ -12,7 +12,7 @@ class SwoolePoolTest extends BaseTest
 {
     use TSwooleHandlerTest;
 
-    public function test()
+    public function test(): void
     {
         $this->call(function () {
             // 启用连接池

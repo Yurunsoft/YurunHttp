@@ -153,7 +153,7 @@ class WorkermanHttp
         }
         elseif (preg_match("/\r\ncontent-length: ?(\d+)/i", $header, $match))
         {
-            $length = $head_len + $match[1];
+            $length = $head_len + (int) $match[1];
         }
         else
         {
@@ -256,6 +256,7 @@ class WorkermanHttp
             unset($connection->__header);
         }
 
+        // @phpstan-ignore-next-line
         if (isset($response->file))
         {
             $file = $response->file['file'];

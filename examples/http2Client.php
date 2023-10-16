@@ -23,7 +23,8 @@ go(function () {
         {
             $response = $client->recv();
             var_dump($response->body());
-        } while ($response->success);
+        }
+        while ($response->success);
     });
 
     // 客户端请求和响应获取
@@ -52,7 +53,8 @@ go(function () {
         {
             ++$returnCount;
         }
-    } while ($returnCount < $count);
+    }
+    while ($returnCount < $count);
 
     $client->close();
 });

@@ -10,7 +10,7 @@ class DefaultHandlerTest extends BaseTest
 {
     use TSwooleHandlerTest;
 
-    public function testCurl()
+    public function testCurl(): void
     {
         if (\extension_loaded('swoole'))
         {
@@ -21,7 +21,7 @@ class DefaultHandlerTest extends BaseTest
         $this->assertInstanceOf(\Yurun\Util\YurunHttp\Handler\Curl::class, YurunHttp::getHandler());
     }
 
-    public function testSwoole()
+    public function testSwoole(): void
     {
         $this->call(function () {
             $this->assertNotEquals(-1, Coroutine::getuid());
@@ -31,7 +31,7 @@ class DefaultHandlerTest extends BaseTest
         });
     }
 
-    public function testSetDefaultHandler()
+    public function testSetDefaultHandler(): void
     {
         YurunHttp::setDefaultHandler(null);
         $this->assertNull(YurunHttp::getDefaultHandler());
