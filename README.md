@@ -1,7 +1,7 @@
 # YurunHttp
 
 [![Latest Version](https://poser.pugx.org/yurunsoft/yurun-http/v/stable)](https://packagist.org/packages/yurunsoft/yurun-http)
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Yurunsoft/YurunHttp/ci/dev)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Yurunsoft/YurunHttp/ci/v5)
 [![Php Version](https://img.shields.io/badge/php-%3E=5.5-brightgreen.svg)](https://secure.php.net/)
 [![IMI Doc](https://img.shields.io/badge/docs-passing-green.svg)](http://doc.yurunsoft.com/YurunHttp)
 [![IMI License](https://img.shields.io/github/license/Yurunsoft/YurunHttp.svg)](https://github.com/Yurunsoft/YurunHttp/blob/master/LICENSE)
@@ -46,6 +46,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 > 每个小版本的更新日志请移步到 Release 查看
 
+v5.0.0 支持 `psr/http-message` `~2.0` 版本 (PHP >= 7.1)
+
 v4.3.0 新增支持连接池
 
 v4.2.0 重构 Swoole 处理器，并发请求性能大幅提升 (PHP 版本依赖降为 >= 5.5)
@@ -79,7 +81,7 @@ v1.0-1.3 初期版本迭代
 ```json
 {
     "require": {
-        "yurunsoft/yurun-http": "^4.3.0"
+        "yurunsoft/yurun-http": "~5.0"
     }
 }
 ```
