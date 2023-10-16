@@ -293,11 +293,6 @@ class Curl implements IHandler
         {
             $options[\CURLOPT_RETURNTRANSFER] = true;
         }
-        // 保存cookie
-        if (!isset($options[\CURLOPT_COOKIEJAR]))
-        {
-            $options[\CURLOPT_COOKIEJAR] = 'php://memory';
-        }
         // 允许复用连接
         if (!isset($options[\CURLOPT_FORBID_REUSE]))
         {
@@ -323,7 +318,6 @@ class Curl implements IHandler
         $this->parseSSL($request, $options);
         $this->parseProxy($request, $options);
         $this->parseHeaders($request, $options);
-        $this->parseCookies($request, $options);
         $this->parseNetwork($request, $options);
         curl_setopt_array($handler, $options);
     }
@@ -386,6 +380,7 @@ class Curl implements IHandler
         {
             $requestOptions[\CURLOPT_NOBODY] = true;
         }
+        $this->parseCookies($request, $requestOptions);
         curl_setopt_array($handler, $requestOptions);
     }
 
@@ -677,7 +672,7 @@ class Curl implements IHandler
         }
         else
         {
-            $userPwd = '';
+            $userPwd = null;
         }
         // 连接超时
         $options[\CURLOPT_CONNECTTIMEOUT_MS] = $request->getAttribute(Attributes::CONNECT_TIMEOUT, 30000);
@@ -687,8 +682,11 @@ class Curl implements IHandler
         $options[\CURLOPT_MAX_RECV_SPEED_LARGE] = $request->getAttribute(Attributes::DOWNLOAD_SPEED);
         // 上传限速
         $options[\CURLOPT_MAX_SEND_SPEED_LARGE] = $request->getAttribute(Attributes::UPLOAD_SPEED);
-        // 连接中用到的用户名和密码
-        $options[\CURLOPT_USERPWD] = $userPwd;
+        if (null !== $userPwd)
+        {
+            // 连接中用到的用户名和密码
+            $options[\CURLOPT_USERPWD] = $userPwd;
+        }
     }
 
     /**
