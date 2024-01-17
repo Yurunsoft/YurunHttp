@@ -408,8 +408,8 @@ class Swoole implements IHandler
             }
             else
             {
-                // 状态码为5XX或者0才需要重试
-                $retry = (0 === $statusCode || (5 === (int) ($statusCode / 100)));
+                // 状态码为5XX或者<0才需要重试
+                $retry = ($statusCode <= 0 || (5 === (int) ($statusCode / 100)));
             }
             if ($retry)
             {
