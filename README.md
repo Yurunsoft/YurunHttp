@@ -46,6 +46,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 > 每个小版本的更新日志请移步到 Release 查看
 
+v5.0.1 支持 WebSocket 压缩及指定 Opcode
+
 v5.0.0 支持 `psr/http-message` `~2.0` 版本 (PHP >= 7.1)
 
 v4.3.0 新增支持连接池
@@ -230,6 +232,8 @@ $config = $pool->getConfig();
 go(function(){
     $url = 'ws://127.0.0.1:1234/';
     $http = new HttpRequest;
+    // 启用压缩
+    $http->setAttribute('websocket.compression', true);
     $client = $http->websocket($url);
     if(!$client->isConnected())
     {
