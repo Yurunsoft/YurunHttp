@@ -233,13 +233,18 @@ go(function(){
     $url = 'ws://127.0.0.1:1234/';
     $http = new HttpRequest;
     // 启用压缩
-    $http->setAttribute('websocket.compression', true);
+    // $http->websocketCompression(true);
     $client = $http->websocket($url);
     if(!$client->isConnected())
     {
         throw new \RuntimeException('Connect failed');
     }
+    // 文本
     $client->send('data');
+    // 二进制
+    $client->send('data', \Yurun\Util\YurunHttp\WebSocket\Opcode::BINARY);
+    // 更多 Opcode 预定义在：\Yurun\Util\YurunHttp\WebSocket\Opcode
+    // 也支持 WebSocket 标准中的其它 Opcode
     $recv = $client->recv();
     var_dump('recv:', $recv);
     $client->close();
