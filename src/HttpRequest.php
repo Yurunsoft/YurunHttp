@@ -220,6 +220,13 @@ class HttpRequest
     public $connectionPool;
 
     /**
+     * 是否启用 WebSocket 压缩.
+     *
+     * @var bool
+     */
+    public $websocketCompression = false;
+
+    /**
      * 代理认证方式.
      *
      * @var array
@@ -844,6 +851,18 @@ class HttpRequest
     }
 
     /**
+     * 设置是否启用 WebSocket 压缩.
+     *
+     * @return static
+     */
+    public function websocketCompression(bool $websocketCompression): self
+    {
+        $this->websocketCompression = $websocketCompression;
+
+        return $this;
+    }
+
+    /**
      * 设置是否启用连接池.
      *
      * @param bool $connectionPool
@@ -950,6 +969,7 @@ class HttpRequest
                             ->withAttribute(Attributes::CONNECTION_POOL, $this->connectionPool)
                             ->withAttribute(Attributes::RETRY, $this->retry)
                             ->withAttribute(Attributes::RETRY_CALLBACK, $this->retryCallback)
+                            ->withAttribute(Attributes::WEBSOCKET_COMPRESSION, $this->websocketCompression)
                             ->withProtocolVersion($this->protocolVersion)
         ;
         foreach ($this->proxy as $name => $value)
