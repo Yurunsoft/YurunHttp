@@ -644,6 +644,53 @@ class HttpRequestTest extends BaseTest
      *
      * @return void
      */
+    public function testCoBatchUploadMulti(): void
+    {
+        $this->call(function () {
+            $file1 = new UploadedFile(basename(__FILE__), MediaType::TEXT_HTML, __FILE__);
+            $file2Path = __DIR__ . '/1.txt';
+            $file2 = new UploadedFile('1.txt', MediaType::TEXT_PLAIN, $file2Path);
+            $http1 = new HttpRequest();
+            $http1->url($this->host . '?a=info');
+            $http1->method('POST');
+            $http1->content([
+                'file' => $file1,
+            ]);
+            $http2 = new HttpRequest();
+            $http2->url($this->host . '?a=info');
+            $http2->method('POST');
+            $http2->content([
+                'file' => $file2,
+            ]);
+            $result = Batch::run([
+                'http1' => $http1,
+                'http2' => $http2,
+            ]);
+            foreach ($result as $k => $response) {
+                $this->assertResponse($response);
+                $data = $response->json(true);
+                $this->assertTrue(isset($data['files']['file']));
+                $file = $data['files']['file'];
+                if ($k === 'http1') {
+                    $content = file_get_contents(__FILE__);
+                    $this->assertEquals(MediaType::TEXT_HTML, $file['type']);
+                } elseif ($k === 'http2') {
+                    $content = file_get_contents($file2Path);
+                    $this->assertEquals(MediaType::TEXT_PLAIN, $file['type']);
+                } else {
+                    $content = '';
+                }
+                $this->assertEquals(\strlen($content), $file['size']);
+                $this->assertEquals(md5($content), $file['hash']);
+            }
+        });
+    }
+
+    /**
+     * batch.
+     *
+     * @return void
+     */
     public function testCoBatchTimeout(): void
     {
         $this->call(function () {
