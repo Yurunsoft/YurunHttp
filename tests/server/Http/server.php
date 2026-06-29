@@ -76,8 +76,17 @@ $http_worker->onMessage = function (TcpConnection $connection, Request $request)
             break;
         case 'redirectOther':
             $connection->send(new Response(302, [
-                'Location' => 'https://www.httpbin.org/get?id=1',
+                'Location' => '/?a=redirectTarget&id=1',
             ]));
+            break;
+        case 'redirectTarget':
+            $args = $request->get();
+            unset($args['a']); // strip routing param, mimic httpbin behavior
+            $connection->send(new Response(200, [
+                'Content-Type' => 'application/json',
+            ], json_encode([
+                'args' => $args,
+            ])));
             break;
         case 'redirect':
             $connection->send(new Response(302, [
