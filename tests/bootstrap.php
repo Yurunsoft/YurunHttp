@@ -10,7 +10,7 @@ foreach (['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy', 'ALL_PROXY',
 }
 
 define('SWOOLE_ON', extension_loaded('swoole'));
-define('IS_WIN', 'WIN' === strtoupper(substr(PHP_OS, 0, 3)));
+define('IS_WIN', 'WIN' === strtoupper(substr(\PHP_OS, 0, 3)));
 
 /**
  * @param string $name
@@ -49,7 +49,9 @@ register_shutdown_function(function () {
                 `kill -15 {$GLOBALS['_wss_pid']} 2>/dev/null`;
             }
             echo 'WSS server stopped!', \PHP_EOL;
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e)
+        {
             echo 'WSS server stop failed: ', $e->getMessage(), \PHP_EOL;
         }
     }
@@ -62,7 +64,9 @@ register_shutdown_function(function () {
             echo 'Stopping Http2 server...', \PHP_EOL;
             echo `{$cmd}`, \PHP_EOL;
             echo 'Http2 server stopped!', \PHP_EOL;
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e)
+        {
             echo 'Http2 server stop failed: ', $e->getMessage(), \PHP_EOL;
         }
     }
@@ -101,7 +105,9 @@ register_shutdown_function(function () {
             }
 
             echo $name, ' stopped!', \PHP_EOL;
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e)
+        {
             echo $name, ' stop failed: ', $e->getMessage(), \PHP_EOL;
         }
     }
@@ -126,7 +132,9 @@ register_shutdown_function(function () {
                     }
                 }
             }
-        } catch (\Throwable $e) {
+        }
+        catch (\Throwable $e)
+        {
             // ignore
         }
     }
@@ -135,10 +143,10 @@ register_shutdown_function(function () {
 });
 
 /**
- * Start a PHP server process in background using proc_open.
+ * Start a PHP server process in background.
  *
  * On Windows: uses proc_open, records PID for taskkill /T cleanup later.
- * On Linux/Mac: uses Workerman daemon mode (php ... start -d).
+ * On Linux/Mac: calls start-server.sh shell script (Workerman daemon mode).
  *
  * @param string $phpFile Absolute path to the PHP file
  * @param string $name    Human-readable name for logging
@@ -173,7 +181,7 @@ function startServerProcess($phpFile, $name)
     }
     else
     {
-        $cmd = 'php ' . escapeshellarg($phpFile) . ' start -d';
+        $cmd = dirname($phpFile) . '/start-server.sh';
         echo `{$cmd}`, \PHP_EOL;
         $GLOBALS['_server_handles'][] = [
             'proc'    => null,
@@ -211,7 +219,7 @@ function waitForWebSocketServer($port)
     {
         $context = stream_context_create(['http' => ['timeout' => 1]]);
         @file_get_contents('http://127.0.0.1:' . $port . '/', false, $context);
-        if (isset($http_response_header[0]) && false !== strpos($http_response_header[0], '400'))
+        if (isset($http_response_header[0]) && str_contains($http_response_header[0], '400'))
         {
             return;
         }
@@ -247,7 +255,7 @@ if (SWOOLE_ON && !IS_WIN)
     {
         $context = stream_context_create(['http' => ['timeout' => 1]]);
         @file_get_contents('http://127.0.0.1:8902/', false, $context);
-        if (isset($http_response_header[0]) && false !== strpos($http_response_header[0], '400'))
+        if (isset($http_response_header[0]) && str_contains($http_response_header[0], '400'))
         {
             $serverStarted = true;
             break;
