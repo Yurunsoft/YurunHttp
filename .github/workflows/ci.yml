@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   ci-only-curl:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -29,7 +29,7 @@ jobs:
         run: php .github/print-logs.php
 
   ci-curl-swoole:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
