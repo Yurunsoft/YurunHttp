@@ -293,7 +293,7 @@ class CookieManager
                     $path = \dirname($path);
                 }
             }
-            if ('\\' === \DIRECTORY_SEPARATOR && str_contains($path, \DIRECTORY_SEPARATOR))
+            if ('\\' === \DIRECTORY_SEPARATOR && false !== strpos($path, \DIRECTORY_SEPARATOR))
             {
                 $path = str_replace(\DIRECTORY_SEPARATOR, '/', $path);
             }
