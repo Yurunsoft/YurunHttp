@@ -15,7 +15,7 @@ jobs:
       PHP_DOCKER_VERSION: ${{ matrix.php }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: prepare
         run: |
@@ -42,6 +42,9 @@ jobs:
             5.0-php8.0,
             5.0-php8.1,
             5.0-php8.2,
+            6.2-php8.3,
+            6.2-php8.4,
+            6.2-php8.5,
             4.8-php7.2,
             4.8-php7.3,
             4.8-php7.4,
@@ -53,7 +56,7 @@ jobs:
       SWOOLE_DOCKER_VERSION: ${{ matrix.swoole }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: prepare
         run: |
