@@ -12,4 +12,4 @@ RUN apt install --allow-unauthenticated -y --force-yes unzip ca-certificates
 
 RUN docker-php-ext-install pcntl > /dev/null
 
-RUN curl -o /usr/bin/composer https://getcomposer.org/composer-2.phar && chmod +x /usr/bin/composer
+RUN curl -o /usr/bin/composer https://getcomposer.org/composer-1.phar && chmod +x /usr/bin/composer && composer self-update --2.2
