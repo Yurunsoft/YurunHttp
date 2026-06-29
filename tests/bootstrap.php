@@ -30,7 +30,7 @@ function testEnv($name, $default = null)
 }
 
 /**
- * Store for background server info.
+ * Store for background server info (Windows only).
  * Each item: ['proc' => resource|null, 'pid' => int, 'phpFile' => string, 'name' => string]
  */
 $GLOBALS['_server_handles'] = [];
@@ -39,51 +39,19 @@ $GLOBALS['_server_handles'] = [];
 register_shutdown_function(function () {
     echo \PHP_EOL, '=== Cleaning up servers ===', \PHP_EOL;
 
-    // Stop WSS server (Swoole)
-    if (isset($GLOBALS['_wss_pid']) && $GLOBALS['_wss_pid'])
+    if (IS_WIN)
     {
-        try {
-            echo 'Stopping WSS server...', \PHP_EOL;
-            if (!IS_WIN)
-            {
-                `kill -15 {$GLOBALS['_wss_pid']} 2>/dev/null`;
-            }
-            echo 'WSS server stopped!', \PHP_EOL;
-        }
-        catch (\Throwable $e)
+        // Kill Workerman servers started via proc_open
+        foreach ($GLOBALS['_server_handles'] as $item)
         {
-            echo 'WSS server stop failed: ', $e->getMessage(), \PHP_EOL;
-        }
-    }
-
-    // Stop Http2 server
-    if (SWOOLE_ON && !IS_WIN)
-    {
-        try {
-            $cmd = __DIR__ . '/server/Http2/stop-server.sh';
-            echo 'Stopping Http2 server...', \PHP_EOL;
-            echo `{$cmd}`, \PHP_EOL;
-            echo 'Http2 server stopped!', \PHP_EOL;
-        }
-        catch (\Throwable $e)
-        {
-            echo 'Http2 server stop failed: ', $e->getMessage(), \PHP_EOL;
-        }
-    }
-
-    // Kill Workerman servers
-    foreach ($GLOBALS['_server_handles'] as $item)
-    {
-        try {
-            $name = $item['name'];
-            $pid = $item['pid'];
-            $proc = $item['proc'];
-            $phpFile = $item['phpFile'];
-
-            echo 'Stopping ', $name, '...', \PHP_EOL;
-
-            if (IS_WIN)
+            try
             {
+                $name = $item['name'];
+                $pid = $item['pid'];
+                $proc = $item['proc'];
+
+                echo 'Stopping ', $name, '...', \PHP_EOL;
+
                 // Kill the ENTIRE process tree (Workerman spawns child workers)
                 if ($pid > 0)
                 {
@@ -94,28 +62,18 @@ register_shutdown_function(function () {
                 {
                     proc_close($proc);
                 }
+
+                echo $name, ' stopped!', \PHP_EOL;
             }
-            else
+            catch (\Throwable $e)
             {
-                // On Linux/Mac, use Workerman's built-in stop command
-                if ($phpFile)
-                {
-                    `php {$phpFile} stop 2>/dev/null`;
-                }
+                echo $item['name'], ' stop failed: ', $e->getMessage(), \PHP_EOL;
             }
-
-            echo $name, ' stopped!', \PHP_EOL;
         }
-        catch (\Throwable $e)
+
+        // Final safety net: kill any remaining php.exe on our test ports
+        try
         {
-            echo $name, ' stop failed: ', $e->getMessage(), \PHP_EOL;
-        }
-    }
-
-    // Final safety net: kill any remaining php.exe on our test ports
-    if (IS_WIN)
-    {
-        try {
             foreach ([8898, 8900] as $port)
             {
                 $output = `netstat -ano 2>nul | findstr ":{$port} " | findstr "LISTENING"`;
@@ -138,24 +96,46 @@ register_shutdown_function(function () {
             // ignore
         }
     }
+    else
+    {
+        // Linux: stop servers via stop-server.sh (previous version's method)
+        $cmd = __DIR__ . '/server/Http/stop-server.sh';
+        echo 'Stoping http server...', \PHP_EOL;
+        echo `{$cmd}`, \PHP_EOL;
+        echo 'Http Server stoped!', \PHP_EOL;
+
+        if (SWOOLE_ON)
+        {
+            $cmd = __DIR__ . '/server/WebSocket/stop-server.sh';
+            echo 'Stoping WebSocket server...', \PHP_EOL;
+            echo `{$cmd}`, \PHP_EOL;
+            echo 'WebSocket Server stoped!', \PHP_EOL;
+
+            $cmd = __DIR__ . '/server/Http2/stop-server.sh';
+            echo 'Stoping Http2 server...', \PHP_EOL;
+            echo `{$cmd}`, \PHP_EOL;
+            echo 'Http2 Server stoped!', \PHP_EOL;
+        }
+    }
 
     echo '=== Cleanup complete ===', \PHP_EOL;
 });
 
-/**
- * Start a PHP server process in background.
- *
- * On Windows: uses proc_open, records PID for taskkill /T cleanup later.
- * On Linux/Mac: calls start-server.sh shell script (Workerman daemon mode).
- *
- * @param string $phpFile Absolute path to the PHP file
- * @param string $name    Human-readable name for logging
- *
- * @return void
- */
-function startServerProcess($phpFile, $name)
+if (IS_WIN)
 {
-    if (IS_WIN)
+    // ===== Windows: start servers via proc_open (current logic) =====
+
+    /**
+     * Start a PHP server process in background.
+     *
+     * Uses proc_open, records PID for taskkill /T cleanup later.
+     *
+     * @param string $phpFile Absolute path to the PHP file
+     * @param string $name    Human-readable name for logging
+     *
+     * @return void
+     */
+    function startServerProcess($phpFile, $name)
     {
         $logFile = dirname($phpFile) . '/log.log';
         $descriptorspec = [
@@ -179,110 +159,68 @@ function startServerProcess($phpFile, $name)
             'name'    => $name,
         ];
     }
-    else
-    {
-        $cmd = dirname($phpFile) . '/start-server.sh';
-        echo `{$cmd}`, \PHP_EOL;
-        $GLOBALS['_server_handles'][] = [
-            'proc'    => null,
-            'pid'     => 0,
-            'phpFile' => $phpFile,
-            'name'    => $name,
-        ];
-    }
-}
 
-/**
- * Wait for HTTP server to be ready.
- */
-function waitForServer($port, $checkBody = 'YurunHttp')
-{
-    $url = 'http://127.0.0.1:' . $port . '/';
-    for ($i = 0; $i < 30; ++$i)
+    /**
+     * Wait for HTTP server to be ready.
+     */
+    function waitForServer($port, $checkBody = 'YurunHttp')
     {
-        $context = stream_context_create(['http' => ['timeout' => 1]]);
-        if ($checkBody === @file_get_contents($url, false, $context))
+        $url = 'http://127.0.0.1:' . $port . '/';
+        for ($i = 0; $i < 30; ++$i)
         {
-            return;
+            $context = stream_context_create(['http' => ['timeout' => 1]]);
+            if ($checkBody === @file_get_contents($url, false, $context))
+            {
+                return;
+            }
+            sleep(1);
         }
-        sleep(1);
+        throw new \RuntimeException('Server start failed on port ' . $port);
     }
-    throw new \RuntimeException('Server start failed on port ' . $port);
-}
 
-/**
- * Wait for WebSocket server to be ready.
- */
-function waitForWebSocketServer($port)
-{
-    for ($i = 0; $i < 30; ++$i)
+    /**
+     * Wait for WebSocket server to be ready.
+     */
+    function waitForWebSocketServer($port)
     {
-        $context = stream_context_create(['http' => ['timeout' => 1]]);
-        @file_get_contents('http://127.0.0.1:' . $port . '/', false, $context);
-        if (isset($http_response_header[0]) && str_contains($http_response_header[0], '400'))
+        for ($i = 0; $i < 30; ++$i)
         {
-            return;
+            $context = stream_context_create(['http' => ['timeout' => 1]]);
+            @file_get_contents('http://127.0.0.1:' . $port . '/', false, $context);
+            if (isset($http_response_header[0]) && str_contains($http_response_header[0], '400'))
+            {
+                return;
+            }
+            sleep(1);
         }
-        sleep(1);
+        throw new \RuntimeException('WebSocket server start failed on port ' . $port);
     }
-    throw new \RuntimeException('WebSocket server start failed on port ' . $port);
+
+    // --- Http Server (Workerman) ---
+    echo 'Starting Http server...', \PHP_EOL;
+    startServerProcess(__DIR__ . '/server/Http/server.php', 'Http server');
+    waitForServer(8898);
+    echo 'Http server started!', \PHP_EOL;
+
+    // --- WebSocket Server (Workerman) ---
+    echo 'Starting WebSocket server...', \PHP_EOL;
+    startServerProcess(__DIR__ . '/server/WebSocket/server.php', 'WebSocket server');
+    waitForWebSocketServer(8900);
+    echo 'WebSocket server started!', \PHP_EOL;
 }
-
-// --- Http Server (Workerman) ---
-echo 'Starting Http server...', \PHP_EOL;
-startServerProcess(__DIR__ . '/server/Http/server.php', 'Http server');
-waitForServer(8898);
-echo 'Http server started!', \PHP_EOL;
-
-// --- WebSocket Server (Workerman) ---
-echo 'Starting WebSocket server...', \PHP_EOL;
-startServerProcess(__DIR__ . '/server/WebSocket/server.php', 'WebSocket server');
-waitForWebSocketServer(8900);
-echo 'WebSocket server started!', \PHP_EOL;
-
-// --- WSS Server (Swoole-based, only on non-Windows with Swoole) ---
-if (SWOOLE_ON && !IS_WIN)
+else
 {
-    echo 'Starting WSS server (Swoole)...', \PHP_EOL;
-    $cmd = 'nohup php ' . escapeshellarg(__DIR__ . '/server/WebSocket/wss-server.php') . ' > /dev/null 2>&1 & echo $!';
-    $wssPid = trim(`{$cmd}`);
-    if ($wssPid)
-    {
-        $GLOBALS['_wss_pid'] = $wssPid;
-    }
-    $serverStarted = false;
-    for ($i = 0; $i < 10; ++$i)
-    {
-        $context = stream_context_create(['http' => ['timeout' => 1]]);
-        @file_get_contents('http://127.0.0.1:8902/', false, $context);
-        if (isset($http_response_header[0]) && str_contains($http_response_header[0], '400'))
-        {
-            $serverStarted = true;
-            break;
-        }
-        sleep(1);
-    }
-    if ($serverStarted)
-    {
-        echo 'WSS server started!', \PHP_EOL;
-    }
-    else
-    {
-        throw new \RuntimeException('WSS server start failed');
-    }
-}
+    // ===== Linux: start servers via start-server.sh (previous version's method) =====
 
-// --- Http2 Server (Swoole-only, not available on Windows) ---
-if (SWOOLE_ON && !IS_WIN)
-{
-    $cmd = __DIR__ . '/server/Http2/start-server.sh';
-    echo 'Starting Http2 server...', \PHP_EOL;
+    // Http Server
+    $cmd = __DIR__ . '/server/Http/start-server.sh';
+    echo 'Starting Http server...', \PHP_EOL;
     echo `{$cmd}`, \PHP_EOL;
     $serverStarted = false;
     for ($i = 0; $i < 10; ++$i)
     {
-        @file_get_contents(testEnv('HTTP2_SERVER_HOST', 'http://127.0.0.1:8901/'));
-        if (isset($http_response_header[0]) && 'HTTP/1.1 200 OK' === $http_response_header[0])
+        $context = stream_context_create(['http' => ['timeout' => 1]]);
+        if ('YurunHttp' === @file_get_contents(testEnv('HTTP_SERVER_HOST', 'http://127.0.0.1:8898/'), false, $context))
         {
             $serverStarted = true;
             break;
@@ -291,18 +229,61 @@ if (SWOOLE_ON && !IS_WIN)
     }
     if ($serverStarted)
     {
-        echo 'Http2 server started!', \PHP_EOL;
+        echo 'Http server started!', \PHP_EOL;
     }
     else
     {
-        throw new \RuntimeException('Http2 server start failed');
+        throw new \RuntimeException('Http server start failed');
     }
-}
-elseif (!SWOOLE_ON)
-{
-    echo 'Http2 server skipped (Swoole not available)', \PHP_EOL;
-}
-else
-{
-    echo 'Http2 server skipped (not supported on Windows)', \PHP_EOL;
+
+    if (SWOOLE_ON)
+    {
+        // WebSocket Server
+        $cmd = __DIR__ . '/server/WebSocket/start-server.sh';
+        echo 'Starting WebSocket server...', \PHP_EOL;
+        echo `{$cmd}`, \PHP_EOL;
+        $serverStarted = false;
+        for ($i = 0; $i < 10; ++$i)
+        {
+            @file_get_contents(str_replace('ws://', 'http://', testEnv('WS_SERVER_HOST', 'ws://127.0.0.1:8900/')));
+            if (isset($http_response_header[0]) && 'HTTP/1.1 400 Bad Request' === $http_response_header[0])
+            {
+                $serverStarted = true;
+                break;
+            }
+            sleep(1);
+        }
+        if ($serverStarted)
+        {
+            echo 'WebSocekt server started!', \PHP_EOL;
+        }
+        else
+        {
+            throw new \RuntimeException('WebSocekt server start failed');
+        }
+
+        // Http2 Server
+        $cmd = __DIR__ . '/server/Http2/start-server.sh';
+        echo 'Starting Http2 server...', \PHP_EOL;
+        echo `{$cmd}`, \PHP_EOL;
+        $serverStarted = false;
+        for ($i = 0; $i < 10; ++$i)
+        {
+            @file_get_contents(testEnv('HTTP2_SERVER_HOST', 'http://127.0.0.1:8901/'));
+            if (isset($http_response_header[0]) && 'HTTP/1.1 200 OK' === $http_response_header[0])
+            {
+                $serverStarted = true;
+                break;
+            }
+            sleep(1);
+        }
+        if ($serverStarted)
+        {
+            echo 'Http2 server started!', \PHP_EOL;
+        }
+        else
+        {
+            throw new \RuntimeException('Http2 server start failed');
+        }
+    }
 }
