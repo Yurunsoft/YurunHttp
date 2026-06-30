@@ -115,6 +115,26 @@ register_shutdown_function(function () {
             echo 'Stoping Http2 server...', \PHP_EOL;
             echo `{$cmd}`, \PHP_EOL;
             echo 'Http2 Server stoped!', \PHP_EOL;
+
+            $pidFile = __DIR__ . '/server/WebSocket/wss-server.pid';
+            if (is_file($pidFile))
+            {
+                $pid = (int) file_get_contents($pidFile);
+                if ($pid > 0)
+                {
+                    echo 'Stoping WSS server (PID: ' . $pid . ')...', \PHP_EOL;
+                    if (function_exists('posix_kill'))
+                    {
+                        posix_kill($pid, \SIGTERM);
+                    }
+                    else
+                    {
+                        `kill -15 {$pid} 2>/dev/null`;
+                    }
+                }
+                @unlink($pidFile);
+                echo 'WSS Server stoped!', \PHP_EOL;
+            }
         }
     }
 
@@ -246,7 +266,7 @@ else
         for ($i = 0; $i < 10; ++$i)
         {
             @file_get_contents(str_replace('ws://', 'http://', testEnv('WS_SERVER_HOST', 'ws://127.0.0.1:8900/')));
-            if (isset($http_response_header[0]) && 'HTTP/1.1 400 Bad Request' === $http_response_header[0])
+            if (isset($http_response_header[0]) && false !== stripos($http_response_header[0], '400 Bad Request'))
             {
                 $serverStarted = true;
                 break;
@@ -284,6 +304,32 @@ else
         else
         {
             throw new \RuntimeException('Http2 server start failed');
+        }
+
+        // WSS Server (Swoole SSL WebSocket)
+        $wssPidFile = __DIR__ . '/server/WebSocket/wss-server.pid';
+        $cmd = 'nohup /usr/bin/env php "' . __DIR__ . '/server/WebSocket/wss-server.php" > "' . __DIR__ . '/server/WebSocket/wss-server.log" 2>&1 & echo $! > "' . $wssPidFile . '"';
+        echo 'Starting WSS server...', \PHP_EOL;
+        echo `{$cmd}`, \PHP_EOL;
+        $serverStarted = false;
+        for ($i = 0; $i < 10; ++$i)
+        {
+            $context = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
+            @file_get_contents('https://127.0.0.1:8902/', false, $context);
+            if (isset($http_response_header[0]) && false !== stripos($http_response_header[0], '400'))
+            {
+                $serverStarted = true;
+                break;
+            }
+            sleep(1);
+        }
+        if ($serverStarted)
+        {
+            echo 'WSS server started!', \PHP_EOL;
+        }
+        else
+        {
+            throw new \RuntimeException('WSS server start failed');
         }
     }
 }
