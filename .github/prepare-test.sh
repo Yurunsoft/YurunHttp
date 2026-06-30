@@ -4,11 +4,7 @@ __DIR__=$(cd `dirname $0`; pwd)
 
 cd $__DIR__
 
-if [[ `expr $PHP_DOCKER_VERSION \< 7.1` -eq 0 ]]; then
-  export PHP_DOCKER_FILE="php.dockerfile"
-else
-  export PHP_DOCKER_FILE="php-low.dockerfile"
-fi
+export PHP_DOCKER_FILE="php.dockerfile"
 
 containerName=$1
 

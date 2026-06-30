@@ -29,7 +29,7 @@ function testEnv($name, $default = null)
     return $result;
 }
 
-/**
+/*
  * Store for background server info (Windows only).
  * Each item: ['proc' => resource|null, 'pid' => int, 'phpFile' => string, 'name' => string]
  */
@@ -55,7 +55,7 @@ register_shutdown_function(function () {
                 // Kill the ENTIRE process tree (Workerman spawns child workers)
                 if ($pid > 0)
                 {
-                    `taskkill /F /T /PID {$pid} 2>nul`;
+                    shell_exec("taskkill /F /T /PID {$pid} 2>nul");
                 }
                 // Also close the proc_open handle
                 if (is_resource($proc))
@@ -76,7 +76,7 @@ register_shutdown_function(function () {
         {
             foreach ([8898, 8900] as $port)
             {
-                $output = `netstat -ano 2>nul | findstr ":{$port} " | findstr "LISTENING"`;
+                $output = shell_exec("netstat -ano 2>nul | findstr \":{$port} \" | findstr \"LISTENING\"");
                 if ($output)
                 {
                     $lines = explode("\n", trim($output));
@@ -85,7 +85,7 @@ register_shutdown_function(function () {
                         $line = trim($line);
                         if (preg_match('/\s+(\d+)$/', $line, $m))
                         {
-                            `taskkill /F /T /PID {$m[1]} 2>nul`;
+                            shell_exec("taskkill /F /T /PID {$m[1]} 2>nul");
                         }
                     }
                 }
@@ -101,19 +101,19 @@ register_shutdown_function(function () {
         // Linux: stop servers via stop-server.sh (previous version's method)
         $cmd = __DIR__ . '/server/Http/stop-server.sh';
         echo 'Stoping http server...', \PHP_EOL;
-        echo `{$cmd}`, \PHP_EOL;
+        echo shell_exec($cmd), \PHP_EOL;
         echo 'Http Server stoped!', \PHP_EOL;
 
         if (SWOOLE_ON)
         {
             $cmd = __DIR__ . '/server/WebSocket/stop-server.sh';
             echo 'Stoping WebSocket server...', \PHP_EOL;
-            echo `{$cmd}`, \PHP_EOL;
+            echo shell_exec($cmd), \PHP_EOL;
             echo 'WebSocket Server stoped!', \PHP_EOL;
 
             $cmd = __DIR__ . '/server/Http2/stop-server.sh';
             echo 'Stoping Http2 server...', \PHP_EOL;
-            echo `{$cmd}`, \PHP_EOL;
+            echo shell_exec($cmd), \PHP_EOL;
             echo 'Http2 Server stoped!', \PHP_EOL;
 
             $pidFile = __DIR__ . '/server/WebSocket/wss-server.pid';
@@ -129,7 +129,7 @@ register_shutdown_function(function () {
                     }
                     else
                     {
-                        `kill -15 {$pid} 2>/dev/null`;
+                        shell_exec("kill -15 {$pid} 2>/dev/null");
                     }
                 }
                 @unlink($pidFile);
@@ -182,6 +182,11 @@ if (IS_WIN)
 
     /**
      * Wait for HTTP server to be ready.
+     * 
+     * @param int $port
+     * @param string $checkBody
+     * 
+     * @return void
      */
     function waitForServer($port, $checkBody = 'YurunHttp')
     {
@@ -200,6 +205,10 @@ if (IS_WIN)
 
     /**
      * Wait for WebSocket server to be ready.
+     * 
+     * @param int $port
+     * 
+     * @return void
      */
     function waitForWebSocketServer($port)
     {
@@ -235,7 +244,7 @@ else
     // Http Server
     $cmd = __DIR__ . '/server/Http/start-server.sh';
     echo 'Starting Http server...', \PHP_EOL;
-    echo `{$cmd}`, \PHP_EOL;
+    echo shell_exec($cmd), \PHP_EOL;
     $serverStarted = false;
     for ($i = 0; $i < 10; ++$i)
     {
@@ -261,7 +270,7 @@ else
         // WebSocket Server
         $cmd = __DIR__ . '/server/WebSocket/start-server.sh';
         echo 'Starting WebSocket server...', \PHP_EOL;
-        echo `{$cmd}`, \PHP_EOL;
+        echo shell_exec($cmd), \PHP_EOL;
         $serverStarted = false;
         for ($i = 0; $i < 10; ++$i)
         {
@@ -285,7 +294,7 @@ else
         // Http2 Server
         $cmd = __DIR__ . '/server/Http2/start-server.sh';
         echo 'Starting Http2 server...', \PHP_EOL;
-        echo `{$cmd}`, \PHP_EOL;
+        echo shell_exec($cmd), \PHP_EOL;
         $serverStarted = false;
         for ($i = 0; $i < 10; ++$i)
         {
@@ -310,7 +319,7 @@ else
         $wssPidFile = __DIR__ . '/server/WebSocket/wss-server.pid';
         $cmd = 'nohup /usr/bin/env php "' . __DIR__ . '/server/WebSocket/wss-server.php" > "' . __DIR__ . '/server/WebSocket/wss-server.log" 2>&1 & echo $! > "' . $wssPidFile . '"';
         echo 'Starting WSS server...', \PHP_EOL;
-        echo `{$cmd}`, \PHP_EOL;
+        echo shell_exec($cmd), \PHP_EOL;
         $serverStarted = false;
         for ($i = 0; $i < 10; ++$i)
         {
