@@ -182,10 +182,10 @@ if (IS_WIN)
 
     /**
      * Wait for HTTP server to be ready.
-     * 
-     * @param int $port
+     *
+     * @param int    $port
      * @param string $checkBody
-     * 
+     *
      * @return void
      */
     function waitForServer($port, $checkBody = 'YurunHttp')
@@ -205,9 +205,9 @@ if (IS_WIN)
 
     /**
      * Wait for WebSocket server to be ready.
-     * 
+     *
      * @param int $port
-     * 
+     *
      * @return void
      */
     function waitForWebSocketServer($port)
