@@ -738,7 +738,6 @@ class Curl implements IHandler
                 $result[$k] = null;
                 $curlHandler = curl_init();
                 $recvHeaders[$k] = $saveFileFps[$k] = null;
-                $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k]);
                 $files = $request->getUploadedFiles();
                 $body = (string) $request->getBody();
                 if (!empty($files))
@@ -746,6 +745,7 @@ class Curl implements IHandler
                     $body = FormDataBuilder::build($body, $files, $boundary);
                     $request = $request->withHeader('Content-Type', MediaType::MULTIPART_FORM_DATA . '; boundary=' . $boundary);
                 }
+                $this->buildCurlHandlerBase($request, $curlHandler, $recvHeaders[$k], $saveFileFps[$k]);
                 $this->buildCurlHandlerEx($request, $curlHandler, null, null, $body);
                 curl_multi_add_handle($mh, $curlHandler);
                 $curlHandlers[$k] = $curlHandler;

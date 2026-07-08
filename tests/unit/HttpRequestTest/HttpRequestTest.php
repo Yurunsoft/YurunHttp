@@ -404,6 +404,32 @@ class HttpRequestTest extends BaseTest
     }
 
     /**
+     * 验证 Curl::send 单请求上传文件时，请求主头 Content-Type 被正确设置为 multipart/form-data。
+     *
+     * @return void
+     */
+    public function testSendUploadContentType(): void
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $file = new UploadedFile(basename(__FILE__), MediaType::TEXT_HTML, __FILE__);
+            $http->content([
+                'file' => $file,
+            ]);
+            $response = $http->post($this->host . '?a=info');
+            $this->assertResponse($response);
+            $data = $response->json(true);
+
+            // 上传文件被正确解析（间接证明主头 Content-Type 正确）
+            $this->assertTrue(isset($data['files']['file']));
+            // 直接验证请求主头 Content-Type 已被正确设置为 multipart/form-data 且带 boundary
+            $headers = array_change_key_case($data['header'], CASE_LOWER);
+            $this->assertArrayHasKey('content-type', $headers);
+            $this->assertStringStartsWith('multipart/form-data; boundary=', $headers['content-type']);
+        });
+    }
+
+    /**
      * body.
      *
      * @return void
@@ -635,6 +661,57 @@ class HttpRequestTest extends BaseTest
                 {
                     throw new \RuntimeException(sprintf('Unknown %s', $i));
                 }
+            }
+        });
+    }
+
+    /**
+     * 并发批量上传文件时，验证每个请求的主请求头 Content-Type 均被正确设置为 multipart/form-data。
+     *
+     * @return void
+     */
+    public function testCoBatchUploadMulti(): void
+    {
+        $this->call(function () {
+            $file1 = new UploadedFile(basename(__FILE__), MediaType::TEXT_HTML, __FILE__);
+            $file2Path = __DIR__ . '/1.txt';
+            $file2 = new UploadedFile('1.txt', MediaType::TEXT_PLAIN, $file2Path);
+            $http1 = new HttpRequest();
+            $http1->url($this->host . '?a=info');
+            $http1->method('POST');
+            $http1->content([
+                'file' => $file1,
+            ]);
+            $http2 = new HttpRequest();
+            $http2->url($this->host . '?a=info');
+            $http2->method('POST');
+            $http2->content([
+                'file' => $file2,
+            ]);
+            $result = Batch::run([
+                'http1' => $http1,
+                'http2' => $http2,
+            ]);
+            foreach ($result as $k => $response) {
+                $this->assertResponse($response);
+                $data = $response->json(true);
+                $this->assertTrue(isset($data['files']['file']));
+                // 验证请求主头 Content-Type 已被正确设置为 multipart/form-data（含 boundary）
+                $headers = array_change_key_case($data['header'], CASE_LOWER);
+                $this->assertArrayHasKey('content-type', $headers);
+                $this->assertStringStartsWith('multipart/form-data; boundary=', $headers['content-type']);
+                $file = $data['files']['file'];
+                if ($k === 'http1') {
+                    $content = file_get_contents(__FILE__);
+                    $this->assertEquals(MediaType::TEXT_HTML, $file['type']);
+                } elseif ($k === 'http2') {
+                    $content = file_get_contents($file2Path);
+                    $this->assertEquals(MediaType::TEXT_PLAIN, $file['type']);
+                } else {
+                    $content = '';
+                }
+                $this->assertEquals(\strlen($content), $file['size']);
+                $this->assertEquals(md5($content), $file['hash']);
             }
         });
     }
