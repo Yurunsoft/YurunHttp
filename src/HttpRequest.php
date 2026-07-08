@@ -227,20 +227,6 @@ class HttpRequest
     public $websocketCompression = false;
 
     /**
-     * 代理认证方式.
-     *
-     * @var array
-     */
-    public static $proxyAuths = [];
-
-    /**
-     * 代理类型.
-     *
-     * @var array
-     */
-    public static $proxyType = [];
-
-    /**
      * 自动扩展名标志.
      */
     const AUTO_EXT_FLAG = '.*';
@@ -912,6 +898,7 @@ class HttpRequest
                         }
                     }
                     $body = http_build_query($body, '', '&');
+                    break;
             }
         }
         else
@@ -943,9 +930,8 @@ class HttpRequest
             $method = $this->method;
         }
         list($body, $files) = $this->parseRequestBody(null === $requestBody ? $this->content : $requestBody, $contentType);
-        $request = new Request($url, $this->headers, $body, $method);
         $saveFileOption = $this->saveFileOption;
-        $request = $request->withUploadedFiles($files)
+        $request = (new Request($url, $this->headers, $body, $method))->withUploadedFiles($files)
                             ->withCookieParams($this->cookies)
                             ->withAttribute(Attributes::MAX_REDIRECTS, $this->maxRedirects)
                             ->withAttribute(Attributes::IS_VERIFY_CA, $this->isVerifyCA)
@@ -1127,7 +1113,7 @@ class HttpRequest
         $result = $this->saveFile($fileName)->send($url, $requestBody, $method);
         if ($isAutoExt)
         {
-            self::parseDownloadAutoExt($result, $fileName);
+            $result = self::parseDownloadAutoExt($result, $fileName);
         }
         $this->saveFileOption = [];
 
@@ -1174,9 +1160,9 @@ class HttpRequest
      * @param \Yurun\Util\YurunHttp\Http\Response $response
      * @param string                              $tempFileName
      *
-     * @return void
+     * @return \Yurun\Util\YurunHttp\Http\Response
      */
-    public static function parseDownloadAutoExt(&$response, $tempFileName)
+    public static function parseDownloadAutoExt($response, $tempFileName)
     {
         $ext = MediaType::getExt($response->getHeaderLine('Content-Type'));
         if (null === $ext)
@@ -1185,23 +1171,7 @@ class HttpRequest
         }
         $savedFileName = substr($tempFileName, 0, -\strlen(self::AUTO_EXT_TEMP_EXT)) . '.' . $ext;
         rename($tempFileName, $savedFileName);
-        $response = $response->withSavedFileName($savedFileName);
+
+        return $response->withSavedFileName($savedFileName);
     }
-}
-
-if (\extension_loaded('curl'))
-{
-    // 代理认证方式
-    HttpRequest::$proxyAuths = [
-        'basic' => \CURLAUTH_BASIC,
-        'ntlm'  => \CURLAUTH_NTLM,
-    ];
-
-    // 代理类型
-    HttpRequest::$proxyType = [
-        'http'      => \CURLPROXY_HTTP,
-        'socks4'    => \CURLPROXY_SOCKS4,
-        'socks4a'   => 6,    // CURLPROXY_SOCKS4A
-        'socks5'    => \CURLPROXY_SOCKS5,
-    ];
 }

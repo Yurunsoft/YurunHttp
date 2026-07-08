@@ -119,7 +119,7 @@ class Curl implements IHandler
             {
                 CurlHttpConnectionManager::getInstance()->release($this->poolKey, $this->handler);
             }
-            else
+            elseif (\PHP_VERSION_ID < 80000)
             {
                 curl_close($this->handler);
             }
@@ -203,7 +203,6 @@ class Curl implements IHandler
                     $bodyContent = false;
                 }
                 $this->buildCurlHandlerEx($request, $handler, $uri, $method, $bodyContent);
-                $result = null;
                 for ($i = 0; $i <= $retry; ++$i)
                 {
                     $receiveHeaders = [];
@@ -227,7 +226,7 @@ class Curl implements IHandler
                         }
                     }
                 }
-                if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && $result && '' !== ($location = $result->getHeaderLine('location')))
+                if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && isset($result) && '' !== ($location = $result->getHeaderLine('location')))
                 {
                     $maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
                     if (++$redirectCount <= $maxRedirects)
@@ -366,6 +365,7 @@ class Curl implements IHandler
                 break;
             default:
                 $httpVersion = \CURL_HTTP_VERSION_1_1;
+                break;
         }
         $requestOptions = [
             \CURLOPT_URL             => (string) $uri,
@@ -817,7 +817,10 @@ class Curl implements IHandler
             foreach ($curlHandlers as $curlHandler)
             {
                 curl_multi_remove_handle($mh, $curlHandler);
-                curl_close($curlHandler);
+                if (\PHP_VERSION_ID < 80000)
+                {
+                    curl_close($curlHandler);
+                }
             }
             curl_multi_close($mh);
         }

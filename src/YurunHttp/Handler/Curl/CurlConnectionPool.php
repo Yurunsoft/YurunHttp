@@ -39,9 +39,12 @@ class CurlConnectionPool extends BaseConnectionPool
         $connections = $this->connections;
         $this->connections = [];
         $this->queue = new \SplQueue();
-        foreach ($connections as $connection)
+        if (\PHP_VERSION_ID < 80000)
         {
-            curl_close($connection);
+            foreach ($connections as $connection)
+            {
+                curl_close($connection);
+            }
         }
     }
 
