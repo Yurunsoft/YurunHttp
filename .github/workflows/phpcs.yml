@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -15,7 +15,7 @@ jobs:
       SWOOLE_DOCKER_VERSION: ${{ matrix.swoole }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Prepare
         run: |

@@ -4,10 +4,4 @@ __DIR__=$(cd `dirname $0`; pwd)
 
 ${__DIR__}/stop-server.sh
 
-if [[ $TRAVIS ]]; then
-phpPath="/opt/swoole/bin/php"
-else
-phpPath="/usr/bin/env php"
-fi
-
-nohup $phpPath $__DIR__/ws-server.php > ${__DIR__}/log.log 2>&1 & echo $! > "$__DIR__/server.pid"
+/usr/bin/env php $__DIR__/server.php start -d > ${__DIR__}/log.log

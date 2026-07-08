@@ -803,16 +803,16 @@ class Swoole implements IHandler
         $handlers = [];
         $results = [];
         $beginTime = microtime(true);
-        foreach ($requests as $i => &$request)
+        foreach ($requests as $i => &$request1)
         {
             $results[$i] = null;
             $handlers[$i] = $handler = new self();
-            $request = $handler->sendDefer($request);
+            $request1 = $handler->sendDefer($request1);
         }
-        unset($request);
+        unset($request1);
         $beginTime = microtime(true);
         $recvTimeout = null;
-        foreach ($requests as $i => $request)
+        foreach ($requests as $i => $request2)
         {
             if (null !== $timeout)
             {
@@ -822,7 +822,7 @@ class Swoole implements IHandler
                     break;
                 }
             }
-            $results[$i] = $handlers[$i]->recvDefer($request, $recvTimeout)->withTotalTime(microtime(true) - $beginTime);
+            $results[$i] = $handlers[$i]->recvDefer($request2, $recvTimeout)->withTotalTime(microtime(true) - $beginTime);
         }
 
         return $results;
