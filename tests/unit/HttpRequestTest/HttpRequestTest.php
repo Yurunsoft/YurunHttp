@@ -825,4 +825,25 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals('3', isset($data['cookie']['c']) ? $data['cookie']['c'] : null);
         });
     }
+
+    /**
+     * rawHeader/rawHeaders 跳过不含冒号的行（避免未定义索引警告）.
+     *
+     * @return void
+     */
+    public function testRawHeaderWithoutColon(): void
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $http->rawHeader('X-NoColon')
+                 ->rawHeaders([
+                     'X-Valid: 1',
+                     'X-NoColon2',
+                 ]);
+            $this->assertArrayHasKey('X-Valid', $http->headers);
+            $this->assertEquals('1', $http->headers['X-Valid']);
+            $this->assertArrayNotHasKey('X-NoColon', $http->headers);
+            $this->assertArrayNotHasKey('X-NoColon2', $http->headers);
+        });
+    }
 }

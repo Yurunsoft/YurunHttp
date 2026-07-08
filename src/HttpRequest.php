@@ -448,6 +448,10 @@ class HttpRequest
         $thisHeaders = &$this->headers;
         foreach ($headers as $header)
         {
+            if (false === strpos($header, ':'))
+            {
+                continue;
+            }
             $list = explode(':', $header, 2);
             $thisHeaders[trim($list[0])] = trim($list[1]);
         }
@@ -464,6 +468,10 @@ class HttpRequest
      */
     public function rawHeader($header)
     {
+        if (false === strpos($header, ':'))
+        {
+            return $this;
+        }
         $list = explode(':', $header, 2);
         $this->headers[trim($list[0])] = trim($list[1]);
 
