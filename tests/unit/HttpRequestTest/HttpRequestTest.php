@@ -900,6 +900,10 @@ class HttpRequestTest extends BaseTest
      */
     public function testConnectionPoolChannelCapacity(): void
     {
+        if (!\extension_loaded('swoole'))
+        {
+            $this->markTestSkipped('Requires ext/swoole');
+        }
         $config = new \Yurun\Util\YurunHttp\Pool\Config\PoolConfig($this->host, 5, 0.0);
         $pool = new \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionPool($config);
         $ref = new \ReflectionProperty($pool, 'channel');
