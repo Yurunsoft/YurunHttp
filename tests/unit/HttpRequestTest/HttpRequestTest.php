@@ -846,4 +846,24 @@ class HttpRequestTest extends BaseTest
             $this->assertArrayNotHasKey('X-NoColon2', $http->headers);
         });
     }
+
+    /**
+     * get() 在已有查询参数时正确拼接请求体.
+     *
+     * @return void
+     */
+    public function testGetWithExistingQueryAndBody(): void
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $time = time();
+            $response = $http->get($this->host . '?a=info', [
+                'time' => $time,
+            ]);
+            $this->assertResponse($response);
+            $data = $response->json(true);
+            $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
+            $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
+        });
+    }
 }

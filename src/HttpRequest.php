@@ -5,6 +5,7 @@ namespace Yurun\Util;
 use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Request;
 
 class HttpRequest
@@ -1022,15 +1023,18 @@ class HttpRequest
     {
         if (!empty($requestBody))
         {
-            if (strpos($url, '?'))
+            if (null === $url)
             {
-                $url .= '&';
+                $url = $this->url;
             }
-            else
+            $uri = new Uri($url);
+            $query = $uri->getQuery();
+            if ('' !== $query)
             {
-                $url .= '?';
+                $query .= '&';
             }
-            $url .= http_build_query($requestBody, '', '&');
+            $query .= http_build_query($requestBody, '', '&');
+            $url = (string) $uri->withQuery($query);
         }
 
         return $this->send($url, [], 'GET');
