@@ -462,7 +462,7 @@ class Curl implements IHandler
         for ($i = 1; $i < $count; ++$i)
         {
             $line = trim($headers[$i]);
-            if (empty($line) || false == strstr($line, ':'))
+            if (empty($line) || false === strstr($line, ':'))
             {
                 continue;
             }
@@ -674,7 +674,7 @@ class Curl implements IHandler
     {
         // 用户名密码处理
         $username = $request->getAttribute(Attributes::USERNAME);
-        if (null != $username)
+        if (null !== $username)
         {
             $userPwd = $username . ':' . $request->getAttribute(Attributes::PASSWORD, '');
         }
