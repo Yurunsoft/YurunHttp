@@ -29,7 +29,9 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
     public function __construct($config)
     {
         parent::__construct($config);
-        $this->channel = new Channel(1024);
+        $maxConnections = $config->getMaxConnections();
+        $capacity = $maxConnections > 0 ? $maxConnections : 1024;
+        $this->channel = new Channel($capacity);
     }
 
     /**
@@ -41,7 +43,9 @@ class SwooleHttp2ConnectionPool extends BaseConnectionPool
     {
         $connections = $this->connections;
         $this->connections = [];
-        $this->channel = new Channel(1024);
+        $maxConnections = $this->config->getMaxConnections();
+        $capacity = $maxConnections > 0 ? $maxConnections : 1024;
+        $this->channel = new Channel($capacity);
         foreach ($connections as $connection)
         {
             $connection->close();

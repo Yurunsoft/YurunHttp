@@ -889,4 +889,26 @@ class HttpRequestTest extends BaseTest
             }
         });
     }
+
+    /**
+     * 连接池 Channel 容量等于最大连接数，未配置时为 1024.
+     *
+     * @return void
+     */
+    public function testConnectionPoolChannelCapacity(): void
+    {
+        $config = new \Yurun\Util\YurunHttp\Pool\Config\PoolConfig($this->host, 5, 0.0);
+        $pool = new \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionPool($config);
+        $ref = new \ReflectionProperty($pool, 'channel');
+        $ref->setAccessible(true);
+        $channel = $ref->getValue($pool);
+        $this->assertEquals(5, $channel->capacity);
+
+        $config2 = new \Yurun\Util\YurunHttp\Pool\Config\PoolConfig($this->host, 0, 0.0);
+        $pool2 = new \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionPool($config2);
+        $ref2 = new \ReflectionProperty($pool2, 'channel');
+        $ref2->setAccessible(true);
+        $channel2 = $ref2->getValue($pool2);
+        $this->assertEquals(1024, $channel2->capacity);
+    }
 }
