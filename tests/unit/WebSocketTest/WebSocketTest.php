@@ -30,6 +30,8 @@ class WebSocketTest extends BaseTest
             $recv = $client->recv();
             $this->assertEquals('test:' . $time, $recv);
             $client->close();
+            // 关闭后 isConnected() 必须返回 false（issue #32）
+            $this->assertFalse($client->isConnected());
         });
     }
 
@@ -53,6 +55,7 @@ class WebSocketTest extends BaseTest
             $recv = $client->recv();
             $this->assertEquals('test:' . $time, $recv);
             $client->close();
+            $this->assertFalse($client->isConnected());
         });
     }
 

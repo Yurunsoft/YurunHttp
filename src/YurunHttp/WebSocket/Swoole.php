@@ -118,7 +118,7 @@ class Swoole implements IWebSocketClient
     public function close()
     {
         $this->handler->close();
-        $this->connected = true;
+        $this->connected = false;
     }
 
     /**
