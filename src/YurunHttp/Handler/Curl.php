@@ -226,29 +226,32 @@ class Curl implements IHandler
                         }
                     }
                 }
-                if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && isset($result) && '' !== ($location = $result->getHeaderLine('location')))
+                if (isset($result))
                 {
-                    $maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
-                    if (++$redirectCount <= $maxRedirects)
+                    if ($request->getAttribute(Attributes::FOLLOW_LOCATION, true) && ($statusCode >= 300 && $statusCode < 400) && '' !== ($location = $result->getHeaderLine('location')))
                     {
-                        // 重定向清除之前下载的文件
-                        if (null !== $saveFileFp)
+                        $maxRedirects = $request->getAttribute(Attributes::MAX_REDIRECTS, 10);
+                        if (++$redirectCount <= $maxRedirects)
                         {
-                            ftruncate($saveFileFp, 0);
-                            fseek($saveFileFp, 0);
+                            // 重定向清除之前下载的文件
+                            if (null !== $saveFileFp)
+                            {
+                                ftruncate($saveFileFp, 0);
+                                fseek($saveFileFp, 0);
+                            }
+                            $isLocation = true;
+                            $uri = $this->parseRedirectLocation($location, $uri);
+                            continue;
                         }
-                        $isLocation = true;
-                        $uri = $this->parseRedirectLocation($location, $uri);
-                        continue;
+                        else
+                        {
+                            $result = $result->withErrno(-1)
+                                            ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
+                        }
                     }
-                    else
-                    {
-                        $result = $result->withErrno(-1)
-                                        ->withError(sprintf('Maximum (%s) redirects followed', $maxRedirects));
-                    }
+                    $result = $result->withTotalTime(microtime(true) - $beginTime);
+                    $this->logRequest($request, $result);
                 }
-                $result = $result->withTotalTime(microtime(true) - $beginTime);
-                $this->logRequest($request, $result);
                 $this->cookieManager->gc();
                 $this->saveCookieJar();
                 break;
