@@ -866,4 +866,27 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
         });
     }
+
+    /**
+     * 保存文件 fopen 失败时抛出 RuntimeException.
+     *
+     * @return void
+     */
+    public function testSaveFileFopenFailureThrows(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->call(function () {
+            YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Curl::class);
+            set_error_handler(function () {
+                return true;
+            }, \E_WARNING);
+            try {
+                $http = new HttpRequest();
+                $http->saveFile('/path/does/not/exist/yurunhttp_test_save.txt')
+                     ->get($this->host);
+            } finally {
+                restore_error_handler();
+            }
+        });
+    }
 }

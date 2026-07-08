@@ -570,6 +570,10 @@ class Curl implements IHandler
                 $saveFilePath .= basename($request->getUri()->__toString());
             }
             $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
+            if (false === $saveFileFp)
+            {
+                throw new \RuntimeException(sprintf('fopen save file failed: %s', $saveFilePath));
+            }
             $options[\CURLOPT_HEADER] = false;
             $options[\CURLOPT_RETURNTRANSFER] = false;
             $options[\CURLOPT_FILE] = $saveFileFp;
