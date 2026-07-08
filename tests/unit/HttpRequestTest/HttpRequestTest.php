@@ -880,11 +880,14 @@ class HttpRequestTest extends BaseTest
             set_error_handler(function () {
                 return true;
             }, \E_WARNING);
-            try {
+            try
+            {
                 $http = new HttpRequest();
                 $http->saveFile('/path/does/not/exist/yurunhttp_test_save.txt')
                      ->get($this->host);
-            } finally {
+            }
+            finally
+            {
                 restore_error_handler();
             }
         });

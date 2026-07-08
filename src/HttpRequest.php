@@ -449,7 +449,7 @@ class HttpRequest
         $thisHeaders = &$this->headers;
         foreach ($headers as $header)
         {
-            if (false === strpos($header, ':'))
+            if (!str_contains($header, ':'))
             {
                 continue;
             }
@@ -469,7 +469,7 @@ class HttpRequest
      */
     public function rawHeader($header)
     {
-        if (false === strpos($header, ':'))
+        if (!str_contains($header, ':'))
         {
             return $this;
         }
