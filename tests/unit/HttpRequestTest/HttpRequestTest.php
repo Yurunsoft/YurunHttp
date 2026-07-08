@@ -423,7 +423,7 @@ class HttpRequestTest extends BaseTest
             // 上传文件被正确解析（间接证明主头 Content-Type 正确）
             $this->assertTrue(isset($data['files']['file']));
             // 直接验证请求主头 Content-Type 已被正确设置为 multipart/form-data 且带 boundary
-            $headers = array_change_key_case($data['header'], CASE_LOWER);
+            $headers = array_change_key_case($data['header'], \CASE_LOWER);
             $this->assertArrayHasKey('content-type', $headers);
             $this->assertStringStartsWith('multipart/form-data; boundary=', $headers['content-type']);
         });
@@ -692,22 +692,28 @@ class HttpRequestTest extends BaseTest
                 'http1' => $http1,
                 'http2' => $http2,
             ]);
-            foreach ($result as $k => $response) {
+            foreach ($result as $k => $response)
+            {
                 $this->assertResponse($response);
                 $data = $response->json(true);
                 $this->assertTrue(isset($data['files']['file']));
                 // 验证请求主头 Content-Type 已被正确设置为 multipart/form-data（含 boundary）
-                $headers = array_change_key_case($data['header'], CASE_LOWER);
+                $headers = array_change_key_case($data['header'], \CASE_LOWER);
                 $this->assertArrayHasKey('content-type', $headers);
                 $this->assertStringStartsWith('multipart/form-data; boundary=', $headers['content-type']);
                 $file = $data['files']['file'];
-                if ($k === 'http1') {
+                if ('http1' === $k)
+                {
                     $content = file_get_contents(__FILE__);
                     $this->assertEquals(MediaType::TEXT_HTML, $file['type']);
-                } elseif ($k === 'http2') {
+                }
+                elseif ('http2' === $k)
+                {
                     $content = file_get_contents($file2Path);
                     $this->assertEquals(MediaType::TEXT_PLAIN, $file['type']);
-                } else {
+                }
+                else
+                {
                     $content = '';
                 }
                 $this->assertEquals(\strlen($content), $file['size']);
