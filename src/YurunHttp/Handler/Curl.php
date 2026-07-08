@@ -766,7 +766,7 @@ class Curl implements IHandler
                     {
                         break;
                     }
-                    usleep(5000); // 每次延时 5 毫秒
+                    curl_multi_select($mh, 0.5);
                 }
                 else
                 {
