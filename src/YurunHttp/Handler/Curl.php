@@ -766,7 +766,10 @@ class Curl implements IHandler
                     {
                         break;
                     }
-                    curl_multi_select($mh, 0.5);
+                    if (-1 === curl_multi_select($mh, 0.5))
+                    {
+                        usleep(250);
+                    }
                 }
                 else
                 {
