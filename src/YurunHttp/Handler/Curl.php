@@ -462,7 +462,7 @@ class Curl implements IHandler
         for ($i = 1; $i < $count; ++$i)
         {
             $line = trim($headers[$i]);
-            if (empty($line) || false == strstr($line, ':'))
+            if (empty($line) || false === strstr($line, ':'))
             {
                 continue;
             }
@@ -570,6 +570,10 @@ class Curl implements IHandler
                 $saveFilePath .= basename($request->getUri()->__toString());
             }
             $saveFileFp = fopen($saveFilePath, $request->getAttribute(Attributes::SAVE_FILE_MODE, 'w+'));
+            if (false === $saveFileFp)
+            {
+                throw new \RuntimeException(sprintf('fopen save file failed: %s', $saveFilePath));
+            }
             $options[\CURLOPT_HEADER] = false;
             $options[\CURLOPT_RETURNTRANSFER] = false;
             $options[\CURLOPT_FILE] = $saveFileFp;
@@ -670,7 +674,7 @@ class Curl implements IHandler
     {
         // 用户名密码处理
         $username = $request->getAttribute(Attributes::USERNAME);
-        if (null != $username)
+        if (null !== $username)
         {
             $userPwd = $username . ':' . $request->getAttribute(Attributes::PASSWORD, '');
         }
@@ -762,7 +766,10 @@ class Curl implements IHandler
                     {
                         break;
                     }
-                    usleep(5000); // 每次延时 5 毫秒
+                    if (-1 === curl_multi_select($mh, 0.5))
+                    {
+                        usleep(250);
+                    }
                 }
                 else
                 {

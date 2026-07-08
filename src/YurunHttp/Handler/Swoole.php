@@ -810,7 +810,6 @@ class Swoole implements IHandler
             $request1 = $handler->sendDefer($request1);
         }
         unset($request1);
-        $beginTime = microtime(true);
         $recvTimeout = null;
         foreach ($requests as $i => $request2)
         {

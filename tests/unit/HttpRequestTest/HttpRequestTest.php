@@ -825,4 +825,97 @@ class HttpRequestTest extends BaseTest
             $this->assertEquals('3', isset($data['cookie']['c']) ? $data['cookie']['c'] : null);
         });
     }
+
+    /**
+     * rawHeader/rawHeaders 跳过不含冒号的行（避免未定义索引警告）.
+     *
+     * @return void
+     */
+    public function testRawHeaderWithoutColon(): void
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $http->rawHeader('X-NoColon')
+                 ->rawHeaders([
+                     'X-Valid: 1',
+                     'X-NoColon2',
+                 ]);
+            $this->assertArrayHasKey('X-Valid', $http->headers);
+            $this->assertEquals('1', $http->headers['X-Valid']);
+            $this->assertArrayNotHasKey('X-NoColon', $http->headers);
+            $this->assertArrayNotHasKey('X-NoColon2', $http->headers);
+        });
+    }
+
+    /**
+     * get() 在已有查询参数时正确拼接请求体.
+     *
+     * @return void
+     */
+    public function testGetWithExistingQueryAndBody(): void
+    {
+        $this->call(function () {
+            $http = new HttpRequest();
+            $time = time();
+            $response = $http->get($this->host . '?a=info', [
+                'time' => $time,
+            ]);
+            $this->assertResponse($response);
+            $data = $response->json(true);
+            $this->assertEquals('GET', isset($data['method']) ? $data['method'] : null);
+            $this->assertEquals($time, isset($data['get']['time']) ? $data['get']['time'] : null);
+        });
+    }
+
+    /**
+     * 保存文件 fopen 失败时抛出 RuntimeException.
+     *
+     * @return void
+     */
+    public function testSaveFileFopenFailureThrows(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->call(function () {
+            YurunHttp::setDefaultHandler(\Yurun\Util\YurunHttp\Handler\Curl::class);
+            set_error_handler(function () {
+                return true;
+            }, \E_WARNING);
+            try
+            {
+                $http = new HttpRequest();
+                $http->saveFile('/path/does/not/exist/yurunhttp_test_save.txt')
+                     ->get($this->host);
+            }
+            finally
+            {
+                restore_error_handler();
+            }
+        });
+    }
+
+    /**
+     * 连接池 Channel 容量等于最大连接数，未配置时为 1024.
+     *
+     * @return void
+     */
+    public function testConnectionPoolChannelCapacity(): void
+    {
+        if (!\extension_loaded('swoole'))
+        {
+            $this->markTestSkipped('Requires ext/swoole');
+        }
+        $config = new \Yurun\Util\YurunHttp\Pool\Config\PoolConfig($this->host, 5, 0.0);
+        $pool = new \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionPool($config);
+        $ref = new \ReflectionProperty($pool, 'channel');
+        $ref->setAccessible(true);
+        $channel = $ref->getValue($pool);
+        $this->assertEquals(5, $channel->capacity);
+
+        $config2 = new \Yurun\Util\YurunHttp\Pool\Config\PoolConfig($this->host, 0, 0.0);
+        $pool2 = new \Yurun\Util\YurunHttp\Handler\Swoole\SwooleHttpConnectionPool($config2);
+        $ref2 = new \ReflectionProperty($pool2, 'channel');
+        $ref2->setAccessible(true);
+        $channel2 = $ref2->getValue($pool2);
+        $this->assertEquals(1024, $channel2->capacity);
+    }
 }

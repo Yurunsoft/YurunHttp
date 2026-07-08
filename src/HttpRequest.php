@@ -5,6 +5,7 @@ namespace Yurun\Util;
 use Yurun\Util\YurunHttp\Attributes;
 use Yurun\Util\YurunHttp\Http\Psr7\Consts\MediaType;
 use Yurun\Util\YurunHttp\Http\Psr7\UploadedFile;
+use Yurun\Util\YurunHttp\Http\Psr7\Uri;
 use Yurun\Util\YurunHttp\Http\Request;
 
 class HttpRequest
@@ -448,6 +449,10 @@ class HttpRequest
         $thisHeaders = &$this->headers;
         foreach ($headers as $header)
         {
+            if (!str_contains($header, ':'))
+            {
+                continue;
+            }
             $list = explode(':', $header, 2);
             $thisHeaders[trim($list[0])] = trim($list[1]);
         }
@@ -464,6 +469,10 @@ class HttpRequest
      */
     public function rawHeader($header)
     {
+        if (!str_contains($header, ':'))
+        {
+            return $this;
+        }
         $list = explode(':', $header, 2);
         $this->headers[trim($list[0])] = trim($list[1]);
 
@@ -1014,15 +1023,18 @@ class HttpRequest
     {
         if (!empty($requestBody))
         {
-            if (strpos($url, '?'))
+            if (null === $url)
             {
-                $url .= '&';
+                $url = $this->url;
             }
-            else
+            $uri = new Uri($url);
+            $query = $uri->getQuery();
+            if ('' !== $query)
             {
-                $url .= '?';
+                $query .= '&';
             }
-            $url .= http_build_query($requestBody, '', '&');
+            $query .= http_build_query($requestBody, '', '&');
+            $url = (string) $uri->withQuery($query);
         }
 
         return $this->send($url, [], 'GET');
