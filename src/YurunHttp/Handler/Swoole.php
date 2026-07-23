@@ -232,6 +232,10 @@ class Swoole implements IHandler
      */
     public function sendDefer($request)
     {
+        if ('3.0' === $request->getProtocolVersion())
+        {
+            throw new \RuntimeException('Swoole handler does not support HTTP/3');
+        }
         $isHttp2 = '2.0' === $request->getProtocolVersion();
         if ($poolIsEnabled = $this->poolIsEnabled)
         {

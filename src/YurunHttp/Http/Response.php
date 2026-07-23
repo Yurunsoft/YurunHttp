@@ -57,6 +57,13 @@ class Response extends Psr7Response
     protected $streamId;
 
     /**
+     * 实际使用的 HTTP 协议版本，如 '1.1'、'2.0'、'3.0'.
+     *
+     * @var string
+     */
+    protected $httpVersion = '';
+
+    /**
      * Request.
      *
      * @var \Yurun\Util\YurunHttp\Http\Request
@@ -372,6 +379,31 @@ class Response extends Psr7Response
     public function getStreamId()
     {
         return $this->streamId;
+    }
+
+    /**
+     * 设置实际使用的 HTTP 协议版本.
+     *
+     * @param string $httpVersion
+     *
+     * @return static
+     */
+    public function withHttpVersion($httpVersion)
+    {
+        $self = clone $this;
+        $self->httpVersion = $httpVersion;
+
+        return $self;
+    }
+
+    /**
+     * 获取实际使用的 HTTP 协议版本，如 '1.1'、'2.0'、'3.0'.
+     *
+     * @return string
+     */
+    public function getHttpVersion()
+    {
+        return $this->httpVersion;
     }
 
     /**

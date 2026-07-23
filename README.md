@@ -10,7 +10,7 @@
 
 YurunHttp，支持智能识别 Curl/Swoole 场景的高性能 Http Client。
 
-支持链式操作，简单易用。支持并发批量请求、HTTP2、WebSocket 全双工通信协议。
+支持链式操作，简单易用。支持并发批量请求、HTTP2、HTTP3、WebSocket 全双工通信协议。
 
 非常适合用于开发通用 SDK 包，不必再为 Swoole 协程兼容而头疼！
 
@@ -28,6 +28,7 @@ YurunHttp 的目标是做最好用的 PHP HTTP Client 开发包！
 * SSL 证书（HTTPS）
 * 并发批量请求
 * HTTP2
+* HTTP3（Curl Handler，基于 QUIC）
 * WebSocket
 * Curl & Swoole 环境智能兼容
 * 连接池
@@ -266,6 +267,23 @@ Curl、Swoole Handler 都支持 Http2，但需要注意的是编译时都需要�
 Curl: `php --ri curl`
 
 Swoole: `php --ri swoole`
+
+### Http3 用法
+
+> 仅支持 Curl Handler（基于 QUIC），Swoole Handler 会抛出异常。
+
+```php
+$http = new HttpRequest;
+$http->protocolVersion = '3.0'; // 这句是关键
+$response = $http->get('https://www.taobao.com/');
+```
+
+使用 HTTP/3 需注意：
+
+* 必须使用 HTTPS 地址（QUIC over TLS）。
+* 需要 libcurl >= 7.66 且编译了 QUIC 支持（ngtcp2 / quiche），可通过 `php --ri curl` 查看。
+* 当服务器不支持 HTTP/3 时，Curl 会自动降级到 HTTP/2 / HTTP/1.1。
+* Swoole Handler 不支持 HTTP/3，发起 `3.0` 请求会抛出 `Swoole handler does not support HTTP/3` 异常。
 
 ### Http2 全双工用法
 

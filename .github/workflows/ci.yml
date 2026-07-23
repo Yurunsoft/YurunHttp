@@ -68,3 +68,78 @@ jobs:
       - name: Print logs
         if: failure()
         run: php .github/print-logs.php
+
+  http3:
+    name: HTTP/3 (Linux + PHP 8.4)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential autoconf libtool pkg-config \
+            cmake ninja-build libssl-dev libpsl-dev libnghttp2-dev git
+
+      # 发行版自带 libcurl 未编译 QUIC，这里从源码构建带 HTTP/3 的 curl
+      - name: Build curl with HTTP/3 (ngtcp2 + nghttp3)
+        run: |
+          set -e
+          PREFIX=/usr/local
+          export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+
+          git clone --depth 1 --branch v1.6.0 https://github.com/ngtcp2/nghttp3.git
+          cd nghttp3
+          git submodule update --init
+          autoreconf -fi
+          ./configure --prefix=$PREFIX --enable-lib-only
+          make -j"$(nproc)"
+          sudo make install
+          cd ..
+
+          git clone --depth 1 --branch v1.6.0 https://github.com/ngtcp2/ngtcp2.git
+          cd ngtcp2
+          git submodule update --init
+          autoreconf -fi
+          ./configure --prefix=$PREFIX --enable-lib-only
+          make -j"$(nproc)"
+          sudo make install
+          cd ..
+
+          git clone --depth 1 --branch curl-8_10_1 https://github.com/curl/curl.git
+          cd curl
+          autoreconf -fi
+          ./configure --prefix=$PREFIX --with-openssl --with-nghttp2 \
+            --with-nghttp3 --with-ngtcp2
+          make -j"$(nproc)"
+          sudo make install
+          cd ..
+
+          echo "$PREFIX/lib" | sudo tee /etc/ld.so.conf.d/zz-local.conf
+          sudo ldconfig
+          /usr/local/bin/curl --version | head -n1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, openssl, mbstring, json
+          coverage: none
+          tools: composer:v2
+
+      # 若环境仍不支持 HTTP/3，直接让 job 失败，避免“假绿”
+      - name: Verify HTTP/3 support
+        run: |
+          php -r 'exit((defined("CURL_VERSION_HTTP3") && (curl_version()["features"] & CURL_VERSION_HTTP3)) ? 0 : 1);'
+          php -r 'echo "libcurl: " . curl_version()["version"] . PHP_EOL;'
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run HTTP/3 tests
+        run: ./vendor/bin/phpunit -c ./tests/phpunit.xml --filter Http3Test
+
+      - name: Print server logs (on failure)
+        if: failure()
+        run: php .github/print-logs.php
