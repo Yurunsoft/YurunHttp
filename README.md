@@ -47,6 +47,8 @@ API 文档：[https://apidoc.gitee.com/yurunsoft/YurunHttp](https://apidoc.gitee
 
 > 每个小版本的更新日志请移步到 Release 查看
 
+v5.1.0 支持 HTTP/3（基于 QUIC，Curl Handler，需 libcurl >= 7.66 且编译 QUIC 支持；Swoole Handler 不支持）
+
 v5.0.1 支持 WebSocket 压缩及指定 Opcode
 
 v5.0.0 支持 `psr/http-message` `~2.0` 版本 (PHP >= 7.1)
