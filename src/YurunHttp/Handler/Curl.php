@@ -423,9 +423,9 @@ class Curl implements IHandler
         // body
         $result = new Response($body, curl_getinfo($handler, \CURLINFO_HTTP_CODE));
 
-        // 实际使用的 HTTP 协议版本
-        $httpVersion = $this->getCurlHttpVersion(curl_getinfo($handler, \CURLINFO_HTTP_VERSION));
-
+        // 实际使用的 HTTP 协议版本（CURLINFO_HTTP_VERSION 自 PHP 7.3 引入）
+        $curlHttpVersion = \defined('\CURLINFO_HTTP_VERSION') ? curl_getinfo($handler, \CURLINFO_HTTP_VERSION) : 0;
+        $httpVersion = $this->getCurlHttpVersion($curlHttpVersion);
 
         // headers
         $headers = $this->parseHeaderOneRequest($receiveHeaders);
@@ -467,11 +467,11 @@ class Curl implements IHandler
     {
         switch ($version)
         {
-            case \CURL_HTTP_VERSION_1_0:
+            case \defined('\CURL_HTTP_VERSION_1_0') ? \CURL_HTTP_VERSION_1_0 : 1:
                 return '1.0';
-            case \CURL_HTTP_VERSION_1_1:
+            case \defined('\CURL_HTTP_VERSION_1_1') ? \CURL_HTTP_VERSION_1_1 : 2:
                 return '1.1';
-            case \CURL_HTTP_VERSION_2:
+            case \defined('\CURL_HTTP_VERSION_2') ? \CURL_HTTP_VERSION_2 : 3:
                 return '2.0';
             case \defined('\CURL_HTTP_VERSION_3') ? \CURL_HTTP_VERSION_3 : 30:
                 return '3.0';

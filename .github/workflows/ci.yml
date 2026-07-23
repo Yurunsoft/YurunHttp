@@ -80,7 +80,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential autoconf libtool pkg-config \
-            cmake ninja-build libssl-dev libpsl-dev libnghttp2-dev git
+            cmake ninja-build libgnutls28-dev libpsl-dev libnghttp2-dev git
 
       # 发行版自带 libcurl 未编译 QUIC，这里从源码构建带 HTTP/3 的 curl
       - name: Build curl with HTTP/3 (ngtcp2 + nghttp3)
@@ -102,7 +102,7 @@ jobs:
           cd ngtcp2
           git submodule update --init
           autoreconf -fi
-          ./configure --prefix=$PREFIX --enable-lib-only
+          ./configure --prefix=$PREFIX --enable-lib-only --with-gnutls
           make -j"$(nproc)"
           sudo make install
           cd ..
@@ -110,7 +110,7 @@ jobs:
           git clone --depth 1 --branch curl-8_10_1 https://github.com/curl/curl.git
           cd curl
           autoreconf -fi
-          ./configure --prefix=$PREFIX --with-openssl --with-nghttp2 \
+          ./configure --prefix=$PREFIX --with-gnutls --with-nghttp2 \
             --with-nghttp3 --with-ngtcp2
           make -j"$(nproc)"
           sudo make install
