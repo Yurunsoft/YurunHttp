@@ -17,7 +17,7 @@ class Http3Test extends BaseTest
             $this->markTestSkipped('CURL_HTTP_VERSION_3 未定义，当前 PHP/libcurl 版本不支持 HTTP/3');
         }
 
-        $curlVersion = \curl_version();
+        $curlVersion = curl_version();
         // HTTP/3 需要 libcurl >= 7.66.0（0x074200）
         if ($curlVersion['version_number'] < 0x074200)
         {

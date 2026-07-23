@@ -368,7 +368,7 @@ class Curl implements IHandler
                 break;
             case '3.0':
                 // HTTP/3 基于 QUIC，需 libcurl >= 7.66 且编译了 QUIC 支持
-                $httpVersion = \defined('\CURL_HTTP_VERSION_3') ? \CURL_HTTP_VERSION_3 : 30;
+                $httpVersion = \defined('\CURL_HTTP_VERSION_3') ? CURL_HTTP_VERSION_3 : 30;
                 break;
             default:
                 $httpVersion = \CURL_HTTP_VERSION_1_1;
@@ -473,7 +473,7 @@ class Curl implements IHandler
                 return '1.1';
             case \defined('\CURL_HTTP_VERSION_2') ? \CURL_HTTP_VERSION_2 : 3:
                 return '2.0';
-            case \defined('\CURL_HTTP_VERSION_3') ? \CURL_HTTP_VERSION_3 : 30:
+            case \defined('\CURL_HTTP_VERSION_3') ? CURL_HTTP_VERSION_3 : 30:
                 return '3.0';
             default:
                 return '';
