@@ -366,6 +366,10 @@ class Curl implements IHandler
                     $httpVersion = \CURL_HTTP_VERSION_2;
                 }
                 break;
+            case '3.0':
+                // HTTP/3 基于 QUIC，需 libcurl >= 7.66 且编译了 QUIC 支持
+                $httpVersion = \defined('\CURL_HTTP_VERSION_3') ? CURL_HTTP_VERSION_3 : 30;
+                break;
             default:
                 $httpVersion = \CURL_HTTP_VERSION_1_1;
                 break;
@@ -419,6 +423,10 @@ class Curl implements IHandler
         // body
         $result = new Response($body, curl_getinfo($handler, \CURLINFO_HTTP_CODE));
 
+        // 实际使用的 HTTP 协议版本（CURLINFO_HTTP_VERSION 自 PHP 7.3 引入）
+        $curlHttpVersion = \defined('\CURLINFO_HTTP_VERSION') ? curl_getinfo($handler, \CURLINFO_HTTP_VERSION) : 0;
+        $httpVersion = $this->getCurlHttpVersion($curlHttpVersion);
+
         // headers
         $headers = $this->parseHeaderOneRequest($receiveHeaders);
         foreach ($headers as $name => $value)
@@ -443,8 +451,33 @@ class Curl implements IHandler
 
         return $result->withRequest($request)
                       ->withCookieOriginParams($cookies)
+                      ->withHttpVersion($httpVersion)
                       ->withError(curl_error($handler))
                       ->withErrno(curl_errno($handler));
+    }
+
+    /**
+     * 将 curl 的 CURLINFO_HTTP_VERSION 枚举值转换为协议版本字符串.
+     *
+     * @param int $version
+     *
+     * @return string
+     */
+    private function getCurlHttpVersion($version)
+    {
+        switch ($version)
+        {
+            case \defined('\CURL_HTTP_VERSION_1_0') ? \CURL_HTTP_VERSION_1_0 : 1:
+                return '1.0';
+            case \defined('\CURL_HTTP_VERSION_1_1') ? \CURL_HTTP_VERSION_1_1 : 2:
+                return '1.1';
+            case \defined('\CURL_HTTP_VERSION_2') ? \CURL_HTTP_VERSION_2 : 3:
+                return '2.0';
+            case \defined('\CURL_HTTP_VERSION_3') ? CURL_HTTP_VERSION_3 : 30:
+                return '3.0';
+            default:
+                return '';
+        }
     }
 
     /**
@@ -615,7 +648,7 @@ class Curl implements IHandler
         {
             $request = $request->withHeader('User-Agent', $request->getAttribute(Attributes::USER_AGENT, self::$defaultUA));
         }
-        if (!$request->hasHeader('Connection') && $request->getProtocolVersion() >= 1.1)
+        if (!$request->hasHeader('Connection') && $request->getProtocolVersion() >= 1.1 && '3.0' !== $request->getProtocolVersion())
         {
             $request = $request->withHeader('Connection', 'Keep-Alive')->withHeader('Keep-Alive', '300');
         }

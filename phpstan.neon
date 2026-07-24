@@ -27,3 +27,4 @@ parameters:
             message: '#Method \S+ has no return typehint specified.#'
             paths:
                 - tests/unit/**Test.php
+        - '#Constant CURL_HTTP_VERSION_3 not found.#'
